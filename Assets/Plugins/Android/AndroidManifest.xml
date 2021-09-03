@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.unity3d.player"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:installLocation="preferExternal"
+    android:versionCode="1"
+    android:versionName="1.0"
+    >
+  <supports-screens
+      android:smallScreens="true"
+      android:normalScreens="true"
+      android:largeScreens="true"
+      android:xlargeScreens="true"
+      android:anyDensity="true"/>
+  <application
+      android:theme="@style/UnityThemeSelector"
+      android:icon="@drawable/app_icon"
+      android:label="@string/app_name">
+    
+    <meta-data android:name="XRAppMode" android:value="window" />
+    <!--Application type-->
+    <meta-data android:name="XRAppType" android:value="normal" />
+
+    <!--Unity Activity is shown on phone screen if 'XRLegacyStartMode' is 'false', or on glasses vice versa.
+    If 'XRActivityShowMode' is set to 'false', activity would be hidden by default on glasses.-->
+
+    <!--Double Screen (Activity + Window)-->
+    <!--<meta-data android:name="XRLegacyStartMode" android:value="true" />
+    <meta-data android:name="XRActivityShowMode" android:value="true" />-->
+
+    <!--Normal Window-->
+    <meta-data android:name="XRLegacyStartMode" android:value="false" />
+    <meta-data android:name="XRActivityShowMode" android:value="false" />
+    
+    <!--Set this value and "XRActivityShowMode" to true to enable fullscreen splash activity-->
+    <meta-data android:name="XRActivityFullScreenMode" android:value="false" />
+
+    <!--Auto request all permissions in AndroidManifest.xml when start-->
+    <meta-data android:name="XRAutoRequestAllPermissions" android:value="true" />
+    <!--Quit if not all permissions are granted when "XRAutoRequestAllPermissions" is true-->
+    <meta-data android:name="XRForceRequestAllPermissions" android:value="false" />
+
+    <activity android:name="com.xrwindow.plugin.XRWindowActivity"
+              android:label="@string/app_name">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+		  <!--<category android:name="android.intent.category.LAUNCHER" />-->
+        <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+      </intent-filter>
+	  <meta-data android:name="XRActivityMainEntry" android:value="true" />
+      <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+    </activity>
+  </application>
+  <uses-permission android:name="com.xr.AccessIrisCoreService" />
+</manifest>

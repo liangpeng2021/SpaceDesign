@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/SpaceDesign/Scences/main.unity
+    guid: 9abc70e2634ad4648861d2206250c332
+  - enabled: 0
+    path: Assets/OXRTK/HandTrackingLauncher/Samples/Scenes/HandTrackingLauncher.unity
+    guid: ef818d537205ed54a9cba22715421d57
+  - enabled: 0
+    path: Assets/OXRTK/HandInteraction/Samples/Scenes/PhysicalInterationExample.unity
+    guid: 57265d6ca1a007742a405aac9237bf3b
+  - enabled: 0
+    path: Assets/OXRTK/HandInteraction/Samples/Scenes/PressableButtonExample.unity
+    guid: 46641ce0644d4a04f8754971f3bf97af
+  - enabled: 0
+    path: Assets/OXRTK/HandInteraction/Samples/Scenes/RayInteractionExample.unity
+    guid: 15a4cb492a89fea42a42571d20a2ae4a
+  - enabled: 0
+    path: Assets/OXRTK/HandInteraction/Samples/Scenes/SlateInteractionExample.unity
+    guid: 7155373d629dd4243b0569327d1da9d1
+  m_configObjects:
+    com.oppoview.xr.window.setting: {fileID: 11400000, guid: 03ed929fe54ff8e4e958975ec533d18f,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 4979ced50c1b5ae4d8d7a1c293be4d43,
+      type: 2}
