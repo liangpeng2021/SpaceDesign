@@ -42,7 +42,6 @@ public class TimelineControl : MonoBehaviour
     /// <summary>
     /// 是否自动继续
     /// </summary>
-    [HideInInspector]
     public bool isAutoContinue;
     
     public void StartPause()
