@@ -289,6 +289,7 @@ namespace OXRTK.ARHandTracking
         /// </summary>
         public void OnTouchEnter()
         {
+            Debug.Log("MyLog::m_IsInTouch:"+ m_IsInTouch);
             if (!m_IsInTouch)
             {
                 m_IsInTouch = true;

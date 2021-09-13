@@ -21,7 +21,10 @@ namespace OXRTK.ARHandTracking
             base.Create();
             WindowFullscreen = true;
         }
-
+        public override bool HasCursor()
+        {
+            return false;
+        }
         /// <summary>
         /// Enables GTouch interaction.<br>
         /// 启用GTouch交互。
@@ -29,7 +32,7 @@ namespace OXRTK.ARHandTracking
         public override XRRayCastInfo OnRay(XRRay ray, XRFocusState focusState)
         {
             XRRayCastInfo info = base.OnRay(ray, focusState);
-            LaserPointer.instance?.UpdateLaser(ray, info);
+            //LaserPointer.instance?.UpdateLaser(ray, info);
             return info;
         }
     }

@@ -6,6 +6,11 @@ public class Image2DTrackingDemo : TrackableEventHandler
 {
     public GameObject targetModel;
 
+    //public override void Start()
+    //{
+    //    SetModelVisible(false);
+    //}
+
     public void StartTrack()
     {
         Image2DTrackingManager.Instance.TrackStart();
@@ -55,10 +60,9 @@ public class Image2DTrackingDemo : TrackableEventHandler
         Debug.Log("Image2DTrackingDemoLog:OnLossTarget");
         SetModelVisible(false);
     }
-
-
+    
     private void SetModelVisible(bool isVisible)
     {
-        targetModel.SetActive(isVisible);
+        //targetModel.SetActive(isVisible);
     }
 }
