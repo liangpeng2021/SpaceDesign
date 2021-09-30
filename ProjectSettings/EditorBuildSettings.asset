@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/SpaceDesign/Scences/MainScence.unity
     guid: 9abc70e2634ad4648861d2206250c332
-  - enabled: 1
+  - enabled: 0
     path: Assets/DongXiao/Scene/Animations.unity
     guid: 617bb8816c45beb4eafd1aa5bd9ca134
   - enabled: 0
@@ -26,6 +26,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/OXRTK/HandInteraction/Samples/Scenes/SlateInteractionExample.unity
     guid: 7155373d629dd4243b0569327d1da9d1
+  - enabled: 0
+    path: Assets/SpaceDesign/Scences/Scence2DTest.unity
+    guid: e9f9f8a20c1461046b379aed1582a478
+  - enabled: 1
+    path: Assets/SpaceDesign/Scences/Test.unity
+    guid: 2137ff81d372edc42bcf651b8cdd9a07
   m_configObjects:
     com.oppoview.xr.window.setting: {fileID: 11400000, guid: 03ed929fe54ff8e4e958975ec533d18f,
       type: 2}
