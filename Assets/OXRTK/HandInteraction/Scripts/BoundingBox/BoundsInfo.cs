@@ -25,4 +25,15 @@ namespace OXRTK.ARHandTracking
         ActivateOnStart = 0,
         ActivateByProximityAndPoint = 1,
     }
+
+    public enum BoundsAvailableAction
+    {
+        Translation = 0,
+        Rotation = 1,
+        Rescaling = 2,
+        TranslationAndRotation = 3,
+        TranslationAndRescaling = 4,
+        RotationAndRescaling = 5,
+        All = 6
+    }
 }

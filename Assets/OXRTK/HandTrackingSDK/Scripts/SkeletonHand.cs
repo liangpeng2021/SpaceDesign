@@ -35,17 +35,11 @@ namespace OXRTK.ARHandTracking
         /// </summary>
         Transform[] m_Bones;
 
-        protected override void UpdateHand()
-        {
-            UpdateHandData();
-            UpdateSkeletonHand();
-        }
-
         protected override void Init()
         {
             handGameObject.transform.SetParent(transform, false);
             handGameObject.transform.localRotation = Quaternion.identity;
-            
+
             joints = new Transform[21];
             m_Bones = new Transform[20];
 
@@ -53,13 +47,17 @@ namespace OXRTK.ARHandTracking
             {
                 joints[i] = Instantiate(jointPrefab).transform;
                 joints[i].name = "Joint_" + i;
-                joints[i].transform.SetParent(handGameObject.transform);                
+                joints[i].transform.SetParent(handGameObject.transform);
+                
+                handRenderers.Add(joints[i].GetComponent<Renderer>());
             }
             for (int i = 0; i < m_Bones.Length; i++)
             {
                 m_Bones[i] = Instantiate(bonePrefab).transform;
                 m_Bones[i].name = "Bone_" + i;
-                m_Bones[i].transform.SetParent(handGameObject.transform);                
+                m_Bones[i].transform.SetParent(handGameObject.transform);
+                
+                handRenderers.Add(m_Bones[i].GetComponent<Renderer>());
             }
 
             joints[1].SetParent(joints[0]);
@@ -89,42 +87,26 @@ namespace OXRTK.ARHandTracking
             joints[20].SetParent(joints[19]);
 
             HandColliderHandle.AddColliderAndRigidbody(joints, m_ColliderType, m_JointCollider);
+
+            base.Init();
         }
 
-        void UpdateHandData()
-        {            
-            switch (handType)
-            {
-                default:
-                case HandTrackingPlugin.HandType.RightHand:                    
-                    m_HandInfo = HandTrackingPlugin.instance.rightHandInfo;
-                    break;
-                case HandTrackingPlugin.HandType.LeftHand:                    
-                    m_HandInfo = HandTrackingPlugin.instance.leftHandInfo;
-                    break;
-            }
-        }
-
-        void UpdateSkeletonHand()
+        protected override void UpdateHandTransform()
         {
-            if (!m_HandInfo.handDetected)
+            if (m_HandInfo.handDetected)
             {
-                handGameObject.SetActive(false);
-            }
-            else
-            {                
                 for (int i = 0; i < joints.Length; i++)
                 {
                     if (i == 0)
-                    {                        
+                    {
                         joints[i].transform.position = HandTrackingPlugin.instance.GetJointWorldPosition(handType, i);
                     }
                     else
-                    {                             
+                    {
                         joints[i].transform.position = joints[0].transform.position +
                             (HandTrackingPlugin.instance.GetJointWorldPosition(handType, i) - joints[0].transform.position) * scaleFactor;
                     }
-                    
+
                     joints[i].transform.localRotation = HandTrackingPlugin.instance.GetJointLocalRotation(handType, i);
                 }
 
@@ -133,11 +115,11 @@ namespace OXRTK.ARHandTracking
                     Vector3 BoneStart;
                     if (i % 4 == 0)
                     {
-                        BoneStart = joints[0].transform.position;                        
+                        BoneStart = joints[0].transform.position;
                     }
                     else
                     {
-                        BoneStart = joints[i].transform.position;                        
+                        BoneStart = joints[i].transform.position;
                     }
                     Vector3 BoneEnd = joints[i + 1].transform.position;
                     m_Bones[i].transform.position = (BoneStart + BoneEnd) / 2;
@@ -146,8 +128,6 @@ namespace OXRTK.ARHandTracking
                         distanceBetweenTwoJoints * 0.5f, bonePrefab.transform.localScale.z);
                     m_Bones[i].transform.rotation = Quaternion.LookRotation((BoneEnd - BoneStart).normalized) * Quaternion.Euler(90, 0, 0);
                 }
-
-                handGameObject.SetActive(true);
             }
         }
     }

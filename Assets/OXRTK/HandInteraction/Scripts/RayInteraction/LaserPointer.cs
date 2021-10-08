@@ -19,6 +19,8 @@ namespace OXRTK.ARHandTracking
         Vector3 m_StartPosition, m_Direction;
         bool m_IsPressed = false;
         bool m_IsActive = false;
+        bool m_IsHandMenuOpened = false;
+        int m_RaycastLayer = ~Physics.IgnoreRaycastLayer;
 
         public static LaserPointer instance;
 
@@ -46,6 +48,11 @@ namespace OXRTK.ARHandTracking
         void Start()
         {
             m_IsActive = true;
+
+            if (PointerManager.instance != null)
+            {
+                PointerManager.instance.onHandMenuChanged += UpdateHandMenuStatus;
+            }
         }
 
         void Update()
@@ -183,9 +190,27 @@ namespace OXRTK.ARHandTracking
 
             m_StartPosition = ray.pose.position.ToVector3_FlipZ();
             m_Direction = ray.direction.ToVector3_FlipZ();
-            m_PhysicalHitResult = Physics.Raycast(m_StartPosition, m_Direction, out m_HitInfo, float.PositiveInfinity, ~Physics.IgnoreRaycastLayer);
+            m_PhysicalHitResult = Physics.Raycast(m_StartPosition, m_Direction, out m_HitInfo, float.PositiveInfinity, m_RaycastLayer);
 
             UpdatePointerEvent();
+        }
+
+        void UpdateHandMenuStatus(bool status)
+        {
+            if (m_IsHandMenuOpened != status)
+            {
+                m_IsHandMenuOpened = status;
+                if (m_IsHandMenuOpened)
+                {
+                    ResetTarget();
+                    m_RaycastLayer = 1 << 15;
+                }
+                else
+                {
+                    ResetTarget();
+                    m_RaycastLayer = ~Physics.IgnoreRaycastLayer;
+                }
+            }
         }
     }
 }

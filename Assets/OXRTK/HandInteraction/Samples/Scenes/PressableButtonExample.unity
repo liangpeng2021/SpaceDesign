@@ -229,9 +229,6 @@ MonoBehaviour:
   localPressableDistanceThreshold: 1
   pressableHandler: {fileID: 2139560621}
   colliderOverride: {fileID: 0}
-  onClick:
-    m_PersistentCalls:
-      m_Calls: []
   onPressDown:
     m_PersistentCalls:
       m_Calls:
@@ -312,6 +309,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!65 &331279221
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -570,11 +570,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: HandPlugin
       objectReference: {fileID: 0}
-    - target: {fileID: 5691732396735883531, guid: 525bdc35f880f1543b2257c07cfeea7e,
-        type: 3}
-      propertyPath: enableOfflineTest
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 525bdc35f880f1543b2257c07cfeea7e, type: 3}
 --- !u!1001 &807548712
@@ -643,21 +638,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 700337604328158346, guid: acd56a2c8095c8549a9c14130e1f81ec,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 700337604328158346, guid: acd56a2c8095c8549a9c14130e1f81ec,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 700337604328158346, guid: acd56a2c8095c8549a9c14130e1f81ec,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: acd56a2c8095c8549a9c14130e1f81ec, type: 3}
@@ -871,9 +851,6 @@ MonoBehaviour:
   localPressableDistanceThreshold: 1
   pressableHandler: {fileID: 997269229}
   colliderOverride: {fileID: 0}
-  onClick:
-    m_PersistentCalls:
-      m_Calls: []
   onPressDown:
     m_PersistentCalls:
       m_Calls:
@@ -954,6 +931,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!65 &1326604644
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1523,6 +1503,31 @@ PrefabInstance:
         type: 3}
       propertyPath: handSetting.Array.data[1].useUIInteraction
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7506050919485458670, guid: 1305085af74aec84e80e1412b2836c8e,
+        type: 3}
+      propertyPath: okFeedback
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7506050919485458670, guid: 1305085af74aec84e80e1412b2836c8e,
+        type: 3}
+      propertyPath: handSetting.Array.data[0].isHandDisplayOn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7506050919485458670, guid: 1305085af74aec84e80e1412b2836c8e,
+        type: 3}
+      propertyPath: handSetting.Array.data[1].isHandDisplayOn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7506050919485458670, guid: 1305085af74aec84e80e1412b2836c8e,
+        type: 3}
+      propertyPath: handSetting.Array.data[0].useRayInteraction
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7506050919485458670, guid: 1305085af74aec84e80e1412b2836c8e,
+        type: 3}
+      propertyPath: handSetting.Array.data[1].useRayInteraction
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7506050919485458671, guid: 1305085af74aec84e80e1412b2836c8e,
         type: 3}

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace OXRTK.ARHandTracking
 {
@@ -49,6 +50,16 @@ namespace OXRTK.ARHandTracking
         public static event Action<HandController> onActiveHandChanged;
 
         int m_LastActiveHandId;
+        
+        /// <summary>
+        /// Change the visibility and display mode of the hand model<br>
+        /// 改变手的可见性与手模的显示模式。<br>
+        /// </summary>
+        /// <remarks>
+        /// If true, the hand model will be displayed; If false, the model will be hidden and other visual cues will represent the functioning status of the hand<br>
+        /// 若为真，则会正常显示手部模型；若为假，则手模隐藏，手的姿态与工作状态将由其他视觉元素表达<br>
+        /// </remarks>
+        public bool hidHandMode;
 
         void Awake()
         {
@@ -80,7 +91,7 @@ namespace OXRTK.ARHandTracking
         void updateHandVisualization(bool isInit = false)
         {
             if (hands.Length <= 0)
-            {                
+            {
                 Debug.LogError("There is no available hand. OXRTK Hand requires to have at least one available hand !!!");
                 return;
             }

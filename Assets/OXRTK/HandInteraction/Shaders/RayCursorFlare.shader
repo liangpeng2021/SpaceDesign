@@ -1,7 +1,7 @@
 Shader "OXRTK/RayCursorFlare" {
     Properties {
         _MainTex ("MainTex", 2D) = "white" {}
-        _EmissionPow ("EmissionPow", Range(1, 3)) = 1
+        [HideInInspector]_EmissionPow ("EmissionPow", Range(1, 3)) = 1
         [HideInInspector]_Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
         _Stencil ("Stencil ID", Float) = 0
         [Toggle] _IsSwap("Swap Color", Float) = 0
@@ -18,12 +18,14 @@ Shader "OXRTK/RayCursorFlare" {
                 "LightMode"="ForwardBase"
             }
             Blend One One
+            // Blend SrcAlpha OneMinusSrcAlpha
             ZWrite Off
             ZTest Off
             
             Stencil {
                 Ref [_Stencil]
                 Comp Equal
+                ZFail Replace
             }
             CGPROGRAM
             #pragma vertex vert

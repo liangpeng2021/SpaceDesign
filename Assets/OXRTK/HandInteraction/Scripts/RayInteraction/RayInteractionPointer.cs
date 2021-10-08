@@ -1,6 +1,7 @@
 ﻿using ArmIK;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace OXRTK.ARHandTracking
 {
@@ -59,6 +60,31 @@ namespace OXRTK.ARHandTracking
         /// </summary>        
         public bool useLaserLine = true;
 
+        /// <summary>
+        /// The color gradient of the laser under the normal status.<br>
+        /// 射线正常状态下的色彩渐变。<br>
+        /// </summary> 
+        public Gradient normalLaserCol;
+
+        /// <summary>
+        /// The color gradient of the laser under the pinch status.<br>
+        /// 射线在pinch状态下的色彩渐变。<br>
+        /// </summary> 
+        public Gradient pinchedLaserCol;
+        
+        /// <summary>
+        /// The color gradient of the laser under handmenu normal status.<br>
+        /// 射线在handMenu正常状态下的色彩渐变。<br>
+        /// </summary> 
+        public Gradient menuNormalLaserCol;
+        
+        /// <summary>
+        /// The color gradient of the laser under handmenu pinch status.<br>
+        /// 射线在handMenu pinch状态下的色彩渐变。<br>
+        /// </summary> 
+        public Gradient menuPinchLaserCol;
+        
+        
         //当有手势相关交互发生时触发
         public PointerEvent onActionEvent = new PointerEvent();
         #endregion
@@ -67,15 +93,15 @@ namespace OXRTK.ARHandTracking
         HandController m_HandController;
         //用于射线计算的参数
         //射线显示起始点
-        public Vector3 m_StartPosition,
+        Vector3 m_StartPosition,
             //射线方向
             m_Direction,
             //当前射线终点
             m_CurrentTargetPoint;
 
         //当前射线打到物体结果
-        public bool m_PhysicalHitResult;
-        public RaycastHit m_HitInfo;
+        bool m_PhysicalHitResult;
+        RaycastHit m_HitInfo;
         //当前射线打到的有效交互物体
         RayPointerHandler m_CurrentTarget;
         RayPointerHandler m_TargetInInteraction;
@@ -87,7 +113,7 @@ namespace OXRTK.ARHandTracking
         //当前手指捏合状态
         bool m_IsPinched = false;
         //手是否被检测到，若不是，则隐藏射线
-        public bool m_IsHandDetected = false;
+        bool m_IsHandDetected = false;
         //交互初始化状态
         bool m_IsActive = false;
         bool m_PriorityEnabled = false;
@@ -109,6 +135,10 @@ namespace OXRTK.ARHandTracking
             get { return m_CursorPosition; }
         }
 
+        bool m_IsHandMenuOpened = false;
+        bool m_PalmBackStatus = false;
+
+        int m_RaycastLayer = ~Physics.IgnoreRaycastLayer;
         Coroutine m_InitRoutine;
         #endregion
 
@@ -157,7 +187,6 @@ namespace OXRTK.ARHandTracking
                     {
                         DestroyImmediate(gameObject.GetComponent<LineRenderer>());
                     };
-
                 }
             }
 #endif
@@ -184,6 +213,11 @@ namespace OXRTK.ARHandTracking
             if (HandTrackingPlugin.instance != null)
             {
                 HandTrackingPlugin.instance.onHandDataUpdated += UpdateHandInfo;
+            }
+
+            if (PointerManager.instance != null)
+            {
+                PointerManager.instance.onHandMenuChanged += UpdateHandMenuStatus;
             }
         }
 
@@ -327,6 +361,42 @@ namespace OXRTK.ARHandTracking
             m_InitRoutine = null;
         }
 
+        void UpdateHandMenuStatus(bool status)
+        {
+            if (m_IsHandMenuOpened != status)
+            {
+                m_IsHandMenuOpened = status;
+                if (m_IsHandMenuOpened)
+                {
+                    if (m_IsEnabled)
+                    {
+                        ResetTarget();
+                    }
+                    else
+                    {
+                        Reset();
+                    }
+                    m_RaycastLayer = 1 << 15;
+                    if (m_PointerLine != null)
+                        m_PointerLine.colorGradient = menuNormalLaserCol;
+                }
+                else
+                {
+                    if (m_IsEnabled)
+                    {
+                        ResetTarget();
+                    }
+                    else
+                    {
+                        Reset();
+                    }
+                    m_RaycastLayer = ~Physics.IgnoreRaycastLayer;
+                    if (m_PointerLine != null)
+                        m_PointerLine.colorGradient = normalLaserCol;
+                }
+            }
+        }
+
         void UpdateHandInfo()
         {
             if (!m_IsActive)
@@ -341,6 +411,11 @@ namespace OXRTK.ARHandTracking
             UpdateHandVisible(info.handDetected);
 
             if (!m_IsHandDetected)
+                return;
+
+            UpdatePalmDirection();
+
+            if (m_PalmBackStatus)
                 return;
 
             m_HandInfo = info;
@@ -358,13 +433,13 @@ namespace OXRTK.ARHandTracking
                         m_IsPinched = true;
                         m_AlgorithmCounterIn = 0;
                         
-                        if (!m_IsEnabled)
+                        if (!m_IsEnabled && !m_IsHandMenuOpened)
                             return;
                         if (!m_PriorityEnabled)
                             return;
 
                         Vector3 dir = m_KStartPosition - m_IShoulder.position;
-                        UpdatePointerCurve(m_KStartPosition, dir, m_CurrentTargetPoint);
+                        UpdatePointerCurve(m_StartPosition, dir, m_CurrentTargetPoint);
 
                         if (m_CurrentTarget != null)
                         {
@@ -374,7 +449,10 @@ namespace OXRTK.ARHandTracking
                             m_CurrentTarget.OnPinchDown(m_KStartPosition, m_Direction, m_CurrentTargetPoint);
                             if (HandTrackingPlugin.debugLevel > 0) Debug.Log("CurrentTarget: " + m_CurrentTarget.gameObject.name + " ---> OnPinchDown");
 
-                            m_LockCursor = m_CurrentTarget.isLockCursor;
+                            if (m_CurrentTarget != null)
+                                m_LockCursor = m_CurrentTarget.isLockCursor;
+                            else
+                                m_LockCursor = false;
                             if (m_LockCursor)
                             {
                                 m_RelativeCursorPositionOnPinch = m_CurrentTarget.transform.InverseTransformPoint(cursor.transform.position);
@@ -385,7 +463,7 @@ namespace OXRTK.ARHandTracking
                 }
                 else
                 {
-                    if (!m_IsEnabled)
+                    if (!m_IsEnabled && !m_IsHandMenuOpened)
                         return;
                     if (!m_PriorityEnabled)
                         return;
@@ -407,7 +485,7 @@ namespace OXRTK.ARHandTracking
                         m_IsPinched = false;
                         m_AlgorithmCounterOut = 0;
 
-                        if (!m_IsEnabled)
+                        if (!m_IsEnabled && !m_IsHandMenuOpened)
                             return;
                         if (!m_PriorityEnabled)
                             return;
@@ -437,7 +515,7 @@ namespace OXRTK.ARHandTracking
                 {
                     m_IsHandDetected = true;
 
-                    if (m_IsEnabled)
+                    if (m_IsEnabled || m_IsHandMenuOpened)
                     {
                         if (PointerManager.instance != null)
                         {
@@ -447,6 +525,7 @@ namespace OXRTK.ARHandTracking
                                 return;
                             }
                         }
+                        m_PointerLine.enabled = true;
                     }
                 }
             }
@@ -456,7 +535,7 @@ namespace OXRTK.ARHandTracking
                 {
                     m_IsHandDetected = false;
 
-                    if (m_IsEnabled)
+                    if (m_IsEnabled || m_IsHandMenuOpened)
                     {
                         SetVisualizationItems(false);
 
@@ -466,31 +545,91 @@ namespace OXRTK.ARHandTracking
                         }
                         ResetTarget();
                     }
+                    m_PointerLine.enabled = false;
+                    m_PalmBackStatus = true;
                 }
+            }
+        }
+
+        void UpdatePalmDirection()
+        {
+            bool palmBackStatus = false;
+
+            if(CustomizedGestureController.instance != null)
+            {
+                palmBackStatus = CustomizedGestureController.instance.GetHandStatus(m_HandType, CustomizedGesture.PalmBack);
+            }
+
+            if(m_PalmBackStatus != palmBackStatus)
+            {
+                if(m_PalmBackStatus && !palmBackStatus)
+                {
+                    if (m_IsEnabled || m_IsHandMenuOpened)
+                    {
+                        if (PointerManager.instance != null)
+                        {
+                            int res = PointerManager.instance.UpdatePriorityInteraction(m_HandType, m_Type, m_Priority, false);
+                            if (res < 0)
+                            {
+                                return;
+                            }
+                        }
+                        m_PointerLine.enabled = true;
+                    }
+                }
+                else
+                {
+                    if (m_IsEnabled || m_IsHandMenuOpened)
+                    {
+                        SetVisualizationItems(false);
+
+                        if (PointerManager.instance != null)
+                        {
+                            PointerManager.instance.UpdatePriorityInteraction(m_HandType, m_Type, m_Priority, true);
+                        }
+                        ResetTarget();
+                    }
+                    m_PointerLine.enabled = false;
+                }
+
+                m_PalmBackStatus = palmBackStatus;
             }
         }
 
         void UpdatePointer()
         {
-            if (!m_IsEnabled)
+            if (!m_IsEnabled && !m_IsHandMenuOpened)
+            {
                 return;
+            }
 
             if (!m_IsHandDetected)
+            {
                 return;
+            }
+
+            if (m_PalmBackStatus)
+            {
+                return;
+            }
 
             Vector3 shoulderPosition;
             shoulderPosition = m_IShoulder.position;
 
             if (m_IndexRoot == null && m_ThumbRoot == null)
+            {
                 return;
+            }
             m_StartPosition = (m_IndexRoot.position + m_ThumbRoot.position) / 2;
 
             m_KStartPosition = m_KFilter.KUpdate(m_StartPosition);
             m_Direction = Vector3.Normalize(m_KStartPosition - shoulderPosition);
-            m_PhysicalHitResult = Physics.Raycast(m_KStartPosition, m_Direction, out m_HitInfo, float.PositiveInfinity, ~Physics.IgnoreRaycastLayer);
+            m_PhysicalHitResult = Physics.Raycast(m_KStartPosition, m_Direction, out m_HitInfo, float.PositiveInfinity, m_RaycastLayer);
 
             if (!m_PriorityEnabled)
+            {
                 return;
+            }
 
             Vector3 cursorNormal;
             if (m_LockCursor)
@@ -521,26 +660,67 @@ namespace OXRTK.ARHandTracking
             m_CurrentTargetPoint = m_CursorPosition;
             Vector3 dir = m_KStartPosition - shoulderPosition;
 
-            if (m_IsPinched)
+            if (m_HandController.hidHandMode)
             {
+                if (m_PointerLine.enabled == false)
+                {
+                    m_PointerLine.enabled = true;
+                }
+
                 if (m_PointerLine != null)
                 {
-                    UpdatePointerCurve(m_KStartPosition, dir, m_CurrentTargetPoint);
-                    m_PointerLine.enabled = true;
+                    UpdatePointerCurve(m_StartPosition, dir, m_CurrentTargetPoint);
+
+                    if (!m_IsHandMenuOpened)
+                    {
+                        if (m_IsPinched)
+                        {
+                            m_PointerLine.colorGradient = pinchedLaserCol;
+                        }
+                        else
+                        {
+                            m_PointerLine.colorGradient = normalLaserCol;
+                        }
+                    }
+                    else
+                    {
+                        if (m_IsPinched)
+                        {
+                            m_PointerLine.colorGradient = menuPinchLaserCol;
+                        }
+                        else
+                        {
+                            m_PointerLine.colorGradient = menuNormalLaserCol;
+                        }
+                    }
                 }
             }
             else
             {
-                if (m_PointerLine != null)
-                    m_PointerLine.enabled = false;
+                if (m_IsPinched)
+                {
+                    if (m_PointerLine != null)
+                    {
+                        UpdatePointerCurve(m_StartPosition, dir, m_CurrentTargetPoint);
+                        m_PointerLine.enabled = true;
+                    }
+                }
+                else
+                {
+                    if (m_PointerLine != null)
+                    {
+                        m_PointerLine.enabled = false;
+                    }
+                }
             }
+
             UpdateCursor(m_CursorPosition, cursorNormal);
         }
 
         //更新射线事件
         void UpdatePointerEvent()
         {
-            if (!m_IsEnabled)
+            if (!m_IsEnabled && !m_IsHandMenuOpened)
                 return;
 
             if (m_IsPinched)

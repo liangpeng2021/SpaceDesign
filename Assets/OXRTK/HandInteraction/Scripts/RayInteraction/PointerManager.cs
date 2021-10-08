@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace OXRTK.ARHandTracking
@@ -24,6 +26,7 @@ namespace OXRTK.ARHandTracking
 
         public static PointerManager instance = null;
 
+        public Action<bool> onHandMenuChanged;
         GameObject m_LeftHand, m_RightHand;
         
         List<InteractionInfo> m_LeftAvailableTypes = new List<InteractionInfo>();
@@ -32,6 +35,10 @@ namespace OXRTK.ARHandTracking
         Dictionary<HandTrackingPlugin.HandType, InteractionSetting> m_HandSettings = new Dictionary<HandTrackingPlugin.HandType, InteractionSetting>();
 
         bool m_IsActive = false;
+
+        HandMenuLocator[] m_HandMenus;
+        int m_HandMenuOpened = 0;
+        bool m_IsHandMenuOpened = false;
 
         #region IKControl
         [SerializeField]
@@ -99,6 +106,7 @@ namespace OXRTK.ARHandTracking
             //ResetInteractionTypeList();
 
             m_IsActive = true;
+            onHandMenuChanged += WavePauseControl;
         }
 
         void SwitchIK(bool onOff)
@@ -114,6 +122,53 @@ namespace OXRTK.ARHandTracking
         public bool CheckActive()
         {
             return m_IsActive;
+        }
+
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            InitHandMenuList();
+        }
+
+        void InitHandMenuList()
+        {
+            m_HandMenus = FindObjectsOfType<HandMenuLocator>();
+            for (int i = 0; i < m_HandMenus.Length; i++)
+            {
+                m_HandMenus[i].onMenuStatusChange += SetHandMenuNumber;
+            }
+            m_HandMenuOpened = 0;
+            if (m_IsHandMenuOpened)
+            {
+                m_IsHandMenuOpened = false;
+                onHandMenuChanged?.Invoke(m_IsHandMenuOpened);
+            }
+        }
+
+        void SetHandMenuNumber(bool status)
+        {
+            if (status)
+            {
+                if (m_HandMenuOpened == 0)
+                {
+                    m_IsHandMenuOpened = true;
+                    onHandMenuChanged?.Invoke(m_IsHandMenuOpened);
+                }
+                m_HandMenuOpened += 1;
+            }
+            else if (m_HandMenuOpened > 0)
+            {
+                m_HandMenuOpened -= 1;
+                if (m_HandMenuOpened == 0)
+                {
+                    m_IsHandMenuOpened = false;
+                    onHandMenuChanged?.Invoke(m_IsHandMenuOpened);
+                }
+            }
         }
 
         /// <summary>
@@ -491,9 +546,14 @@ namespace OXRTK.ARHandTracking
             }
             else
             {
-                InteractionSetting emptySetting = new InteractionSetting(hand, false, false, false);
+                InteractionSetting emptySetting = new InteractionSetting(hand, true, false, false, false);
                 return emptySetting;
             }
+        }
+
+        void WavePauseControl(bool status)
+        {
+            WaveInteraction.g_IsPause = status;
         }
     } 
 }

@@ -10,15 +10,24 @@ namespace OXRTK.ARHandTracking
     /// </summary>
     public class ModelHand : BaseHand
     {
+        /// <summary>
+        /// The skinned mesh renderer controlled by this component.<br>
+        /// 被该组件控制的skinned mesh renderer。
+        /// </summary>
+        public SkinnedMeshRenderer skinnedMeshRenderer;
+
         protected override void Init()
-        {                                                
+        {
             joints = new Transform[21];
             for (int i = 0; i < joints.Length; i++)
             {
-                string jointName = "joint" + i;                
+                string jointName = "joint" + i;
                 joints[i] = findChildRecursively(handGameObject.transform, jointName);
             }
-            HandColliderHandle.AddColliderAndRigidbody(joints,m_ColliderType, m_JointCollider, colliderScaleFactor);
+            HandColliderHandle.AddColliderAndRigidbody(joints, m_ColliderType, m_JointCollider, colliderScaleFactor);
+            
+            handRenderers.Add(skinnedMeshRenderer);
+            base.Init();
         }
 
         Transform findChildRecursively(Transform parent, string target)
@@ -43,42 +52,16 @@ namespace OXRTK.ARHandTracking
             return t;
         }
 
-        protected override void UpdateHand()
+        protected override void UpdateHandTransform()
         {
-            UpdateHandData();
-            UpdateModelHand();
-        }
-
-        void UpdateHandData()
-        {            
-            switch (handType)
+            if (m_HandInfo.handDetected)
             {
-                default:
-                case HandTrackingPlugin.HandType.RightHand:                    
-                    m_HandInfo = HandTrackingPlugin.instance.rightHandInfo;
-                    break;
-                case HandTrackingPlugin.HandType.LeftHand:                    
-                    m_HandInfo = HandTrackingPlugin.instance.leftHandInfo;
-                    break;
-            }
-        }
-
-        void UpdateModelHand()
-        {
-            if (!m_HandInfo.handDetected)
-            {
-                handGameObject.SetActive(false);
-            }
-            else
-            {                
                 handGameObject.transform.localPosition = HandTrackingPlugin.instance.GetJointLocalPosition(handType, 0);
 
                 for (int i = 0; i < joints.Length; i++)
                 {
                     joints[i].localRotation = HandTrackingPlugin.instance.GetJointLocalRotation(handType, i);
                 }
-                
-                handGameObject.SetActive(true);
             }
         }
     }

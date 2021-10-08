@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
 using XR;
-using UnityEngine.SceneManagement;
 #if ARRemoteDebug
 using OXRTK.ARRemoteDebug;
 #endif
@@ -25,7 +23,7 @@ namespace OXRTK.ARHandTracking
 
         }
 
-        readonly string m_OxrtkHandVersion = "0.2.2";
+        readonly string m_OxrtkHandVersion = "0.2.4.2";
 
         /// <summary>
         /// The controller for right hand.<br>
@@ -38,6 +36,18 @@ namespace OXRTK.ARHandTracking
         /// 左手控制器。
         /// </summary>
         public HandController leftHandController;
+
+        /// <summary>
+        /// Determines if prediction is enabled for right hand.<br>
+        /// 决定是否为右手启用预测。
+        /// </summary>
+        public bool enableRightHandPrediction;
+
+        /// <summary>
+        /// Determines if prediction is enabled for left hand.<br>
+        /// 决定是否为左手启用预测。
+        /// </summary>
+        public bool enableLeftHandPrediction;
 
         /// <summary>
         /// Determines if Remote Debug is enabled.<br>
@@ -60,10 +70,6 @@ namespace OXRTK.ARHandTracking
         public int offlineDataId;
 
         bool m_IsHandTrackingStarted = false;
-        // Algorithm already contains data filtering. Use this if algorithm's is not enough.
-        float m_HandDataFilter = 0f;
-        bool m_IsFirstFrameOfRightHand = true;
-        bool m_IsFirstFrameOfLeftHand = true;
 
         /// <summary>
         /// The structure for all hand data output by algorithm.<br>
@@ -149,8 +155,8 @@ namespace OXRTK.ARHandTracking
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 48)]
             public float[] dofData;
         }
-        
-        XR.HandTracking.HandJointsAngles m_JointsAngles;
+
+        HandTracking.HandJointsAngles m_JointsAngles;
 
         /// <summary>
         /// The structure for all joints' local position and local rotation in Unity coordinate system.         
@@ -172,6 +178,12 @@ namespace OXRTK.ARHandTracking
         }
         JointData[] m_JointData = new JointData[2];
         JointData[] m_RawJointData = new JointData[2];
+        JointData[] m_LastFrameRawJointData = new JointData[2];
+
+        // The buffer to store right hand root joint's position.
+        List<Vector3> m_RightHandBuffer;
+        // The buffer to store left hand root joint's position.
+        List<Vector3> m_LeftHandBuffer;
 
         /// <summary>
         /// The enum of hand types.<br>
@@ -283,7 +295,11 @@ namespace OXRTK.ARHandTracking
 
         // 0 right hand, 1 left hand
         HandInfo[] m_HandInfo = new HandInfo[2];
-        
+        int[] m_HideHandCounter = new int[2] { 0, 0 };
+        // Hand will be hid after not detected for some frames. This is only valid when hand be shown at least once.
+        int m_HideHandThreshold = 3;
+        bool[] m_HandBeShownOnce = new bool[] { false, false };
+
         /// <summary>
         /// Data of right hand.<br>
         /// 右手的数据。
@@ -309,12 +325,12 @@ namespace OXRTK.ARHandTracking
         }
 
         // To receive data from OppoXR Unity SDK.
-        XR.HandTracking.HandInfo m_HandTrackingInfo;        
+        HandTracking.HandInfo m_HandTrackingInfo;
 
         Thread m_HandThread;
         int m_HandThreadLock = 0;
         bool m_HandUpdating = false;
-        bool m_XrHandTrackingIsCorrect = false;
+        bool m_IsHandTrackingCorrect = false;
         bool m_IsInitialized = false;
         bool m_IsPaused = false;
 
@@ -323,7 +339,7 @@ namespace OXRTK.ARHandTracking
         /// 添加到手部数据的平滑滤波。数值越大，滤波越强。默认数值是0.65。范围是0 ~ 0.9。
         /// </summary>
         [Range(0.0f, 0.9f)]
-        private float m_SmoothFilter = 0.65f;
+        private float m_SmoothFilter = 0.75f;
         bool m_LastFrameRightHandDetected = false;
         bool m_LastFrameLeftHandDetected = false;
         JointData[] m_LastFrameJointData = new JointData[2];
@@ -338,15 +354,23 @@ namespace OXRTK.ARHandTracking
         float[][] m_OfflinePred3DRight = new float[3][];
         float[][] m_OfflineDofRight = new float[3][];
 
-        ReadGaborCalib reader;
-        // debugLevel on PC can be set here. On Android, it is determined by system property "oxrtk.hand.debug".
+        ReadGaborCalib m_CalibReader;
+
+        /// <summary>
+        /// The number to determine printing level.<br>
+        /// On Android, set it with adb command like this "adb shell setprop oxrtk.hand.debug 0".<br>
+        /// Default level is 0, only critical information will be printed. Set it to 1 will print more debugging information.<br>
+        /// 决定打印级别的数字。<br>
+        /// 在Android，使用adb指令来设置，例如"adb shell setprop oxrtk.hand.debug 0"。<br>
+        /// 默认级别是0，仅打印重要信息。设置为1将会打印更多调试信息。
+        /// </summary>
         public static int debugLevel = 0;
 
         void Awake()
-        {           
+        {
             if (instance != null)
-            {                
-                Destroy(gameObject);
+            {
+                DestroyImmediate(gameObject);
             }
             else
             {
@@ -359,32 +383,35 @@ namespace OXRTK.ARHandTracking
 
                 if (Application.platform == RuntimePlatform.Android)
                 {
-                    reader = new ReadGaborCalib();
-                    debugLevel = reader.GetOxrtkDebugLevel(0);                    
+                    debugLevel = ToolLibraryDll.GetOxrtkDebugLevel(0);
                     Debug.Log("OXRTK Hand Debug Level: " + debugLevel);
+
+                    m_CalibReader = new ReadGaborCalib();
                     ReadCalibAndSetHand();
-                }                
+                }
 
                 m_HandInfo[0].handType = HandType.RightHand;
                 m_HandInfo[1].handType = HandType.LeftHand;
                 DontDestroyOnLoad(gameObject);
+
+                m_IsInitialized = false;
+
+                // Add a AudioListener in Unity Editor
+                if (Application.platform != RuntimePlatform.Android && !GetComponent<AudioListener>())
+                    gameObject.AddComponent<AudioListener>();
             }
-            m_IsInitialized = false;            
-            
-            // Add a AudioListener in Unity Editor
-            if (Application.platform != RuntimePlatform.Android && !GetComponent<AudioListener>())
-                gameObject.AddComponent<AudioListener>();
+
         }
 
         void ReadCalibAndSetHand()
         {
-            reader.SetRightFisheyeTransform(rightHandController.transform);
-            reader.SetLeftFisheyeTransform(leftHandController.transform);
-            reader.ApplyCalibrationDataForFisheye();
+            m_CalibReader.SetRightFisheyeTransform(rightHandController.transform);
+            m_CalibReader.SetLeftFisheyeTransform(leftHandController.transform);
+            m_CalibReader.ApplyCalibrationDataForFisheye();
             if (debugLevel > 0)
             {
                 Debug.Log("Calibration data applied to hand tracking.");
-            }                        
+            }
         }
 
         void Start()
@@ -394,7 +421,7 @@ namespace OXRTK.ARHandTracking
             if (enableRemoteDebug)
             {
                 InitRemoteDebug();
-            }            
+            }
 
             if (enableOfflineTest)
             {
@@ -415,27 +442,38 @@ namespace OXRTK.ARHandTracking
             if (Application.platform != RuntimePlatform.Android) return;
 
             enableOfflineTest = false;
-            
-            // Start hand tracking.                        
+
+            // Start hand tracking and get algorithm data in multi-threading.
             if (m_HandThread == null)
             {
                 m_HandUpdating = true;
                 m_HandThread = new Thread(new ThreadStart(ThreadUpdateHandData));
                 m_HandThread.Start();
+            }
 
-                XRCameraManager.OnRenderPause += OnPause;
-                XRManager.OnQuit += Release;
-            }            
-        }        
+            /*
+            // Start hand tracking.
+            HandTracking.SetGestureClassificationMode(0);
+            if (!m_IsHandTrackingStarted)
+            {
+                HandTracking.Start();                
+                m_IsHandTrackingStarted = true;
+            }
+            m_IsInitialized = true;
+            */
+
+            XRCameraManager.OnRenderPause += OnPause;
+            XRManager.OnQuit += Release;
+        }
 
         void InitDataStructure()
         {
-            m_HandTrackingInfo = new XR.HandTracking.HandInfo();
-            m_JointsAngles = new XR.HandTracking.HandJointsAngles();            
+            m_HandTrackingInfo = new HandTracking.HandInfo();
+            m_JointsAngles = new HandTracking.HandJointsAngles();
 
             for (int i = 0; i < m_HandInfo.Length; i++)
-            {                
-                m_HandInfo[i].pred3D = new float[63];                                
+            {
+                m_HandInfo[i].pred3D = new float[63];
                 m_HandInfo[i].dofData = new float[48];
             }
 
@@ -449,6 +487,9 @@ namespace OXRTK.ARHandTracking
 
                 m_RawJointData[i].localPositions = new Vector3[21];
                 m_RawJointData[i].localRotations = new Quaternion[21];
+
+                m_LastFrameRawJointData[i].localPositions = new Vector3[21];
+                m_LastFrameRawJointData[i].localRotations = new Quaternion[21];
             }
         }
 
@@ -457,15 +498,15 @@ namespace OXRTK.ARHandTracking
 #if ARRemoteDebug
             ARRemoteDebugWrapper.Init();
 
-            GameObject arRemoteDebugWrapperObj = GameObject.Find("ARRemoteDebug.Conduit");                        
+            GameObject arRemoteDebugWrapperObj = GameObject.Find("ARRemoteDebug.Conduit");
             arRemoteDebugWrapperObj.transform.SetParent(transform);
 
             if (Application.platform == RuntimePlatform.Android)
             {
                 ARRemoteDebugWrapper.AddEditorDataListener(OnEditorDataReceived);
             }
-            else if (Application.platform == RuntimePlatform.WindowsEditor || 
-                Application.platform == RuntimePlatform.OSXEditor || 
+            else if (Application.platform == RuntimePlatform.WindowsEditor ||
+                Application.platform == RuntimePlatform.OSXEditor ||
                 Application.platform == RuntimePlatform.LinuxEditor)
             {
                 ARRemoteDebugWrapper.AddAndroidDataListener(OnAndroidDataReceived);
@@ -477,7 +518,7 @@ namespace OXRTK.ARHandTracking
         {
             if (data is HandInfo[])
             {
-                HandInfo[] info = (HandInfo[])data;                
+                HandInfo[] info = (HandInfo[])data;
 
                 m_HandInfo[0] = info[0];
                 if (m_HandInfo[0].handDetected)
@@ -489,7 +530,7 @@ namespace OXRTK.ARHandTracking
                     }
                     ApplyDofData(m_HandInfo[0].dofData, m_RawJointData[0].localRotations);
                 }
-                
+
                 m_HandInfo[1] = info[1];
                 if (m_HandInfo[1].handDetected)
                 {
@@ -500,9 +541,6 @@ namespace OXRTK.ARHandTracking
                     }
                     ApplyDofData(m_HandInfo[1].dofData, m_RawJointData[1].localRotations);
                 }
-
-                smoothHandData();
-                onHandDataUpdated?.Invoke();
             }
         }
 
@@ -512,33 +550,39 @@ namespace OXRTK.ARHandTracking
         }
 
         void Update()
-        {            
+        {
             if (Application.platform == RuntimePlatform.Android)
-            {                
-                if (m_XrHandTrackingIsCorrect && m_HandThreadLock == 1)
+            {
+                if (!m_IsHandTrackingStarted || m_IsPaused)
+                {
+                    return;
+                }
+
+                /*
+                var resultOfGetHandInfo = HandTracking.GetHandInfo(ref m_HandTrackingInfo);
+                var resultOfGetHandJointAngles = HandTracking.GetHandJointAngles(ref m_JointsAngles);
+                */
+                //if (resultOfGetHandInfo == XRError.XR_ERROR_SUCCESS && resultOfGetHandJointAngles == XRError.XR_ERROR_SUCCESS)
+                if (debugLevel > 0)
+                {
+                    Debug.Log("updating, m_HandThreadLock " + m_HandThreadLock + ", m_IsHandTrackingCorrect " + m_IsHandTrackingCorrect);
+                }
+
+                if (m_HandThreadLock == 1)
                 {
                     m_HandInfo[0].handDetected = m_HandTrackingInfo.right.handDetected;
-                    if (m_HandInfo[0].handDetected)
+                    if (m_IsHandTrackingCorrect && m_HandInfo[0].handDetected)
                     {
+                        m_HandBeShownOnce[0] = true;
+                        m_HideHandCounter[0] = 0;
                         for (int i = 0; i < m_HandTrackingInfo.right.pred3D.Length; i++)
                         {
-                            if (m_IsFirstFrameOfRightHand)
-                            {
-                                m_HandInfo[0].pred3D[i * 3] = m_HandTrackingInfo.right.pred3D[i].x;
-                                m_HandInfo[0].pred3D[i * 3 + 1] = m_HandTrackingInfo.right.pred3D[i].y;
-                                m_HandInfo[0].pred3D[i * 3 + 2] = m_HandTrackingInfo.right.pred3D[i].z;
-                                m_IsFirstFrameOfRightHand = false;
-                            }
-                            else
-                            {
-                                m_HandInfo[0].pred3D[i * 3] = m_HandTrackingInfo.right.pred3D[i].x * (1 - m_HandDataFilter) + m_HandInfo[0].pred3D[i * 3] * m_HandDataFilter;
-                                m_HandInfo[0].pred3D[i * 3 + 1] = m_HandTrackingInfo.right.pred3D[i].y * (1 - m_HandDataFilter) + m_HandInfo[0].pred3D[i * 3 + 1] * m_HandDataFilter;
-                                m_HandInfo[0].pred3D[i * 3 + 2] = m_HandTrackingInfo.right.pred3D[i].z * (1 - m_HandDataFilter) + m_HandInfo[0].pred3D[i * 3 + 2] * m_HandDataFilter;
-                            }
+                            m_HandInfo[0].pred3D[i * 3] = m_HandTrackingInfo.right.pred3D[i].x;
+                            m_HandInfo[0].pred3D[i * 3 + 1] = m_HandTrackingInfo.right.pred3D[i].y;
+                            m_HandInfo[0].pred3D[i * 3 + 2] = m_HandTrackingInfo.right.pred3D[i].z;
 
-                            m_RawJointData[0].localPositions[i] = new Vector3(m_HandInfo[0].pred3D[i * 3], 
+                            m_RawJointData[0].localPositions[i] = new Vector3(m_HandInfo[0].pred3D[i * 3],
                                 -m_HandInfo[0].pred3D[i * 3 + 1], m_HandInfo[0].pred3D[i * 3 + 2]);
-
                         }
                         m_HandInfo[0].staticGesture = (StaticGesture)((int)m_HandTrackingInfo.right.staticGesture);
                         m_HandInfo[0].dynamicGesture = (DynamicGesture)((int)m_HandTrackingInfo.right.dynamicGesture);
@@ -547,39 +591,37 @@ namespace OXRTK.ARHandTracking
                         {
                             m_HandInfo[0].dofData[i * 3] = m_JointsAngles.right.angles[i].x;
                             m_HandInfo[0].dofData[i * 3 + 1] = m_JointsAngles.right.angles[i].y;
-                            m_HandInfo[0].dofData[i * 3 + 2] = m_JointsAngles.right.angles[i].z;                             
+                            m_HandInfo[0].dofData[i * 3 + 2] = m_JointsAngles.right.angles[i].z;
                         }
-                        ApplyDofData(m_HandInfo[0].dofData, m_RawJointData[0].localRotations);                        
+                        ApplyDofData(m_HandInfo[0].dofData, m_RawJointData[0].localRotations);
                     }
                     else
                     {
-                        m_IsFirstFrameOfRightHand = true;
-                        m_HandInfo[0].staticGesture = StaticGesture.None;
-                        m_HandInfo[0].dynamicGesture = DynamicGesture.None;
+                        if (m_HideHandCounter[0] < m_HideHandThreshold - 1 && m_HandBeShownOnce[0])
+                        {
+                            m_HideHandCounter[0]++;
+                            m_HandInfo[0].handDetected = true;
+                        }
+                        else
+                        {
+                            m_HandInfo[0].staticGesture = StaticGesture.None;
+                            m_HandInfo[0].dynamicGesture = DynamicGesture.None;
+                        }
                     }
 
                     m_HandInfo[1].handDetected = m_HandTrackingInfo.left.handDetected;
-                    if (m_HandInfo[1].handDetected)
+                    if (m_IsHandTrackingCorrect && m_HandInfo[1].handDetected)
                     {
+                        m_HandBeShownOnce[1] = true;
+                        m_HideHandCounter[1] = 0;
                         for (int i = 0; i < m_HandTrackingInfo.left.pred3D.Length; i++)
                         {
-                            if (m_IsFirstFrameOfLeftHand)
-                            {
-                                m_HandInfo[1].pred3D[i * 3] = m_HandTrackingInfo.left.pred3D[i].x;
-                                m_HandInfo[1].pred3D[i * 3 + 1] = m_HandTrackingInfo.left.pred3D[i].y;
-                                m_HandInfo[1].pred3D[i * 3 + 2] = m_HandTrackingInfo.left.pred3D[i].z;
-                                m_IsFirstFrameOfLeftHand = false;
-                            }
-                            else
-                            {
-                                m_HandInfo[1].pred3D[i * 3] = m_HandTrackingInfo.left.pred3D[i].x * (1 - m_HandDataFilter) + m_HandInfo[1].pred3D[i * 3] * m_HandDataFilter;
-                                m_HandInfo[1].pred3D[i * 3 + 1] = m_HandTrackingInfo.left.pred3D[i].y * (1 - m_HandDataFilter) + m_HandInfo[1].pred3D[i * 3 + 1] * m_HandDataFilter;
-                                m_HandInfo[1].pred3D[i * 3 + 2] = m_HandTrackingInfo.left.pred3D[i].z * (1 - m_HandDataFilter) + m_HandInfo[1].pred3D[i * 3 + 2] * m_HandDataFilter;
-                            }
+                            m_HandInfo[1].pred3D[i * 3] = m_HandTrackingInfo.left.pred3D[i].x;
+                            m_HandInfo[1].pred3D[i * 3 + 1] = m_HandTrackingInfo.left.pred3D[i].y;
+                            m_HandInfo[1].pred3D[i * 3 + 2] = m_HandTrackingInfo.left.pred3D[i].z;
 
                             m_RawJointData[1].localPositions[i] = new Vector3(m_HandInfo[1].pred3D[i * 3],
                                 -m_HandInfo[1].pred3D[i * 3 + 1], m_HandInfo[1].pred3D[i * 3 + 2]);
-
                         }
                         m_HandInfo[1].staticGesture = (StaticGesture)((int)m_HandTrackingInfo.left.staticGesture);
                         m_HandInfo[1].dynamicGesture = (DynamicGesture)((int)m_HandTrackingInfo.left.dynamicGesture);
@@ -590,20 +632,27 @@ namespace OXRTK.ARHandTracking
                             m_HandInfo[1].dofData[i * 3 + 1] = m_JointsAngles.left.angles[i].y;
                             m_HandInfo[1].dofData[i * 3 + 2] = m_JointsAngles.left.angles[i].z;
                         }
-                        ApplyDofData(m_HandInfo[1].dofData, m_RawJointData[1].localRotations);                    
+                        ApplyDofData(m_HandInfo[1].dofData, m_RawJointData[1].localRotations);
                     }
                     else
                     {
-                        m_IsFirstFrameOfLeftHand = true;
-                        m_HandInfo[1].staticGesture = StaticGesture.None;
-                        m_HandInfo[1].dynamicGesture = DynamicGesture.None;
+                        if (m_HideHandCounter[1] < m_HideHandThreshold - 1 && m_HandBeShownOnce[1])
+                        {
+                            m_HideHandCounter[1]++;
+                            m_HandInfo[1].handDetected = true;
+                        }
+                        else
+                        {
+                            m_HandInfo[1].staticGesture = StaticGesture.None;
+                            m_HandInfo[1].dynamicGesture = DynamicGesture.None;
+                        }
                     }
 
-                    //smoothHandData();
-#if ARRemoteDebug                    
+#if ARRemoteDebug
                     ARRemoteDebugWrapper.SendDataToEditor(m_HandInfo);
 #endif                                                       
                     m_HandThreadLock = 0;
+
                 }
             }
             else if (enableOfflineTest)
@@ -611,7 +660,7 @@ namespace OXRTK.ARHandTracking
                 m_HandInfo[0].handDetected = true;
                 offlineDataId = offlineDataId < 0 ? 0 : offlineDataId;
                 offlineDataId = offlineDataId >= m_OfflineDofRight.Length ? m_OfflinePred3DRight.Length - 1 : offlineDataId;
-                m_HandInfo[0].pred3D = m_OfflinePred3DRight[offlineDataId];                
+                m_HandInfo[0].pred3D = m_OfflinePred3DRight[offlineDataId];
                 m_HandInfo[0].dofData = m_OfflineDofRight[offlineDataId];
 
                 for (int i = 0; i < m_RawJointData[0].localPositions.Length; i++)
@@ -621,22 +670,22 @@ namespace OXRTK.ARHandTracking
                 }
 
                 ApplyDofData(m_HandInfo[0].dofData, m_RawJointData[0].localRotations);
-                //smoothHandData();
             }
 
-            smoothHandData();
+            PostProcessHandData();
             onHandDataUpdated?.Invoke();
-        }        
+        }
 
-        void smoothHandData()
+        // Post processing contains filtering (smoothing), interpolation (from 30 fps to 60) and prediction.
+        void PostProcessHandData()
         {
             // right hand filtering
             if (m_HandInfo[0].handDetected)
             {
                 if (!m_LastFrameRightHandDetected)
                 {
-                    Array.Copy(m_RawJointData[0].localPositions, m_LastFrameJointData[0].localPositions, m_RawJointData[0].localPositions.Length);
-                    Array.Copy(m_RawJointData[0].localRotations, m_LastFrameJointData[0].localRotations, m_RawJointData[0].localRotations.Length);
+                    Array.Copy(m_RawJointData[0].localPositions, m_JointData[0].localPositions, m_RawJointData[0].localPositions.Length);
+                    Array.Copy(m_RawJointData[0].localRotations, m_JointData[0].localRotations, m_RawJointData[0].localRotations.Length);
                 }
                 else
                 {
@@ -644,18 +693,50 @@ namespace OXRTK.ARHandTracking
                     {
                         m_JointData[0].localPositions[i] = Vector3.Lerp(m_LastFrameJointData[0].localPositions[i],
                             m_RawJointData[0].localPositions[i], 1 - m_SmoothFilter);
-                        m_LastFrameJointData[0].localPositions[i] = m_JointData[0].localPositions[i];
-
-                        m_JointData[0].localRotations[i] = Quaternion.Slerp(m_LastFrameJointData[0].localRotations[i],
-                            m_RawJointData[0].localRotations[i], 1 - m_SmoothFilter);
-                        m_LastFrameJointData[0].localRotations[i] = m_JointData[0].localRotations[i];
+                        m_JointData[0].localRotations[i] = m_RawJointData[0].localRotations[i];
                     }
                 }
+
+                if (enableRightHandPrediction)// && rightHandController.activeHand.handVisualizationType == BaseHand.HandVisualizationType.Model)
+                {
+                    if (m_RightHandBuffer == null)
+                    {
+                        m_RightHandBuffer = new List<Vector3>();
+                    }
+                    m_RightHandBuffer.Add(m_RawJointData[0].localPositions[0]);
+                    if (m_RightHandBuffer.Count == 20)
+                    {
+                        Vector3 deltaAvg = Vector3.zero;
+                        for (int i = 10; i < m_RightHandBuffer.Count - 1; i++)
+                        {
+                            deltaAvg += (m_RightHandBuffer[i + 1] - m_RightHandBuffer[i]);
+                        }
+                        deltaAvg = deltaAvg / 9;
+                        Vector3 predictedOffset = deltaAvg * 2.5f;
+                        for (int i = 0; i < m_JointData[0].localPositions.Length; i++)
+                        {
+                            m_JointData[0].localPositions[i] += predictedOffset;
+                        }
+                        //m_JointData[0].localPositions[0] += deltaAvg * 2.5f;
+                        m_RightHandBuffer.RemoveAt(0);
+                    }
+                }
+
+                Array.Copy(m_RawJointData[0].localPositions, m_LastFrameRawJointData[0].localPositions, m_RawJointData[0].localPositions.Length);
+                Array.Copy(m_RawJointData[0].localRotations, m_LastFrameRawJointData[0].localRotations, m_RawJointData[0].localRotations.Length);
+
+                Array.Copy(m_JointData[0].localPositions, m_LastFrameJointData[0].localPositions, m_JointData[0].localPositions.Length);
+                Array.Copy(m_JointData[0].localRotations, m_LastFrameJointData[0].localRotations, m_JointData[0].localRotations.Length);
+
                 m_LastFrameRightHandDetected = true;
             }
             else
             {
-                m_LastFrameRightHandDetected = false;                
+                if (m_RightHandBuffer != null)
+                {
+                    m_RightHandBuffer.Clear();
+                }
+                m_LastFrameRightHandDetected = false;
             }
 
             // left hand filtering
@@ -663,8 +744,8 @@ namespace OXRTK.ARHandTracking
             {
                 if (!m_LastFrameLeftHandDetected)
                 {
-                    Array.Copy(m_RawJointData[1].localPositions, m_LastFrameJointData[1].localPositions, m_RawJointData[1].localPositions.Length);
-                    Array.Copy(m_RawJointData[1].localRotations, m_LastFrameJointData[1].localRotations, m_RawJointData[1].localRotations.Length);
+                    Array.Copy(m_RawJointData[1].localPositions, m_JointData[1].localPositions, m_RawJointData[1].localPositions.Length);
+                    Array.Copy(m_RawJointData[1].localRotations, m_JointData[1].localRotations, m_RawJointData[1].localRotations.Length);
                 }
                 else
                 {
@@ -672,17 +753,48 @@ namespace OXRTK.ARHandTracking
                     {
                         m_JointData[1].localPositions[i] = Vector3.Lerp(m_LastFrameJointData[1].localPositions[i],
                             m_RawJointData[1].localPositions[i], 1 - m_SmoothFilter);
-                        m_LastFrameJointData[1].localPositions[i] = m_JointData[1].localPositions[i];
-
-                        m_JointData[1].localRotations[i] = Quaternion.Slerp(m_LastFrameJointData[1].localRotations[i],
-                            m_RawJointData[1].localRotations[i], 1 - m_SmoothFilter);
-                        m_LastFrameJointData[1].localRotations[i] = m_JointData[1].localRotations[i];
+                        m_JointData[1].localRotations[i] = m_RawJointData[1].localRotations[i];
                     }
                 }
+
+                if (enableLeftHandPrediction)// && leftHandController.activeHand.handVisualizationType == BaseHand.HandVisualizationType.Model)
+                {
+                    if (m_LeftHandBuffer == null)
+                    {
+                        m_LeftHandBuffer = new List<Vector3>();
+                    }
+                    m_LeftHandBuffer.Add(m_RawJointData[1].localPositions[0]);
+                    if (m_LeftHandBuffer.Count == 20)
+                    {
+                        Vector3 deltaAvg = Vector3.zero;
+                        for (int i = 10; i < m_LeftHandBuffer.Count - 1; i++)
+                        {
+                            deltaAvg += (m_LeftHandBuffer[i + 1] - m_LeftHandBuffer[i]);
+                        }
+                        deltaAvg = deltaAvg / 9;
+                        Vector3 predictedOffset = deltaAvg * 2.5f;
+                        for (int i = 0; i < m_JointData[1].localPositions.Length; i++)
+                        {
+                            m_JointData[1].localPositions[i] += predictedOffset;
+                        }
+                        //m_JointData[1].localPositions[0] += deltaAvg * 2.5f;
+                        m_LeftHandBuffer.RemoveAt(0);
+                    }
+                }
+
+                Array.Copy(m_RawJointData[1].localPositions, m_LastFrameRawJointData[1].localPositions, m_RawJointData[1].localPositions.Length);
+                Array.Copy(m_RawJointData[1].localRotations, m_LastFrameRawJointData[1].localRotations, m_RawJointData[1].localRotations.Length);
+
+                Array.Copy(m_JointData[1].localPositions, m_LastFrameJointData[1].localPositions, m_JointData[1].localPositions.Length);
+                Array.Copy(m_JointData[1].localRotations, m_LastFrameJointData[1].localRotations, m_JointData[1].localRotations.Length);
                 m_LastFrameLeftHandDetected = true;
             }
             else
             {
+                if (m_LeftHandBuffer != null)
+                {
+                    m_LeftHandBuffer.Clear();
+                }
                 m_LastFrameLeftHandDetected = false;
             }
         }
@@ -699,14 +811,14 @@ namespace OXRTK.ARHandTracking
             index = 13;
             localRots[17] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 14;
-            localRots[18] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);            
+            localRots[18] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 15;
             localRots[19] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             localRots[20] = Quaternion.identity;
 
             // index
             index = 1;
-            localRots[13] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);                        
+            localRots[13] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 2;
             localRots[14] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 3;
@@ -715,16 +827,16 @@ namespace OXRTK.ARHandTracking
 
             // middle
             index = 4;
-            localRots[9] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);                      
+            localRots[9] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 5;
-            localRots[10] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);                       
+            localRots[10] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 6;
             localRots[11] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             localRots[12] = Quaternion.identity;
 
             // ring
             index = 10;
-            localRots[5] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);            
+            localRots[5] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 11;
             localRots[6] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 12;
@@ -733,7 +845,7 @@ namespace OXRTK.ARHandTracking
 
             // pinky
             index = 7;
-            localRots[1] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);            
+            localRots[1] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 8;
             localRots[2] = ConvertRotation(dofData[index * 3], dofData[index * 3 + 1], dofData[index * 3 + 2]);
             index = 9;
@@ -741,7 +853,7 @@ namespace OXRTK.ARHandTracking
             localRots[4] = Quaternion.identity;
         }
 
-        // Convert from algorithm data (x, y, z) to Unity coordinate system data (rot)
+        // Converts from algorithm data (x, y, z) to Unity coordinate system data (rot)
         Quaternion ConvertRotation(float x, float y, float z, bool isRoot = false)
         {
             // Algorithm output DOF is radian.
@@ -757,10 +869,10 @@ namespace OXRTK.ARHandTracking
                 rot = Quaternion.Euler(0, 180, 180) * rot;
             }
             return rot;
-        }        
+        }
 
         /// <summary>
-        /// Get local position of selected joint. Data is relative to fisheye camera.<br>
+        /// Gets local position of selected joint. Data is relative to fisheye camera.<br>
         /// 获取选定节点的local position。数据相对于鱼眼相机。
         /// </summary>
         /// <param name="type">Right hand or left hand.<br>右手或左手。</param>
@@ -773,7 +885,20 @@ namespace OXRTK.ARHandTracking
         }
 
         /// <summary>
-        /// Get world position of selected joint.<br>
+        /// Gets local position of selected joint from raw data. Data is relative to fisheye camera and not processed by filtering.<br>
+        /// 从原始数据获取选定节点的local position。数据相对于鱼眼相机，并且没有经过滤波处理。
+        /// </summary>
+        /// <param name="type">Right hand or left hand.<br>右手或左手。</param>
+        /// <param name="id">ID of selected joint.<br>选定节点的ID。</param>
+        /// <returns>Local position of selected joint.<br>选定节点的local position。</returns>
+        public Vector3 GetRawJointLocalPosition(HandType type, int id)
+        {
+            int index = type == HandType.RightHand ? 0 : 1;
+            return m_RawJointData[index].localPositions[id];
+        }
+
+        /// <summary>
+        /// Gets world position of selected joint.<br>
         /// 获取选定节点的world position。
         /// </summary>
         /// <param name="type">Right hand or left hand.<br>右手或左手。</param>
@@ -794,7 +919,7 @@ namespace OXRTK.ARHandTracking
         }
 
         /// <summary>
-        /// Get local rotation of selected joint. Each local rotation is relative to its parent in architecture.<br>
+        /// Gets local rotation of selected joint. Each local rotation is relative to its parent in architecture.<br>
         /// 获取选定节点的local rotation。每个local rotation都是相对于其结构中的母节点而言。
         /// </summary>
         /// <param name="type">Right hand or left hand.<br>右手或左手。</param>
@@ -807,7 +932,20 @@ namespace OXRTK.ARHandTracking
         }
 
         /// <summary>
-        /// Get world rotation of selected joint.<br>
+        /// Gets local rotation of selected joint from raw data. Data is not processed by filtering. Each local rotation is relative to its parent in architecture.<br>
+        /// 从原始数据获取选定节点的local rotation。数据未经滤波处理。每个local rotation都是相对于其结构中的母节点而言。
+        /// </summary>
+        /// <param name="type">Right hand or left hand.<br>右手或左手。</param>
+        /// <param name="id">ID of selected joint.<br>选定节点的ID。</param>
+        /// <returns>Local rotation of selected joint.<br>选定节点的local rotation。</returns>
+        public Quaternion GetRawJointLocalRotation(HandType type, int id)
+        {
+            int index = type == HandType.RightHand ? 0 : 1;
+            return m_RawJointData[index].localRotations[id];
+        }
+
+        /// <summary>
+        /// Gets world rotation of selected joint.<br>
         /// 获取选定节点的world rotation。
         /// </summary>
         /// <param name="type">Right hand or left hand.<br>右手或左手。</param>
@@ -835,40 +973,55 @@ namespace OXRTK.ARHandTracking
             {
                 rot = GetJointWorldRotation(type, id - 1) * rot;
             }
-            
+
             return rot;
         }
-        
-        float m_TimeStart, m_TimeEnd;        
+
+        float m_TimeStart, m_TimeEnd;
         float m_AverageTime;
         void ThreadUpdateHandData()
         {
-            XR.HandTracking.SetGestureClassificationMode(0);
+            HandTracking.SetGestureClassificationMode(0);
             if (!m_IsHandTrackingStarted)
             {
-                XR.HandTracking.Start();
-                m_IsHandTrackingStarted = true;                
+                HandTracking.Start();
+                m_IsHandTrackingStarted = true;
             }
             m_IsInitialized = true;
             while (m_HandUpdating)
             {
                 m_TimeStart = Time.realtimeSinceStartup;
-
+                if (debugLevel > 1)
+                {
+                    Debug.Log("Thread updating, m_HandThreadLock " + m_HandThreadLock + ", m_IsPaused " + m_IsPaused);
+                }
                 if (m_HandThreadLock == 0 && !m_IsPaused)
-                {                    
-                    var state = XR.HandTracking.GetHandInfo(ref m_HandTrackingInfo);                    
-
-                    if (state == 0)
+                {
+                    float timeReadDataStart = Time.realtimeSinceStartup;
+                    var resultOfGetHandInfo = HandTracking.GetHandInfo(ref m_HandTrackingInfo);
+                    float timeGetHandInfoDone = Time.realtimeSinceStartup;
+                    var resultOfGetHandJointAngles = HandTracking.GetHandJointAngles(ref m_JointsAngles);
+                    float timeGetHandJointAnglesDone = Time.realtimeSinceStartup;
+                    if (debugLevel > 1)
                     {
-                        m_XrHandTrackingIsCorrect = true;
+                        Debug.Log("Get algorithm data in " + (timeGetHandJointAnglesDone - timeReadDataStart) * 1000 + "ms, " +
+                            "GetHandInfo: " + (timeGetHandInfoDone - timeReadDataStart) * 1000 + "ms, " +
+                            "GetHandJointAngles: " + (timeGetHandJointAnglesDone - timeGetHandInfoDone) * 1000 + "ms");
+                    }
+
+                    if (resultOfGetHandInfo == XRError.XR_ERROR_SUCCESS && resultOfGetHandJointAngles == XRError.XR_ERROR_SUCCESS)
+                    {
+                        m_IsHandTrackingCorrect = true;
                     }
                     else
                     {
-                        m_XrHandTrackingIsCorrect = false;                        
+                        if (debugLevel > 1)
+                        {
+                            Debug.Log("Thread updating result!!! resultOfGetHandInfo: " + resultOfGetHandInfo + ", resultOfGetHandJointAngles: " + resultOfGetHandJointAngles);
+                        }
+                        m_IsHandTrackingCorrect = false;
                     }
-                    
-                    state = XR.HandTracking.GetHandJointAngles(ref m_JointsAngles);
-                    
+
                     m_HandThreadLock = 1;
                 }
 
@@ -877,7 +1030,7 @@ namespace OXRTK.ARHandTracking
                 if (sleepTime < 0)
                 {
                     sleepTime = 0;
-                }                
+                }
                 Thread.Sleep(sleepTime);
             }
         }
@@ -894,7 +1047,7 @@ namespace OXRTK.ARHandTracking
                 // Stop hand tracking.
                 m_HandUpdating = false;
                 m_HandThread = null;
-                XR.HandTracking.Stop();
+                HandTracking.Stop();
             }
         }
 
@@ -908,15 +1061,15 @@ namespace OXRTK.ARHandTracking
         {
             Debug.Log("HandTrackingPlugin OnPause: " + pause);
             if (!m_IsInitialized) return;
-            
+
             m_IsPaused = pause;
             if (pause)
             {
-                XR.HandTracking.Pause();
+                HandTracking.Pause();
             }
             else
             {
-                XR.HandTracking.Resume();
+                HandTracking.Resume();
             }
         }
     }

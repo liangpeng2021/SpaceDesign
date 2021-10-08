@@ -18,7 +18,7 @@ public class DontDestroyInstance : MonoBehaviour
     {
         if (instance != null)
         {
-            Destroy(gameObject);
+            DestroyImmediate(gameObject);
         }
         else
         {

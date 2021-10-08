@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace OXRTK.ARHandTracking
 {
@@ -69,6 +70,9 @@ namespace OXRTK.ARHandTracking
         //bool m_PriorityEnabled = true;
         bool m_PriorityEnabled = false;
         bool m_IsPinched = false;
+        bool m_PalmBackStatus = false;
+
+        bool m_IsHandMenuOpened = false;
 
         int m_AlgorithmCounterIn = 0;
         int m_AlgorithmCounterOut = 0;
@@ -96,6 +100,11 @@ namespace OXRTK.ARHandTracking
             {
                 HandTrackingPlugin.instance.onHandDataUpdated += UpdateHandInfo;
             }
+
+            if(PointerManager.instance != null)
+            {
+                PointerManager.instance.onHandMenuChanged += UpdateHandMenuStatus;
+            }
         }
 
         // Update is called once per frame
@@ -114,6 +123,16 @@ namespace OXRTK.ARHandTracking
                 Reset();
                 m_IsActive = false;
                 m_InitRoutine = StartCoroutine(InitFingerJoint());
+            }
+        }
+
+        void UpdateHandMenuStatus(bool status)
+        {
+            if (m_IsHandMenuOpened != status)
+            {
+                m_IsHandMenuOpened = status;
+                if (m_IsHandMenuOpened)
+                    Reset();
             }
         }
 
@@ -162,7 +181,11 @@ namespace OXRTK.ARHandTracking
         {
             if (!m_IsEnabled)
                 return;
+            if (m_IsHandMenuOpened)
+                return;
             if (!m_IsHandDetected)
+                return;
+            if (m_PalmBackStatus)
                 return;
             if (m_IsPinched && m_TargetInInteraction != null)
                 return;
@@ -301,6 +324,11 @@ namespace OXRTK.ARHandTracking
             if (!m_IsHandDetected)
                 return;
 
+            UpdatePalmDirection();
+
+            if (m_PalmBackStatus)
+                return;
+
             CheckHandPinch(info);
         }
 
@@ -320,6 +348,8 @@ namespace OXRTK.ARHandTracking
 
                         if (!m_IsEnabled)
                             return;
+                        if (m_IsHandMenuOpened)
+                            return;
                         if (!m_PriorityEnabled)
                             return;
 
@@ -336,6 +366,8 @@ namespace OXRTK.ARHandTracking
                 else
                 {
                     if (!m_IsEnabled)
+                        return;
+                    if (m_IsHandMenuOpened)
                         return;
                     if (!m_PriorityEnabled)
                         return;
@@ -359,6 +391,8 @@ namespace OXRTK.ARHandTracking
                         m_AlgorithmCounterOut = 0;
 
                         if (!m_IsEnabled)
+                            return;
+                        if (m_IsHandMenuOpened)
                             return;
                         if (!m_PriorityEnabled)
                             return;
@@ -389,15 +423,54 @@ namespace OXRTK.ARHandTracking
                 {
                     m_IsHandDetected = false;
 
-                    if (m_IsEnabled)
+                    if (m_IsEnabled && !m_IsHandMenuOpened)
                     {
                         if (PointerManager.instance != null)
                         {
                             PointerManager.instance.UpdatePriorityInteraction(m_HandType, m_Type, m_Priority, true);
                         }
                         ResetHandEvent();
+                        m_PalmBackStatus = true;
                     }
                 }
+            }
+        }
+
+        void UpdatePalmDirection()
+        {
+            bool palmBackStatus = false;
+
+            if (CustomizedGestureController.instance != null)
+            {
+                palmBackStatus = CustomizedGestureController.instance.GetHandStatus(m_HandType, CustomizedGesture.PalmBack);
+            }
+
+            if (m_PalmBackStatus != palmBackStatus)
+            {
+                if (palmBackStatus)
+                {
+                    if (!m_PalmBackStatus)
+                    {
+                        m_PalmBackStatus = true;
+
+                        if (m_IsEnabled && !m_IsHandMenuOpened)
+                        {
+                            if (PointerManager.instance != null)
+                            {
+                                PointerManager.instance.UpdatePriorityInteraction(m_HandType, m_Type, m_Priority, true);
+                            }
+                            ResetHandEvent();
+                        }
+                    }
+                }
+                else
+                {
+                    if (m_PalmBackStatus)
+                    {
+                        m_PalmBackStatus = false;
+                    }
+                }
+                m_PalmBackStatus = palmBackStatus;
             }
         }
 

@@ -23,3 +23,9 @@
 ### 0.1.5  -  5/10/2021
 
 1. Change project folder into OXRTK.Tool.
+
+### 0.1.6  - 5/16/2021
+1. Replace Mirror network library with Telepathy
+
+### 0.1.7 - 7/1/2021
+1. Delete unused Template folder

@@ -7,7 +7,7 @@
 
     public enum HandJointID
     {
-        Wrist = 0, IndexNode1 = 13, MiddleNode1 = 9, ThumbNode2 = 18
+        Wrist = 0, IndexNode1 = 13, MiddleNode1 = 9, ThumbNode2 = 18, PinkyNode1 = 1, RingNode1 = 5
     }
 
     public enum TransformEventType
@@ -47,4 +47,12 @@
         LaserInteraction = 100,
         None = 200,
     }
+
+    public enum InteractionAvailability
+    {
+        AllowRayInteraction = 0,
+        AllowUIInteraction = 1,
+        AllowBoth = 2
+    }
+
 }

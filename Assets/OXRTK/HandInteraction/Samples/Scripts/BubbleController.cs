@@ -8,7 +8,14 @@ public class BubbleController : MonoBehaviour
     [SerializeField] GameObject m_Target;
     private ParticleSystem m_Beacon;
     private Animator m_Anim;
-    
+    private bool hidden;
+
+    private void OnEnable()
+    {
+        if (hidden)
+            gameObject.SetActive(false);
+    } 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -18,7 +25,12 @@ public class BubbleController : MonoBehaviour
     
     public void StopBeacon()
     {
-        m_Beacon.Stop();
+        if (!hidden)
+        {
+            m_Beacon.Stop();
+            hidden = true;
+            m_Anim.SetTrigger("TurnOff");
+        }
     }
 
     void OnTriggerExit(Collider col)

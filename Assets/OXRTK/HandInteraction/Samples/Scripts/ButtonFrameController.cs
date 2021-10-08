@@ -10,6 +10,7 @@ public class ButtonFrameController : MonoBehaviour
     public float highlightAlpha = 0.25f;
     public float pressedAlpha = 0.5f;
 
+    public Color normalColor;
     public Color highlightColor;
     public Color pressedColor;
     public Color clickedColor;
@@ -81,7 +82,6 @@ public class ButtonFrameController : MonoBehaviour
         //SetHandlerAlpha(highlightAlpha);
         SetBackColor(clickedColor);
     }
-
 
     void SetHandlerAlpha(float alpha)
     {

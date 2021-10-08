@@ -4,6 +4,9 @@ Shader "OXRTK/BoundingFrame" {
         _BorderOpacity ("BorderOpacity", Range(0, 1)) = 0.25
         _MainColor ("MainColor", Color) = (0.5,0.5,0.5,1)
         [HideInInspector]_Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
+        _Ref ("Stencil ID", Float) = 10
+        
+        _ZTestMode("ZTest", Float) = 4
     }
     SubShader {
         Tags {
@@ -18,9 +21,10 @@ Shader "OXRTK/BoundingFrame" {
             Blend One One
             ZWrite Off
             Cull Off
-            
+            ZTest [_ZTestMode]
+
             Stencil {
-                Ref 10   
+                Ref [_Ref]   
                 Pass Replace
             }
             CGPROGRAM

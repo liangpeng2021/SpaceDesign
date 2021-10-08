@@ -6,6 +6,7 @@ Shader "OXRTK/BoundingBoxBorder" {
         [HideInInspector]_Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
         _Stencil ("Stencil ID", Float) = 1
 
+        _ZTestMode("ZTest", Float) = 4
     }
     SubShader {
         Tags {
@@ -19,6 +20,7 @@ Shader "OXRTK/BoundingBoxBorder" {
             }
             Blend One One
             ZWrite Off
+            ZTest [_ZTestMode]
             
             Stencil {
                 Ref [_Stencil]

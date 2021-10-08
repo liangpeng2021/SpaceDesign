@@ -11,7 +11,6 @@ namespace OXRTK.ARHandTracking
     /// </summary>
     public class ButtonRayReceiver : RayPointerHandler
     {
-
         /// <summary>
         /// Called when the pointer enter the button. <br>
         /// 当射线打中按键时触发。
@@ -35,15 +34,6 @@ namespace OXRTK.ARHandTracking
         /// 当按键结束被点击时触发。
         /// </summary>
         public UnityEvent onPinchUp;
-
-        void Awake()
-        {
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-        }
 
         /// <summary>
         /// Called when the laser points to the object. <br>
@@ -89,6 +79,5 @@ namespace OXRTK.ARHandTracking
 
             onPinchUp?.Invoke();
         }
-
     }
 }

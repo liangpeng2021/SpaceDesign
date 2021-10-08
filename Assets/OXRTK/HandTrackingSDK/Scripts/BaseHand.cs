@@ -47,7 +47,7 @@ namespace OXRTK.ARHandTracking
         /// </remarks>
         [Tooltip("First 3 Finger(Thumb, Index, Middle)\nFirst 4 Finger(Thumb, Index, Middle, Ring)")]
         [SerializeField] protected HandColliderHandle.JointNeedCollider m_JointCollider = HandColliderHandle.JointNeedCollider.allFingerTip;
-        
+
         /// <summary>
         /// The type of collider.<br>
         /// 碰撞体的类型。
@@ -63,13 +63,19 @@ namespace OXRTK.ARHandTracking
         /// 手连接到的控制器。
         /// </summary>
         public HandController connectedController;
-        
+
         /// <summary>
         /// The rendering gameobject of hand.<br>
         /// 手的渲染gameobject。
         /// </summary>
         public GameObject handGameObject;
 
+        /// <summary>
+        /// The array of renderers used for hand rendering.<br>
+        /// 用于手部渲染的Renderer。
+        /// </summary>
+        [HideInInspector] public List<Renderer> handRenderers = new List<Renderer>();
+        
         /// <summary>
         /// Scale factor for collider due to hand mode size difference.<br>
         /// 根据手模型的建模比例相应调整collider的大小比例参数。
@@ -110,25 +116,87 @@ namespace OXRTK.ARHandTracking
         /// Initializes hand based on its visualization type.<br>
         /// 基于显示类型对手进行初始化。
         /// </summary>
-        protected virtual void Init() { }
+        protected virtual void Init()
+        {
+            if (handGameObject != null)
+            {
+                handGameObject.SetActive(false);
+            }
+            else
+            {
+                Debug.LogError("Rendering gameobject of hand is not set!");
+            }
+            
+            // SwitchHandDisplay(connectedController.hidHandMode);
+        }
 
         /// <summary>
         /// Updates hand based on its visualization type.<br>
         /// 基于显示类型对手进行更新。
         /// </summary>
-        protected virtual void UpdateHand() { }
+        protected virtual void UpdateHand()
+        {            
+            UpdateHandData();
+            UpdateHandTransform();
+            UpdateHandRendering();
+        }
+
+        protected virtual void UpdateHandData()
+        {
+            switch (handType)
+            {
+                default:
+                case HandTrackingPlugin.HandType.RightHand:
+                    m_HandInfo = HandTrackingPlugin.instance.rightHandInfo;
+                    break;
+                case HandTrackingPlugin.HandType.LeftHand:
+                    m_HandInfo = HandTrackingPlugin.instance.leftHandInfo;
+                    break;
+            }
+        }
+
+        protected virtual void UpdateHandTransform() { }
+
+        protected virtual void UpdateHandRendering()
+        {
+            if (m_HandInfo.handDetected)
+            {
+                if (!handGameObject.activeSelf)
+                {
+                    handGameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                if (handGameObject.activeSelf)
+                {
+                    handGameObject.SetActive(false);
+                }
+            }
+        }
 
         void Start()
         {
             handType = connectedController.handType;
             Init();
+
+            if (HandTrackingPlugin.instance != null)
+            {
+                HandTrackingPlugin.instance.onHandDataUpdated += UpdateHand;
+            }
         }
 
-        void Update()
+        /// <summary>
+        /// Change to show or hide the hand model. if the input boolean is true, then it uses the hidden hand mode; Otherwise, it displays the hand model.<br>
+        /// 控制是否渲染手模的开关，当isOn为真，则打开隐藏手模式；反之则打开手模。
+        /// </summary>
+        public void SwitchHandDisplay(bool isOn)
         {
-            UpdateHand();
+            foreach (Renderer r in handRenderers)
+            {
+                r.enabled = !isOn;
+            }
         }
-
     }
 }
 

@@ -20,17 +20,24 @@ public class BoundsColorController : MonoBehaviour
 
     void HandlerColorInit()
     {
-        for(int i = 0; i < boundingBox.cornerObjects.Length; i++) 
+        if (boundingBox.cornerObjects != null)
         {
-            BoundsHandlerColorController handlerColorController = 
-                boundingBox.cornerObjects[i].gameObject.AddComponent<BoundsHandlerColorController>();
-            handlerColorController.Init(highlightColor, pressedColor);
+            for (int i = 0; i < boundingBox.cornerObjects.Length; i++)
+            {
+                BoundsHandlerColorController handlerColorController =
+                    boundingBox.cornerObjects[i].gameObject.AddComponent<BoundsHandlerColorController>();
+                handlerColorController.Init(highlightColor, pressedColor);
+            }
         }
-        for (int i = 0; i < boundingBox.edgeObjects.Length; i++)
+
+        if (boundingBox.edgeObjects != null)
         {
-            BoundsHandlerColorController handlerColorController =
-                boundingBox.edgeObjects[i].gameObject.AddComponent<BoundsHandlerColorController>();
-            handlerColorController.Init(highlightColor, pressedColor);
+            for (int i = 0; i < boundingBox.edgeObjects.Length; i++)
+            {
+                BoundsHandlerColorController handlerColorController =
+                    boundingBox.edgeObjects[i].gameObject.AddComponent<BoundsHandlerColorController>();
+                handlerColorController.Init(highlightColor, pressedColor);
+            }
         }
     }
 }

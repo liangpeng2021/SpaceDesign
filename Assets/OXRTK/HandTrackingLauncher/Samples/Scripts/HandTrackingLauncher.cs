@@ -54,7 +54,7 @@ public class HandTrackingLauncher : MonoBehaviour
             m_Buttons[i].gameObject.transform.SetParent(uiCanvas.gameObject.transform, false);
             m_Buttons[i].gameObject.transform.localPosition = new Vector3(0, rt.sizeDelta.y / 2 - m_BoarderHeight - unitHeight * (i + 1), 0);
             int num = i;
-            m_Buttons[i].onClick.AddListener(delegate { LoadScene(num); });
+            //m_Buttons[i].onClick.AddListener(delegate { LoadScene(num); });
             
             m_Buttons[i].GetComponent<ButtonRayReceiver>().onPinchDown.AddListener(delegate { LoadScene(num); });
         }

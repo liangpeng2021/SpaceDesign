@@ -13,6 +13,8 @@
         
         _StencilOpFail ("Stencil Fail Operation", Float) = 0
         _StencilOpZFail ("Stencil Z-Fail Operation", Float) = 0
+
+        _ZTestMode("ZTest", Float) = 4
     }
     SubShader {
         Tags {
@@ -27,7 +29,8 @@
             }
             Blend One One
             ZWrite Off
-            
+            ZTest [_ZTestMode]
+                        
             Stencil {
                 Ref [_Stencil]
                 ReadMask [_StencilReadMask]
@@ -46,10 +49,12 @@
             #pragma multi_compile_fwdbase
             #pragma multi_compile_fog
             #pragma target 3.0
+            
             UNITY_INSTANCING_BUFFER_START( Props )
                 UNITY_DEFINE_INSTANCED_PROP( float, _EmissionPow)
                 UNITY_DEFINE_INSTANCED_PROP( float4, _BaseColor)
             UNITY_INSTANCING_BUFFER_END( Props )
+
             struct VertexInput {
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 float4 vertex : POSITION;

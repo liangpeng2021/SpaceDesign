@@ -28,57 +28,68 @@ namespace OXRTK.ARHandTracking
         {
             float maxsize = 0f;
             UnScale maxObj = null;
-            if (m_Corners.Count <= 0)
-                return;
             
-            foreach(UnScale corner in m_Corners)
+            if (m_Corners.Count > 0)
             {
-                corner.UpdateSize();
-                float cornerAngle = corner.GetFovAngle();
-                if(maxsize < cornerAngle)
+                foreach (UnScale corner in m_Corners)
                 {
-                    maxObj = corner;
-                    maxsize = cornerAngle;
+                    corner.UpdateSize();
+                    float cornerAngle = corner.GetFovAngle();
+                    if (maxsize < cornerAngle)
+                    {
+                        maxObj = corner;
+                        maxsize = cornerAngle;
+                    }
+                }
+
+                if (maxObj == null)
+                    return;
+
+                if (!m_IsRotation)
+                {
+                    if (maxsize > m_MaxAngle)
+                    {
+                        float r = maxObj.GetRescaleRatio(m_MaxAngle / 2);
+                        foreach (UnScale corner in m_Corners)
+                        {
+                            corner.SetScreenSize(r);
+                        }
+                        foreach (UnScale edge in m_Edges)
+                        {
+                            edge.SetScreenSize(r);
+                        }
+                    }
+                    else if (maxsize < m_MinAngle)
+                    {
+                        float r = maxObj.GetRescaleRatio(m_MinAngle / 2);
+                        foreach (UnScale corner in m_Corners)
+                        {
+                            corner.SetScreenSize(r);
+                        }
+                        foreach (UnScale edge in m_Edges)
+                        {
+                            edge.SetScreenSize(r);
+                        }
+                    }
                 }
             }
 
-            if (maxObj == null)
-                return;
+            float edgemax = 0, cornermax = 0;
+            if (m_Corners.Count > 0)
+                cornermax = m_Corners[0].GetLongestEdge();
+            else if (m_Edges.Count > 0)
+                cornermax = m_Edges[0].GetLongestEdge() / 2f;
 
+            if (m_Edges.Count > 0)
+                edgemax = m_Edges[0].GetLongestEdge();
+            else if (m_Corners.Count > 0)
+                edgemax = m_Corners[0].GetLongestEdge() * 2f;
 
-            if (!m_IsRotation)
-            {
-                if (maxsize > m_MaxAngle)
-                {
-                    float r = maxObj.GetRescaleRatio(m_MaxAngle / 2);
-                    foreach (UnScale corner in m_Corners)
-                    {
-                        corner.SetScreenSize(r);
-                    }
-                    foreach (UnScale edge in m_Edges)
-                    {
-                        edge.SetScreenSize(r);
-                    }
-                }
-                else if (maxsize < m_MinAngle)
-                {
-                    float r = maxObj.GetRescaleRatio(m_MinAngle / 2);
-                    foreach (UnScale corner in m_Corners)
-                    {
-                        corner.SetScreenSize(r);
-                    }
-                    foreach (UnScale edge in m_Edges)
-                    {
-                        edge.SetScreenSize(r);
-                    }
-                }
-            }
-
-            float minHandlerEdgeLengthAddUp = m_Corners[0].GetLongestEdge() + m_Edges[0].GetLongestEdge();
+            float minHandlerEdgeLengthAddUp = cornermax + edgemax;
             Vector3 boundsWorldSize = GetWorldScale(boundsCollider.transform, boundsCollider.size);
             float minBoundEdge;
 
-            if (m_Corners.Count > 4 && m_Edges.Count > 4)
+            if (m_Corners.Count > 4 || m_Edges.Count > 4)
             {
                 minBoundEdge = Mathf.Min(Mathf.Min(boundsWorldSize.x, boundsWorldSize.y), boundsWorldSize.z);
             } else
@@ -89,26 +100,38 @@ namespace OXRTK.ARHandTracking
             if (minHandlerEdgeLengthAddUp > minBoundEdge)
             {
                 float r = minHandlerEdgeLengthAddUp / minBoundEdge;
+                if (m_Edges.Count > 0)
+                {
+                    foreach (UnScale edge in m_Edges)
+                    {
+                        edge.SetScreenSize(1.0f / r);
+                    }
+                }
+                if (m_Corners.Count > 0)
+                {
+                    foreach (UnScale corner in m_Corners)
+                    {
+                        corner.SetScreenSize(1.0f / r);
+                    }
+                }
+            }
+
+            if (m_Edges.Count > 0)
+            {
                 foreach (UnScale edge in m_Edges)
                 {
-                    edge.SetScreenSize(1.0f / r);
+                    float currentWrapperScaleOverOriginal = boundsWorldSize.x / m_OriginalBoundsWorldSize.x;
+                    edge.UpdateModelScale(currentWrapperScaleOverOriginal);
                 }
+            }
+
+            if (m_Corners.Count > 0)
+            {
                 foreach (UnScale corner in m_Corners)
                 {
-                    corner.SetScreenSize(1.0f / r);
+                    float currentWrapperScaleOverOriginal = boundsWorldSize.x / m_OriginalBoundsWorldSize.x;
+                    corner.UpdateModelScale(currentWrapperScaleOverOriginal);
                 }
-            }
-
-            foreach(UnScale edge in m_Edges)
-            {
-                float currentWrapperScaleOverOriginal = boundsWorldSize.x / m_OriginalBoundsWorldSize.x;
-                edge.UpdateModelScale(currentWrapperScaleOverOriginal);
-            }
-
-            foreach (UnScale corner in m_Corners)
-            {
-                float currentWrapperScaleOverOriginal = boundsWorldSize.x / m_OriginalBoundsWorldSize.x;
-                corner.UpdateModelScale(currentWrapperScaleOverOriginal);
             }
         }
 
@@ -174,6 +197,5 @@ namespace OXRTK.ARHandTracking
         {
             transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, zMul);
         }
-
     }
 }

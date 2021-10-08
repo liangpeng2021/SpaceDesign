@@ -39,7 +39,6 @@ Shader "OXRTK/TextureBorder"
         Cull Off
         Lighting Off
         ZWrite Off
-        ZTest [unity_GUIZTestMode]
         Blend One One
         ColorMask [_ColorMask]
 
@@ -52,7 +51,6 @@ Shader "OXRTK/TextureBorder"
             #pragma target 2.0
 
             #include "UnityCG.cginc"
-            #include "UnityUI.cginc"
 
             #pragma multi_compile_local _ UNITY_UI_CLIP_RECT
             #pragma multi_compile_local _ UNITY_UI_ALPHACLIP
@@ -98,9 +96,9 @@ Shader "OXRTK/TextureBorder"
             {
                 half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
-                #ifdef UNITY_UI_CLIP_RECT
+                /*#ifdef UNITY_UI_CLIP_RECT
                 color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
-                #endif
+                #endif*/
 
                 #ifdef UNITY_UI_ALPHACLIP
                 clip (color.a - 0.001);

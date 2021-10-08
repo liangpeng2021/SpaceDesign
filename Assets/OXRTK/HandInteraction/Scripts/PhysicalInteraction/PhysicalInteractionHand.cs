@@ -21,21 +21,13 @@ namespace OXRTK.ARHandTracking
         [Tooltip("切换场景时是否自动禁用手势物理交互。")]
         [SerializeField] bool m_DisableWhenSwitchScene = true;
 
-        // TODO:Double check
-        // self implemented moving average algorithm
-
-        //Quaternion m_AverageRotation = Quaternion.identity;
-        Queue<Vector3> m_QueueOfTriangulation1Pos = new Queue<Vector3>();
-        Queue<Vector3> m_QueueOfTriangulation2Pos = new Queue<Vector3>();
-        Queue<Vector3> m_QueueOfTriangulation3Pos = new Queue<Vector3>();
-        int m_WindowWidth = 60;
-        //List<Quaternion> m_ListOfQuaternions = new List<Quaternion>();
         Transform m_GrabbedObjs;
         Transform m_GrabMoveRoot;
         Transform m_TriangulationP1;
         Transform m_TriangulationP2;
         Transform m_TriangulationP3;
         bool m_TriangulationReady = false;
+        bool m_IsPause = false;
 
         List<PhysicalInteractionFingerTip> m_FingerTips = new List<PhysicalInteractionFingerTip>();
 
@@ -47,6 +39,11 @@ namespace OXRTK.ARHandTracking
 
             m_InitRoutine = StartCoroutine(Init());
             HandController.onActiveHandChanged += OnHandStyleChange;
+
+            if(PointerManager.instance != null)
+            {
+                PointerManager.instance.onHandMenuChanged += UpdateHandMenuStatus;
+            }
         }
         void OnEnable()
         {
@@ -87,7 +84,7 @@ namespace OXRTK.ARHandTracking
 
             if (!m_IsEnabled)
             {
-                ToggleFingerTipsOnOff();
+                EnableFingerTips(m_IsEnabled);
             }
             m_InitRoutine = null;
         }
@@ -125,25 +122,43 @@ namespace OXRTK.ARHandTracking
         public bool isEnabled
         {
             get { return m_IsEnabled; }
-            set { ToggleFingerTipsOnOff(value); }
+            set { EnableSystem(value); }
         }
 
-        void ToggleFingerTipsOnOff(bool isEnableTp)
+        /// <summary>
+        /// Temporary disable interaction. <br>暂时禁止交互.</br>
+        /// </summary>
+        public bool isPause
+        {
+            get { return m_IsPause; }
+            set { m_IsPause = value; PauseModule(value); }
+
+        }
+
+        void EnableSystem(bool isEnableTp)
         {
             if (m_IsEnabled != isEnableTp)
             {
                 m_IsEnabled = isEnableTp;
-                ToggleFingerTipsOnOff();
-                if (!m_IsEnabled && m_GrabbedObjs != null)
-                    m_GrabbedObjs.GetComponent<PhysicalInteractionInteractable>()?.FTHReset();
+                EnableFingerTips(m_IsEnabled && !isPause);
+                if (!m_IsEnabled && m_GrabbedObjs != null) m_GrabbedObjs.GetComponent<PhysicalInteractionInteractable>()?.FTHReset();
             }
         }
 
-        void ToggleFingerTipsOnOff()
+        void PauseModule(bool value)
+        {
+            if (m_IsEnabled)
+            {
+                EnableFingerTips(!value);
+                if (value && m_GrabbedObjs != null) m_GrabbedObjs.GetComponent<PhysicalInteractionInteractable>()?.FTHReset();
+            }
+        }
+
+        void EnableFingerTips(bool value)
         {
             for (int i = 0; i < m_FingerTips.Count; i++)
             {
-                m_FingerTips[i].IsEnabled = m_IsEnabled;
+                m_FingerTips[i].IsEnabled = value;
             }
         }
 
@@ -199,52 +214,20 @@ namespace OXRTK.ARHandTracking
 
         void CalculateGrabMoveRootPosRot()
         {
-            Vector3 tempPos1 = m_TriangulationP1.position;
-            Vector3 tempPos2 = m_TriangulationP2.position;
-            Vector3 tempPos3 = m_TriangulationP3.position;
-
-            m_QueueOfTriangulation1Pos.Enqueue(tempPos1);
-            m_QueueOfTriangulation2Pos.Enqueue(tempPos2);
-            m_QueueOfTriangulation3Pos.Enqueue(tempPos3);
-
-            if (m_QueueOfTriangulation1Pos.Count > m_WindowWidth)
-            {
-                m_QueueOfTriangulation1Pos.Dequeue();
-                tempPos1 = Vector3.zero;
-                for (int i = 0; i < m_QueueOfTriangulation1Pos.Count; i++)
-                {
-                    tempPos1 += m_QueueOfTriangulation1Pos.ToArray()[i];
-                }
-                tempPos1 /= m_WindowWidth;
-            }
-            if (m_QueueOfTriangulation2Pos.Count > m_WindowWidth)
-            {
-                m_QueueOfTriangulation2Pos.Dequeue();
-                tempPos2 = Vector3.zero;
-                for (int i = 0; i < m_QueueOfTriangulation2Pos.Count; i++)
-                {
-                    tempPos2 += m_QueueOfTriangulation2Pos.ToArray()[i];
-                }
-                tempPos2 /= m_WindowWidth;
-            }
-            if (m_QueueOfTriangulation3Pos.Count > m_WindowWidth)
-            {
-                m_QueueOfTriangulation3Pos.Dequeue();
-                tempPos3 = Vector3.zero;
-                for (int i = 0; i < m_QueueOfTriangulation3Pos.Count; i++)
-                {
-                    tempPos3 += m_QueueOfTriangulation3Pos.ToArray()[i];
-                }
-                tempPos3 /= m_WindowWidth;
-            }
-
             m_GrabMoveRoot.position = (m_TriangulationP1.position + m_TriangulationP2.position + m_TriangulationP3.position) / 3f;
             Vector3 vec1 = m_TriangulationP2.position - m_TriangulationP1.position;
             Vector3 vec2 = m_TriangulationP3.position - m_TriangulationP1.position;
             Vector3 normal = Vector3.Cross(vec1, vec2).normalized;
 
-            //m_GrabMoveRoot.rotation = Quaternion.LookRotation((m_TriangulationP1.position - m_GrabMoveRoot.position).normalized, normal);
-            m_GrabMoveRoot.rotation = Quaternion.LookRotation((tempPos1 - (tempPos1+tempPos2+tempPos3)/3f).normalized, normal);
+            m_GrabMoveRoot.rotation = Quaternion.LookRotation((m_TriangulationP1.position - m_GrabMoveRoot.position).normalized, normal);
+        }
+
+        void UpdateHandMenuStatus(bool status)
+        {
+            if (isPause != status)
+            {
+                isPause = status;
+            }
         }
 
         void OnValidate()

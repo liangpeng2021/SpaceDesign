@@ -44,11 +44,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   handSetting:
-  - handType: 1
-    useRayFarInteraction: 0
-    useNearColliderInteraction: 0
-    useSpherePressInteraction: 0
   - handType: 0
-    useRayFarInteraction: 0
-    useNearColliderInteraction: 0
-    useSpherePressInteraction: 0
+    isHandDisplayOn: 0
+    useRayInteraction: 1
+    usePhysicalInteraction: 0
+    useUIInteraction: 1
+  - handType: 1
+    isHandDisplayOn: 0
+    useRayInteraction: 1
+    usePhysicalInteraction: 0
+    useUIInteraction: 1
+  okFeedback: 1

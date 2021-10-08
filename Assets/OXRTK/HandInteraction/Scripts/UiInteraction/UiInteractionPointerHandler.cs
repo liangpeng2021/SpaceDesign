@@ -31,6 +31,17 @@ namespace OXRTK.ARHandTracking
         {
             get { return m_IsInInteraction; }
         }
+        
+        protected bool m_IsInFocus = false;
+
+        /// <summary>
+        /// Gets object focus status. <br>
+        /// 获取物体聚焦状态。
+        /// </summary>
+        public bool isInFocus
+        {
+            get { return m_IsInFocus; }
+        }
 
         //当前交互位置到collider距离
         protected float m_TouchableDistance = float.PositiveInfinity;
@@ -48,6 +59,7 @@ namespace OXRTK.ARHandTracking
         public virtual void OnComeClose()
         {
             m_IsInInteraction = true;
+            m_IsInFocus = true;
             if (HandTrackingPlugin.debugLevel > 0) Debug.Log("OnComeClose " + gameObject.name);
         }
 
@@ -58,6 +70,7 @@ namespace OXRTK.ARHandTracking
         public virtual void OnLeaveFar()
         {
             m_IsInInteraction = false;
+            m_IsInFocus = false;
             if (HandTrackingPlugin.debugLevel > 0) Debug.Log("OnLeaveFar " + gameObject.name);
         }
 
@@ -136,6 +149,19 @@ namespace OXRTK.ARHandTracking
         public virtual void OnDragging(Vector3 fingerPosition)
         {
 
+        }
+
+        /// <summary>
+        /// Called when the object is disabled. <br>
+        /// 当物体被disable时调用。
+        /// </summary>
+        public virtual void OnDisable()
+        {
+            if (m_IsInInteraction)
+                OnPinchUp();
+            if (m_IsInFocus)
+                OnLeaveFar();
+            if (HandTrackingPlugin.debugLevel > 0) Debug.Log("Disable " + gameObject.name + ", Reset.");
         }
     }
 }

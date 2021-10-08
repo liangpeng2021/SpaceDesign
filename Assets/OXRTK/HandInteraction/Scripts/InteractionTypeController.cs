@@ -14,16 +14,20 @@ namespace OXRTK.ARHandTracking
     public struct InteractionSetting
     {
         public HandTrackingPlugin.HandType handType;
+        public bool isHandDisplayOn;
         public bool useRayInteraction;
         public bool usePhysicalInteraction;
         public bool useUIInteraction;
-
-        public InteractionSetting(HandTrackingPlugin.HandType type, bool rayStatus, bool physicalStatus, bool uiStatus)
+       // [HideInInspector]
+       // public bool isHandMenuOpen;
+        public InteractionSetting(HandTrackingPlugin.HandType type, bool handDisplay, bool rayStatus, bool physicalStatus, bool uiStatus)
         {
             handType = type;
+            isHandDisplayOn = handDisplay;
             useRayInteraction = rayStatus;
             usePhysicalInteraction = physicalStatus;
             useUIInteraction = uiStatus;
+           // isHandMenuOpen = false;
         }
     }
 
@@ -39,7 +43,13 @@ namespace OXRTK.ARHandTracking
         /// </summary>
         public InteractionSetting[] handSetting;
 
+        [Header("Gesture Feedback")]
+        public bool okFeedback = true;
+
         private InteractionSetting[] m_PreviousHandSetting;
+        HandMenuLocator[] m_HandMenus;
+        int m_HandMenuOpened = 0;
+        bool m_IsHandMenuOpen = false, m_IsLastHandMenuOpen = false;
 
         private void Update()
         {
@@ -51,7 +61,7 @@ namespace OXRTK.ARHandTracking
                 return;
             }
 
-            for(int i = 0; i < handSetting.Length; i++)
+            for (int i = 0; i < handSetting.Length; i++)
             {
                 if (handSetting[i].handType != m_PreviousHandSetting[i].handType)
                 {
@@ -59,27 +69,29 @@ namespace OXRTK.ARHandTracking
                     return;
                 }
 
-                if (handSetting[i].useRayInteraction != m_PreviousHandSetting[i].useRayInteraction)
+                if ((handSetting[i].useRayInteraction || m_IsHandMenuOpen) != (m_PreviousHandSetting[i].useRayInteraction || m_IsLastHandMenuOpen))
                 {
-                    PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.RayInteraction, handSetting[i].useRayInteraction);
-                    m_PreviousHandSetting[i].useRayInteraction = handSetting[i].useRayInteraction;
+                    PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.RayInteraction, (handSetting[i].useRayInteraction || m_IsHandMenuOpen));
                     PointerManager.instance.UpdateCurrentInteraction(handSetting);
                 }
 
-                if (handSetting[i].usePhysicalInteraction != m_PreviousHandSetting[i].usePhysicalInteraction)
+                if ((handSetting[i].usePhysicalInteraction && !m_IsHandMenuOpen) != (m_PreviousHandSetting[i].usePhysicalInteraction && !m_IsLastHandMenuOpen))
                 {
-                    PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.PhysicalInteraction, handSetting[i].usePhysicalInteraction);
-                    m_PreviousHandSetting[i].usePhysicalInteraction = handSetting[i].usePhysicalInteraction;
+                    PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.PhysicalInteraction, handSetting[i].usePhysicalInteraction && !m_IsHandMenuOpen);
                     PointerManager.instance.UpdateCurrentInteraction(handSetting);
                 }
 
-                if (handSetting[i].useUIInteraction != m_PreviousHandSetting[i].useUIInteraction)
+                if ((handSetting[i].useUIInteraction && !m_IsHandMenuOpen) != (m_PreviousHandSetting[i].useUIInteraction && !m_IsLastHandMenuOpen))
                 {
-                    PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.UiIneraction, handSetting[i].useUIInteraction);
-                    m_PreviousHandSetting[i].useUIInteraction = handSetting[i].useUIInteraction;
+                    PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.UiIneraction, handSetting[i].useUIInteraction && !m_IsHandMenuOpen);
                     PointerManager.instance.UpdateCurrentInteraction(handSetting);
                 }
-            }    
+
+                m_PreviousHandSetting[i].useRayInteraction = handSetting[i].useRayInteraction;
+                m_PreviousHandSetting[i].usePhysicalInteraction = handSetting[i].usePhysicalInteraction;
+                m_PreviousHandSetting[i].useUIInteraction = handSetting[i].useUIInteraction;
+            }
+            m_IsLastHandMenuOpen = m_IsHandMenuOpen;
         }
 
         void InteractionSetup()
@@ -94,11 +106,11 @@ namespace OXRTK.ARHandTracking
             }
             for (int i = 0; i < handSetting.Length; i++)
             {
-                PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.RayInteraction, handSetting[i].useRayInteraction);
+                PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.RayInteraction, handSetting[i].useRayInteraction || m_IsHandMenuOpen);
 
-                PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.PhysicalInteraction, handSetting[i].usePhysicalInteraction);
+                PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.PhysicalInteraction, handSetting[i].usePhysicalInteraction && !m_IsHandMenuOpen);
 
-                PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.UiIneraction, handSetting[i].useUIInteraction);
+                PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.UiIneraction, handSetting[i].useUIInteraction && !m_IsHandMenuOpen);
             }
 
             m_PreviousHandSetting = new InteractionSetting[handSetting.Length];
@@ -109,15 +121,67 @@ namespace OXRTK.ARHandTracking
                 m_PreviousHandSetting[i].usePhysicalInteraction = handSetting[i].usePhysicalInteraction;
                 m_PreviousHandSetting[i].useUIInteraction = handSetting[i].useUIInteraction;
             }
+            m_IsLastHandMenuOpen = m_IsHandMenuOpen;
         }
 
         IEnumerator Start()
         {
+            InitHandMenuList();
             yield return new WaitUntil(() => PointerManager.instance != null);
             yield return new WaitUntil(() => PointerManager.instance.CheckActive());
             InteractionSetup();
             PointerManager.instance.UpdateCurrentInteraction(handSetting);
+
+            InitHandDisplayMode();
         }
 
+        public void InitHandDisplayMode()
+        {
+            /*
+            if (handSetting[0].usePhysicalInteraction || handSetting[0].useUIInteraction ||
+                handSetting[1].usePhysicalInteraction || handSetting[1].useUIInteraction)
+            {
+                HandDisplayModeSwtich.ForceHandDisplayOn(true);
+            }
+            else
+            {
+                HandDisplayModeSwtich.ForceHandDisplayOn(false);
+            }
+            */
+            HandDisplayModeSwtich.ForceHandDisplayOn(handSetting[0].isHandDisplayOn, false);
+            HandDisplayModeSwtich.ForceHandDisplayOn(handSetting[1].isHandDisplayOn, true);
+        }
+
+        //HandMenu switch
+        void InitHandMenuList()
+        {
+            m_HandMenus = FindObjectsOfType<HandMenuLocator>();
+            for (int i = 0; i < m_HandMenus.Length; i++)
+            {
+                m_HandMenus[i].onMenuStatusChange += SetHandMenuNumber;
+            }
+            m_HandMenuOpened = 0;
+            m_IsHandMenuOpen = false;
+        }
+
+        void SetHandMenuNumber(bool status)
+        {
+            if (status)
+            {
+                if (m_HandMenuOpened == 0)
+                {
+                    m_IsHandMenuOpen = true;
+                }
+                m_HandMenuOpened += 1;
+            }
+            else if(m_HandMenuOpened > 0)
+            {
+                m_HandMenuOpened -= 1;
+                if (m_HandMenuOpened == 0)
+                {
+                    m_IsHandMenuOpen = false;
+                }
+            }
+        }
     }
 }
