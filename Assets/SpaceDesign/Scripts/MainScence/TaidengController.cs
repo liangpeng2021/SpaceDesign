@@ -56,7 +56,6 @@ public class TaidengController : MonoBehaviour
             boundingBoxRayReceiverHelper = GetComponent<BoundingBoxRayReceiverHelper>();
         if (boundingBoxRayReceiverHelper)
             GetComponent<BoundingBoxRayReceiverHelper>().onPointerEnter += PointEnter;
-        Debug.Log("MyLog::"+boundingBoxRayReceiverHelper);
     }
 
     private void OnEnable()
