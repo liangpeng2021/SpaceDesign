@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 /// <summary>
 /// UI颜色效果响应  create by liangpeng 2020-7-7
@@ -16,7 +15,12 @@ public class ImageColorUIButtonSet : ButtonSetFather
 	//图片组件
 	Image image;
 
-	public override void OnClickDownRespons()
+    private void OnDestroy()
+    {
+        image = null;
+    }
+
+    public override void OnClickDownRespons()
 	{
 		base.OnClickDownRespons();
         if (image)

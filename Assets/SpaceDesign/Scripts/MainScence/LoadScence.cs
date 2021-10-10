@@ -83,7 +83,10 @@ public class LoadScence : MonoBehaviour
     public void LoadGameObjectData()
     {
         //BitConverter方式
-        objectDatas = MyDeSerial(EditorControl.Instance.path);
+        string path = EditorControl.GetPth();
+        path = Path.Combine(path, "scence.scn");
+
+        objectDatas = MyDeSerial(path);
 
         if (objectDatas == null)
         {
@@ -104,7 +107,7 @@ public class LoadScence : MonoBehaviour
     /// <summary>
     /// 反序列化（读取path路径下的文件），将数据从文件读取出来
     /// </summary>
-    ScenceData MyDeSerial(string path)
+    public static ScenceData MyDeSerial(string path)
     {
         ScenceData gameObjectDatas = null;
         using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate))

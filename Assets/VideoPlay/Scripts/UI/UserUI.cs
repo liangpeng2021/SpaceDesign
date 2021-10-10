@@ -1,10 +1,13 @@
-﻿using System;
+﻿using SpaceDesign;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using OXRTK.ARHandTracking;
 
 ///b*[^:b#/]+.*$,用于统计代码行数,pico SDK 18327
 
@@ -14,8 +17,46 @@ using UnityEngine.UI;
 
 public class UserUI : MonoBehaviour
 {
-	#region 登录注册界面
-	[Header("登录注册界面")]
+    #region 游客或者用户登录
+    public GameObject choosePanel;
+
+    public ButtonRayReceiver youkeBtn;
+    public ButtonRayReceiver showdengluBtn;
+
+    public ButtonRayReceiver quitBtn;
+    void InitChoosePanel()
+    {
+        //选择面板打开
+        choosePanel.SetActive(true);
+        youkeBtn.onPinchDown.AddListener(LoadMainScence);
+        showdengluBtn.onPinchDown.AddListener(ShowDengluPanel);
+        quitBtn.onPinchDown.AddListener(QuitApp);
+    }
+
+    void QuitApp()
+    {
+        Application.Quit();
+    }
+
+    void LoadMainScence()
+    {
+        SceneManager.LoadScene("MainScence");
+    }
+
+    /// <summary>
+    /// 显示登录面板
+    /// </summary>
+    void ShowDengluPanel()
+    {
+        dengluzhuceTran.gameObject.SetActive(true);
+        _keyBoardManager.gameObject.SetActive(true);
+        ClickBtn(0);
+        choosePanel.SetActive(false);
+    }
+    #endregion
+
+    #region 登录注册界面
+    [Header("登录注册界面")]
 	//切换时的颜色
 	public Color NormalColor = Color.gray;
 
@@ -86,11 +127,18 @@ public class UserUI : MonoBehaviour
 	public Text dumiaoText;
 	BoxCollider dumiaoCol;
     
-	public UserData yoopUserData;
-    
-	void InitDengluZhuce()
+	UserDataSupport yoopUserData;
+
+    /// <summary>
+    /// 返回上一个界面的按钮
+    /// </summary>
+    public OnTagetButton backtolastPanelBtn;
+
+    void InitDengluZhuce()
 	{
-		BtnText = new Text[BtnSet.Length];
+        yoopUserData = DontDestroyInstance.instance.transform.Find("UserDataSupport").GetComponent<UserDataSupport>();
+
+        BtnText = new Text[BtnSet.Length];
 		for (int i = 0; i < BtnSet.Length; i++)
 		{
 			BtnText[i] = BtnSet[i].GetComponent<Text>();
@@ -117,10 +165,22 @@ public class UserUI : MonoBehaviour
 		OnTagetButton chongxinfasongBtn = dumiaoText.GetComponent<OnTagetButton>();
 		chongxinfasongBtn.OnClickDwon.AddListener(SendYanzhengmaAgain);
 
-        ClickBtn(0);
+        //登陆面板关闭
+        dengluzhuceTran.gameObject.SetActive(false);
+        _keyBoardManager.gameObject.SetActive(false);
+
+        backtolastPanelBtn.OnClickDwon.AddListener(BackToLastPanel);
+    }
+
+    void BackToLastPanel()
+    {
+        dengluzhuceTran.gameObject.SetActive(false);
+        _keyBoardManager.gameObject.SetActive(false);
+
+        choosePanel.SetActive(true);
     }
     
-	void ResetInputText()
+    void ResetInputText()
 	{
 		for (int i = 0; i < inputTran.Length; i++)
 		{
@@ -463,25 +523,25 @@ public class UserUI : MonoBehaviour
 		string username=userNameText.text;
 		string phone=phoneText.text;
 		InterfaceName interfaceName;
-        //TODO
-		////注册界面的发送验证码
-		//if (curInputID == 1)
-		//{
-		//	interfaceName = InterfaceName.zhuceyanzheng;
-			
-		//}
-		//else//找回密码界面的发送验证码
-		//{
-		//	interfaceName = InterfaceName.findpasswordyanzheng;
-			
-		//}
-		//StarVerifyTiming();
-		//userManager.YanzhengPhone(username, phone, interfaceName, 
-		//	(yzd, mg) =>
-		//{
-		//	SetYanzhengResult(yzd, mg);
-		//});
-	}
+
+        //注册界面的发送验证码
+        if (curInputID == 1)
+        {
+            interfaceName = InterfaceName.zhuceyanzheng;
+
+        }
+        else//找回密码界面的发送验证码
+        {
+            interfaceName = InterfaceName.findpasswordyanzheng;
+
+        }
+        StarVerifyTiming();
+        userManager.YanzhengPhone(username, phone, interfaceName,
+            (yzd, mg) =>
+        {
+            SetYanzhengResult(yzd, mg);
+        });
+    }
 
 	/// <summary>
 	/// 设置注册的结果
@@ -505,17 +565,17 @@ public class UserUI : MonoBehaviour
 	/// </summary>
 	void SetDengluResult(UserData ud, string message)
 	{
-        //TODO
-		//验证结果
-		//if (!ud.state)
-		//{
-		//	LogManager.Instance.ShowTipObj(message,2f);
-		//}
-		//else
-		//{
-		//	SetLoginUI(ud);
-		//}
-	}
+        //验证结果
+        if (!ud.state)
+        {
+            //TODO
+            //LogManager.Instance.ShowTipObj(message, 2f);
+        }
+        else
+        {
+            SetLoginUI(ud);
+        }
+    }
 
 	/// <summary>
 	/// 设置找回密码结果，成功时自动登录
@@ -542,98 +602,21 @@ public class UserUI : MonoBehaviour
 	/// <param name="isAutoHide"></param>
 	void SetLoginUI(UserData ud,float hideTime=0f)
 	{
-		yoopUserData = ud;
-		//切换为已登录状态
+		yoopUserData.userData = ud;
+        //切换为已登录状态
         //TODO
-		//LogManager.Instance.ShowLoadingObj();
-        
-		//拆分位置信息
-		string[] tempAddress = ud.address.Split('/');
-		string newAddress = "";
-		for (int i=0;i< tempAddress.Length;i++)
-		{
-			newAddress += tempAddress[i];
-			if (i < tempAddress.Length - 1)
-				newAddress += " ";
-		}
-        
-        //TODO
-        ////开启新协程
-        //IEnumerator _ieGetUserImage =YoopInterfaceSupport.GetImageFromURL(YoopInterfaceSupport.yoopInterfaceDic[InterfaceName.publicUserImageURL]+ud.img,512,512,
-        //	//回调
-        //	(_sprite) =>
-        //	{
-        //		LogManager.Instance.CloseLoadingObj(hideTime);
+        //LogManager.Instance.ShowLoadingObj();
+        curInputID = -1;
 
-        //		curInputID = -1;
-
-        //		UIManager.Instance.SetTanPanelActive(dengluzhuceTran.gameObject,false);
-        //		_keyBoardManager.gameObject.SetActive(false);
-
-        //		SwitchLoginUIState(true);
-
-        //		for (int i = 0; i < _userImages.Length; i++)
-        //		{
-        //			_userImages[i].sprite = _sprite;
-        //		}
-        //	}
-        //	,
-        //          (str)=>
-        //          {
-        //              Debug.Log("LoginUIImage:"+str);
-        //          });
-
-        //ActionQueue.InitOneActionQueue().AddAction(_ieGetUserImage).StartQueue();
+        _keyBoardManager.gameObject.SetActive(false);
+        SceneManager.LoadScene("EditorScence");
     }
-
-    /// <summary>
-    /// 修改头像和昵称后，重新赋值
-    /// </summary>
-    /// <param name="nickname"></param>
-    /// <param name="sprite"></param>
-    /// <param name="imageName"></param>
-    public void SetUserData(string nickname,Sprite sprite,string imageName)
-	{
-		yoopUserData.nickname = nickname;
-		yoopUserData.img = imageName;
-	}
-
 	#endregion
     
 	private void Start()
 	{
 		InitDengluZhuce();
-	}
 
-	private void Awake()
-	{
-        //TODO
-        //CheckLocalUserDataToSetLoginUI();
+        InitChoosePanel();
     }
-
-    void CheckLocalUserDataToSetLoginUI()
-	{
-		//开场本地有用户数据时，自动登录
-		if (userManager.CheckLocalUserData())
-		{
-			userManager.AutoLogin((ud, message) =>
-			{
-				SetDengluResult(ud, message);
-				if (!ud.state)
-				{
-					userManager.Logout();
-				}
-				else
-				{
-                    //TODO
-                    //edituserPanel.GetComponent<EditUserDataUI>().Init();
-                }
-            });
-		}
-		else
-		{
-
-        }
-	}
-	
 }

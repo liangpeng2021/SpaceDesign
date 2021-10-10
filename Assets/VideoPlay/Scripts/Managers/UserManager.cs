@@ -1,7 +1,6 @@
-﻿
+﻿using SpaceDesign;
 using Museum;
 using System.Collections;
-
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -20,10 +19,9 @@ public struct UserData
 {
 	public bool state;
 	public string error;
-	public string nickname;
-	public string address;
-	public string name;
-	public string img;
+	public string username;
+    public string scn_url;
+    public string[] scn_data;
 }
 
 /// <summary>
@@ -32,55 +30,6 @@ public struct UserData
 
 public class UserManager : MonoBehaviour
 {
-	//用户本地帐号密码Key
-	private const string idKey = "UserID";
-	private const string pwKey = "UserPW";
-
-	/// <summary>
-	/// 本地用户信息
-	/// </summary>
-	public static string localuserName;
-	public static string localPassword;
-
-	/// <summary>
-	/// 检测用户是否登录过
-	/// </summary>
-	public bool CheckLocalUserData()
-	{
-		if (PlayerPrefs.HasKey(idKey) && PlayerPrefs.HasKey(pwKey))
-		{
-			localuserName = PlayerPrefs.GetString(idKey);
-			localPassword = GameTools.Decrypt(PlayerPrefs.GetString(pwKey));
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	/// <summary>
-	/// 保存用户名和信息到本地
-	/// </summary>
-	public void SaveUserData(string userName, string passWord)
-	{
-		localuserName = userName;
-		localPassword = passWord;
-		PlayerPrefs.SetString(idKey, userName);
-		PlayerPrefs.SetString(pwKey, GameTools.Encrypt(passWord));
-	}
-
-	/// <summary>
-	/// 注销用户
-	/// </summary>
-	public void Logout()
-	{
-		//Debug.LogError("Logout");
-		localuserName = "";
-		localPassword = "";
-		PlayerPrefs.DeleteKey(idKey);
-		PlayerPrefs.DeleteKey(pwKey);
-	}
 	
 	//void Start()
 	//{
@@ -122,14 +71,6 @@ public class UserManager : MonoBehaviour
 	}
 	
 	/// <summary>
-	/// 自动登录
-	/// </summary>
-	public void AutoLogin(System.Action<UserData, string> action)
-	{
-		RequestLogin(localuserName,localPassword, action);
-	}
-
-	/// <summary>
 	/// 开启请求登录的协程
 	/// </summary>
 	public void RequestLogin(string username,string password,System.Action<UserData, string> action)
@@ -138,46 +79,45 @@ public class UserManager : MonoBehaviour
 		wwwFrom.AddField("username", username);
 		wwwFrom.AddField("password", password);
 
-        //TODO
-		//IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwFrom, InterfaceName.denglu,
-		//	(ud) =>
-		//	{
-		//		string showMesg = "";
-		//		bool isShow = false;
-		//		if (ud.state)
-		//		{
-		//			SaveUserData(username, password);
-		//		}
-		//		else
-		//		{
-		//			switch (ud.error)
-		//			{
-		//				case "name_error":
-		//					showMesg = "用户名错误";
-		//					break;
-		//				case "user_disabled":
-		//					showMesg = "用户被禁用";
-		//					break;
-		//				case "pass_error":
-		//					showMesg = "密码错误";
-		//					break;
-		//				case "para_null":
-		//					showMesg = "用户名或密码不能为空";
-		//					break;
-		//				default:
-		//					isShow = false;
-		//					break;
-		//			}
-		//		}
-		//		if (isShow)
-		//		{
-		//			//LogManager.Instance.AddLogMessage(/*"登录失败：" +*/ showMesg);
-		//			Debug.Log(/*"登录失败：" + */showMesg);
-		//		}
-		//		action?.Invoke(ud, showMesg);
-		//	});
-		//ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
-	}
+        IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwFrom, InterfaceName.denglu,
+            (ud) =>
+            {
+                string showMesg = "";
+                bool isShow = false;
+                if (ud.state)
+                {
+                    //TODO
+                }
+                else
+                {
+                    switch (ud.error)
+                    {
+                        case "name_error":
+                            showMesg = "用户名错误";
+                            break;
+                        case "user_disabled":
+                            showMesg = "用户被禁用";
+                            break;
+                        case "pass_error":
+                            showMesg = "密码错误";
+                            break;
+                        case "para_null":
+                            showMesg = "用户名或密码不能为空";
+                            break;
+                        default:
+                            isShow = false;
+                            break;
+                    }
+                }
+                if (isShow)
+                {
+                    //LogManager.Instance.AddLogMessage(/*"登录失败：" +*/ showMesg);
+                    Debug.Log(/*"登录失败：" + */showMesg);
+                }
+                action?.Invoke(ud, showMesg);
+            });
+        ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+    }
 
 	/// <summary>
 	/// 验证手机号
@@ -234,8 +174,8 @@ public class UserManager : MonoBehaviour
 
 				callback?.Invoke(rd, showMsg);
 			});
-        //TODO
-		//ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+
+		ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
 	}
 
 	/// <summary>
@@ -250,60 +190,56 @@ public class UserManager : MonoBehaviour
 		wwwForm.AddField("password", password);
 		wwwForm.AddField("phone", phoneNum);
 		wwwForm.AddField("yzm", yanzhenma);
+        
+        IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwForm, InterfaceName.zhuce,
+            (rd) =>
+            {
+                string showMsg = "";
+                bool isShow = false;
+                if (rd.state)
+                {
+                    isShow = true;
+                    showMsg = "注册成功";
+                }
+                else
+                {
+                    switch (rd.error)
+                    {
+                        case "verify_error":
+                            isShow = true;
+                            showMsg = "验证码错误";
+                            break;
+                        case "verify_timeout":
+                            isShow = true;
+                            showMsg = "验证码超时";
+                            break;
+                        case "user_exists":
+                            isShow = true;
+                            showMsg = "用户名已被注册";
+                            break;
+                        case "phone_exists":
+                            isShow = true;
+                            showMsg = "手机号已被注册";
+                            break;
+                        case "database_error":
+                            isShow = true;
+                            showMsg = "服务器异常，请稍后再试";
+                            break;
+                        default:
+                            isShow = false;
+                            break;
+                    }
+                }
+                if (isShow)
+                {
+                    Debug.Log(/*"注册失败：" + */showMsg);
+                    //LogManager.Instance.AddLogMessage(/*"注册失败：" + */showMsg);
+                }
 
-        //TODO
-		//IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwForm, InterfaceName.zhuce,
-		//	(rd) =>
-		//	{
-		//		string showMsg = "";
-		//		bool isShow = false;
-		//		if (rd.state)
-		//		{
-		//			isShow = true;
-		//			showMsg = "注册成功";
-
-		//				//保存到本地
-		//				SaveUserData(username, password);
-		//		}
-		//		else
-		//		{
-		//			switch (rd.error)
-		//			{
-		//				case "verify_error":
-		//					isShow = true;
-		//					showMsg = "验证码错误";
-		//					break;
-		//				case "verify_timeout":
-		//					isShow = true;
-		//					showMsg = "验证码超时";
-		//					break;
-		//				case "user_exists":
-		//					isShow = true;
-		//					showMsg = "用户名已被注册";
-		//					break;
-		//				case "phone_exists":
-		//					isShow = true;
-		//					showMsg = "手机号已被注册";
-		//					break;
-		//				case "database_error":
-		//					isShow = true;
-		//					showMsg = "服务器异常，请稍后再试";
-		//					break;
-		//				default:
-		//					isShow = false;
-		//					break;
-		//			}
-		//		}
-		//		if (isShow)
-		//		{
-		//			Debug.Log(/*"注册失败：" + */showMsg);
-		//			//LogManager.Instance.AddLogMessage(/*"注册失败：" + */showMsg);
-		//		}
-
-		//		action?.Invoke(rd, showMsg);
-		//	});
-		//ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
-	}
+                action?.Invoke(rd, showMsg);
+            });
+        ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+    }
 
 	/// <summary>
 	/// 发送找回密码的信息到后台
@@ -318,56 +254,53 @@ public class UserManager : MonoBehaviour
 		wwwForm.AddField("phone", phone);
 		wwwForm.AddField("yzm", yanzhengma);
 		wwwForm.AddField("password", password);
+        
+        IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwForm, InterfaceName.findpassword,
+            (rd) =>
+            {
+                string showMsg = "";
+                bool isShow = false;
+                if (rd.state)
+                {
+                    isShow = true;
+                    showMsg = "修改密码成功";
+                }
+                else
+                {
+                    switch (rd.error)
+                    {
+                        case "verify_error":
+                            isShow = true;
+                            showMsg = "验证码错误";
+                            break;
+                        case "verify_timeout":
+                            isShow = true;
+                            showMsg = "验证码超时";
+                            break;
 
-        //TODO
-		//IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwForm, InterfaceName.findpassword,
-		//	(rd) =>
-		//	{
-		//		string showMsg = "";
-		//		bool isShow = false;
-		//		if (rd.state)
-		//		{
-		//			isShow = true;
-		//			showMsg = "修改密码成功";
+                        case "phone_notexists":
+                            isShow = true;
+                            showMsg = "该手机号未被注册";
+                            break;
+                        case "database_error":
+                            isShow = true;
+                            showMsg = "服务器异常，请稍后再试";
+                            break;
+                        default:
+                            isShow = false;
+                            break;
+                    }
+                }
+                if (isShow)
+                {
+                    Debug.Log(/*"找回密码失败：" + */showMsg);
+                    //TODO
+                    //LogManager.Instance.ShowTipObj(showMsg, 2f);
+                }
 
-		//			SaveUserData(rd.name, password);
-		//		}
-		//		else
-		//		{
-		//			switch (rd.error)
-		//			{
-		//				case "verify_error":
-		//					isShow = true;
-		//					showMsg = "验证码错误";
-		//					break;
-		//				case "verify_timeout":
-		//					isShow = true;
-		//					showMsg = "验证码超时";
-		//					break;
-
-		//				case "phone_notexists":
-		//					isShow = true;
-		//					showMsg = "该手机号未被注册";
-		//					break;
-		//				case "database_error":
-		//					isShow = true;
-		//					showMsg = "服务器异常，请稍后再试";
-		//					break;
-		//				default:
-		//					isShow = false;
-		//					break;
-		//			}
-		//		}
-		//		if (isShow)
-		//		{
-		//			Debug.Log(/*"找回密码失败：" + */showMsg);
-  //                  LogManager.Instance.ShowTipObj(showMsg,2f);
-  //                  //LogManager.Instance.AddLogMessage(/*"找回密码失败：" +*/ showMsg);
-  //              }
-
-		//		action?.Invoke(rd, showMsg);
-		//	});
-		//ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
-	}
+                action?.Invoke(rd, showMsg);
+            });
+        ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+    }
 }
 

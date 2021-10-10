@@ -1,17 +1,42 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using OXRTK.ARHandTracking;
-
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using UnityEngine.UI;
+using XR;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 控制编辑场景界面切换，/*create by 梁鹏 2021-9-14 */
 /// </summary>
-public class EditorControl : Singleton<EditorControl>
+public class EditorControl : MonoBehaviour
 {
+    UserDataSupport yoopUserData;
+
+    #region 赋值相机
+
+    public Transform uiTran;
+    public Canvas[] canvas;
+
+    void InitCanvas()
+    {
+        uiTran.parent = XRCameraManager.Instance.stereoCamera.transform;
+        uiTran.localEulerAngles = Vector3.zero;
+        uiTran.localPosition = Vector3.zero;
+        uiTran.localScale = Vector3.one;
+
+        Camera eventCamera = XRCameraManager.Instance.eventCamera;
+        for (int i = 0; i < canvas.Length; i++)
+        {
+            canvas[i].worldCamera = eventCamera;
+        }
+    }
+
+    #endregion
+
+    public static EditorControl Instance;
+
     public GameObject editorUIObj;
     public GameObject previewUIObj;
 
@@ -50,6 +75,11 @@ public class EditorControl : Singleton<EditorControl>
     /// </summary>
     public RoomManager roomManager;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -61,13 +91,17 @@ public class EditorControl : Singleton<EditorControl>
 
         previewBtn.gameObject.SetActive(false);
         saveBtn.gameObject.SetActive(false);
+
+        InitCanvas();
+
+        yoopUserData = DontDestroyInstance.instance.transform.Find("UserDataSupport").GetComponent<UserDataSupport>();
     }
     private void OnEnable()
     {
         previewBtn.onPinchDown.AddListener(LoadPreview);
         saveBtn.onPinchDown.AddListener(SaveScenceData);
         backBtn.onPinchDown.AddListener(BackToEditor);
-        quitBtn.onPinchDown.AddListener(QuitApp);
+        quitBtn.onPinchDown.AddListener(QuitScence);
     }
 
     private void OnDisable()
@@ -75,7 +109,7 @@ public class EditorControl : Singleton<EditorControl>
         previewBtn.onPinchDown.RemoveListener(LoadPreview);
         saveBtn.onPinchDown.RemoveListener(SaveScenceData);
         backBtn.onPinchDown.RemoveListener(BackToEditor);
-        quitBtn.onPinchDown.RemoveListener(QuitApp);
+        quitBtn.onPinchDown.RemoveListener(QuitScence);
     }
     
     public void LoadPreview()
@@ -100,9 +134,11 @@ public class EditorControl : Singleton<EditorControl>
         loadScence.ClearChild();
     }
     
-    void QuitApp()
+    void QuitScence()
     {
-        Application.Quit();
+        uiTran.parent = null;
+        SceneManager.LoadScene(0);
+        //Application.Quit();
     }
     /// <summary>
     /// 切换到房间管理
@@ -136,20 +172,18 @@ public class EditorControl : Singleton<EditorControl>
             //动态请求安装权限
             UnityEngine.Android.Permission.RequestUserPermission("android.permission.WRITE_EXTERNAL_STORAGE");
 #endif
+        ////获取当前时间
+        //int hour = DateTime.Now.Hour;
+        //int minute = DateTime.Now.Minute;
+        //int second = DateTime.Now.Second;
+        //int year = DateTime.Now.Year;
+        //int month = DateTime.Now.Month;
+        //int day = DateTime.Now.Day;
+
+        ////格式化显示当前时间
+        //string timestr= string.Format("{0:D2}-{1:D2}-{2:D2} " + "{3:D4}-{4:D2}-{5:D2}", hour, minute, second, year, month, day);
         path = GetPth();
-
-        //获取当前时间
-        int hour = DateTime.Now.Hour;
-        int minute = DateTime.Now.Minute;
-        int second = DateTime.Now.Second;
-        int year = DateTime.Now.Year;
-        int month = DateTime.Now.Month;
-        int day = DateTime.Now.Day;
-
-        //格式化显示当前时间
-        string timestr= string.Format("{0:D2}-{1:D2}-{2:D2} " + "{3:D4}-{4:D2}-{5:D2}", hour, minute, second, year, month, day);
-
-        path = Path.Combine(path,"scence"+"_"+ timestr+".scn");
+        path = Path.Combine(path,"scence.scn");
     }
 
     void SaveScenceData()
@@ -186,7 +220,7 @@ public class EditorControl : Singleton<EditorControl>
     /// <summary>
     /// 获取配置文件的路径
     /// </summary>
-    public string GetPth()
+    public static string GetPth()
     {
         string path;
 #if UNITY_ANDROID && !UNITY_EDITOR

@@ -217,7 +217,7 @@ public class RoomControl : MonoBehaviour
 
         return false;
     }
-    //TODO
+
     public void CreatePrefab3D(Vector3 pos, string id, GameObject prefab3d)
     {
         try

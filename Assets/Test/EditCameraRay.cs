@@ -3,12 +3,13 @@ using SpaceDesign;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using XR;
 /// <summary>
 /// 编辑器模式下测试使用，/*create by 梁鹏 2021-9-24 */
 /// </summary>
 public class EditCameraRay : MonoBehaviour
 {
-    public Camera editCamera;
+    Camera editCamera;
     public LineRenderer line;
     
     RayPointerHandler _currayPointerHandler;
@@ -16,10 +17,14 @@ public class EditCameraRay : MonoBehaviour
     RayPointerHandler hitrayPointerHandler;       //用来临时存储碰触到的对象
 
     bool isMouseDown;
+    
     // Update is called once per frame
     void Update()
     {
 #if UNITY_EDITOR
+
+        if (editCamera==null)
+            editCamera = XRCameraManager.Instance.eventCamera;
         Ray ray = editCamera.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit hit;
