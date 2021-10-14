@@ -13,12 +13,7 @@ public class ChangeSate : MonoBehaviour
     public int index;
     bool isLightOn;
     GameObject lightObj;
-
-    private void Start()
-    {
-        EditorControl.Instance.HasChange();
-    }
-
+    
     private void OnDestroy()
     {
         lightObj = null;
@@ -70,7 +65,6 @@ public class ChangeSate : MonoBehaviour
     void HasChange()
     {
         EditorControl.Instance.roomManager.ShowRoomObj(index);
-        EditorControl.Instance.HasChange();
     }
 
     public void HightLightOn()

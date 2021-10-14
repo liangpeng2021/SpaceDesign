@@ -18,8 +18,8 @@ public class LogManager : Singleton<LogManager>
 
 	[SerializeField]
 	GameObject[] testObjs;
-
-	public class LogData
+    
+    public class LogData
 	{
 		public string str;
 		public LogType logType;

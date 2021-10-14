@@ -99,6 +99,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -28.590002
       objectReference: {fileID: 0}
+    - target: {fileID: 301314949102331398, guid: 747d9d17b3a9c024595c262e8b68ab0c,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 413baf35215ba2543ac441f48f8ee4a2, type: 2}
+    - target: {fileID: 301314949102331398, guid: 747d9d17b3a9c024595c262e8b68ab0c,
+        type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: 46a40415e14399b4593f0a28236f35ac, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 747d9d17b3a9c024595c262e8b68ab0c, type: 3}
 --- !u!4 &3790094357002342232 stripped
@@ -119,15 +129,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: jianshen
       objectReference: {fileID: 0}
-    - target: {fileID: 4433767968861735896, guid: 60da2e7de4a642c4e86d55944c4208a0,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 854753342647482827, guid: 60da2e7de4a642c4e86d55944c4208a0,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.24
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 854753342647482827, guid: 60da2e7de4a642c4e86d55944c4208a0,
         type: 3}
@@ -142,7 +147,7 @@ PrefabInstance:
     - target: {fileID: 854753342647482827, guid: 60da2e7de4a642c4e86d55944c4208a0,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.00000006657903
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 854753342647482827, guid: 60da2e7de4a642c4e86d55944c4208a0,
         type: 3}

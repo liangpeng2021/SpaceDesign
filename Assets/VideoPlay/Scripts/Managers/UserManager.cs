@@ -22,6 +22,21 @@ public struct UserData
 	public string username;
     public string scn_url;
     public string[] scn_data;
+
+    public void Clear()
+    {
+        error = null;
+        username = null;
+        scn_url = null;
+        if (scn_data != null)
+        {
+            for (int i = 0; i < scn_data.Length; i++)
+            {
+                scn_data[i] = null;
+            }
+            scn_data = null;
+        }
+    }
 }
 
 /// <summary>
@@ -30,63 +45,114 @@ public struct UserData
 
 public class UserManager : MonoBehaviour
 {
-	
-	//void Start()
-	//{
-	//	StartCoroutine(TestRegist());
-	//}
+    //用户本地帐号密码Key
+    private const string idKey = "UserID";
+    private const string pwKey = "UserPW";
 
-	/// <summary>
-	/// 注册界面提交注册信息
+    /// <summary>
+    /// 本地用户信息
+    /// </summary>
+    string localuserName;
+    string localPassword;
+
+    /// <summary>
+	/// 检测用户是否登录过
 	/// </summary>
-	IEnumerator TestRegist()
-	{
-		WWWForm wwwForm = new WWWForm();
-		//wwwForm.AddField("username", username);
-		//wwwForm.AddField("password", password);
-		//wwwForm.AddField("phone", phoneNum);
-		//wwwForm.AddField("yzm", yanzhenma);
-		UnityWebRequest www = UnityWebRequest.Post("http://pv.sohu.com/cityjson?ie=utf-8", wwwForm);
-		www.SendWebRequest();
-		while (www.isDone == false)
-		{
-			yield return 0;
-		}
-		bool isShow = false;
-		string showMsg = null;
-		if (!string.IsNullOrEmpty(www.error))
-			Debug.Log(www.error);
-		if (www.isDone && string.IsNullOrEmpty(www.error))
-		{
-			Debug.Log(www.downloadHandler.text);
-		}
-		else
-		{
-			isShow = true;
-			showMsg = "服务器异常，请稍后再试";
-		}
-		//if (isShow)
-		//	LogManager.Instance.AddLogMessage(showMsg);
-		Debug.Log("showMsg:" + showMsg);
-	}
-	
-	/// <summary>
-	/// 开启请求登录的协程
+	public bool CheckLocalUserData()
+    {
+        Debug.Log("MyLog::PlayerPrefs.HasKey："+ PlayerPrefs.HasKey(idKey)+"/"+ PlayerPrefs.HasKey(pwKey));
+        if (PlayerPrefs.HasKey(idKey) && PlayerPrefs.HasKey(pwKey))
+        {
+            localuserName = PlayerPrefs.GetString(idKey);
+            localPassword = GameTools.Decrypt(PlayerPrefs.GetString(pwKey));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 保存用户名和信息到本地
+    /// </summary>
+    public void SaveUserData(string userName, string passWord)
+    {
+        localuserName = userName;
+        localPassword = passWord;
+        Debug.Log("MyLog::写入用户信息");
+        PlayerPrefs.SetString(idKey, userName);
+        PlayerPrefs.SetString(pwKey, GameTools.Encrypt(passWord));
+    }
+    /// <summary>
+	/// 自动登录
 	/// </summary>
-	public void RequestLogin(string username,string password,System.Action<UserData, string> action)
+	public void AutoLogin(System.Action<UserData, string> action)
+    {
+        RequestLogin(localuserName, localPassword, action);
+    }
+    /// <summary>
+	/// 注销用户
+	/// </summary>
+	public void Logout()
+    {
+        localuserName = "";
+        localPassword = "";
+        PlayerPrefs.DeleteKey(idKey);
+        PlayerPrefs.DeleteKey(pwKey);
+    }
+
+    //   /// <summary>
+    //   /// 注册界面提交注册信息
+    //   /// </summary>
+    //   IEnumerator TestRegist()
+    //{
+    //	WWWForm wwwForm = new WWWForm();
+    //	//wwwForm.AddField("username", username);
+    //	//wwwForm.AddField("password", password);
+    //	//wwwForm.AddField("phone", phoneNum);
+    //	//wwwForm.AddField("yzm", yanzhenma);
+    //	UnityWebRequest www = UnityWebRequest.Post("http://pv.sohu.com/cityjson?ie=utf-8", wwwForm);
+    //	www.SendWebRequest();
+    //	while (www.isDone == false)
+    //	{
+    //		yield return 0;
+    //	}
+    //	bool isShow = false;
+    //	string showMsg = null;
+    //	if (!string.IsNullOrEmpty(www.error))
+    //		Debug.Log(www.error);
+    //	if (www.isDone && string.IsNullOrEmpty(www.error))
+    //	{
+    //		Debug.Log(www.downloadHandler.text);
+    //	}
+    //	else
+    //	{
+    //		isShow = true;
+    //		showMsg = "服务器异常，请稍后再试";
+    //	}
+    //	//if (isShow)
+    //	//	LogManager.Instance.AddLogMessage(showMsg);
+    //	Debug.Log("showMsg:" + showMsg);
+    //}
+
+    /// <summary>
+    /// 开启请求登录的协程
+    /// </summary>
+    public void RequestLogin(string username,string password,System.Action<UserData, string> action)
 	{
 		WWWForm wwwFrom = new WWWForm();
 		wwwFrom.AddField("username", username);
 		wwwFrom.AddField("password", password);
 
-        IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwFrom, InterfaceName.denglu,
+        IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<UserData>(wwwFrom, InterfaceName.denglu,
             (ud) =>
             {
                 string showMesg = "";
                 bool isShow = false;
                 if (ud.state)
                 {
-                    //TODO
+                    SaveUserData(username, password);
                 }
                 else
                 {
@@ -131,7 +197,7 @@ public class UserManager : MonoBehaviour
 		wwwFrom.AddField("phone", phone);
 		//Debug.Log(phone);
 
-		IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<YanzhengData>(wwwFrom, interfaceName,
+		IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<YanzhengData>(wwwFrom, interfaceName,
 			(rd) =>
 			{
 				string showMsg = "";
@@ -191,7 +257,7 @@ public class UserManager : MonoBehaviour
 		wwwForm.AddField("phone", phoneNum);
 		wwwForm.AddField("yzm", yanzhenma);
         
-        IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwForm, InterfaceName.zhuce,
+        IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<UserData>(wwwForm, InterfaceName.zhuce,
             (rd) =>
             {
                 string showMsg = "";
@@ -255,7 +321,7 @@ public class UserManager : MonoBehaviour
 		wwwForm.AddField("yzm", yanzhengma);
 		wwwForm.AddField("password", password);
         
-        IEnumerator enumerator = YoopInterfaceSupport.GetHttpVideoData<UserData>(wwwForm, InterfaceName.findpassword,
+        IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<UserData>(wwwForm, InterfaceName.findpassword,
             (rd) =>
             {
                 string showMsg = "";

@@ -7,10 +7,10 @@ using UnityEngine.UI;
 /// </summary>
 public class KeyBoardManager : MonoBehaviour
 {
-	/// <summary>
-	///	单词状态
-	/// </summary>
-	public enum WordState
+    /// <summary>
+    ///	单词状态
+    /// </summary>
+    public enum WordState
 	{
 		small,
 		bigTemp,
@@ -339,10 +339,15 @@ public class KeyBoardManager : MonoBehaviour
 	/// </summary>
 	System.Action confirmInputAction;
 
-	/// <summary>
-	/// 切换为符号面板
+    /// <summary>
+	/// 确认输入的回调
 	/// </summary>
-	void GotoSymbol()
+	System.Action<string> confirmInputActionString;
+
+    /// <summary>
+    /// 切换为符号面板
+    /// </summary>
+    void GotoSymbol()
 	{
 		isSymbol = !isSymbol;
 		if (isSymbol)
@@ -453,7 +458,8 @@ public class KeyBoardManager : MonoBehaviour
 	void ConfirmCurInput()
 	{
 		confirmInputAction?.Invoke();
-	}
+        confirmInputActionString?.Invoke(_inputText.text);
+    }
 
 	/// <summary>
 	/// 清空输入
@@ -473,10 +479,23 @@ public class KeyBoardManager : MonoBehaviour
 		_inputText.text = isNull?"": text.text;
 		SetGuangBiaoParent();
 		confirmInputAction = action;
-	}
+        confirmInputActionString = null;
+    }
 
-	private void Awake()
+    /// <summary>
+	/// 初始化，赋值文本框，以及文本是否赋空
+	/// </summary>
+	public void InitKeyboard(Text text, bool isNull, System.Action<string> stringAction)
+    {
+        _inputText = text;
+        _inputText.text = isNull ? "" : text.text;
+        SetGuangBiaoParent();
+        confirmInputActionString = stringAction;
+        confirmInputAction = null;
+    }
+
+    private void Awake()
 	{
-		InitTran();
+        InitTran();
 	}
 }

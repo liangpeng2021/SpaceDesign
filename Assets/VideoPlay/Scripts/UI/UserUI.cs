@@ -17,44 +17,6 @@ using OXRTK.ARHandTracking;
 
 public class UserUI : MonoBehaviour
 {
-    #region 游客或者用户登录
-    public GameObject choosePanel;
-
-    public ButtonRayReceiver youkeBtn;
-    public ButtonRayReceiver showdengluBtn;
-
-    public ButtonRayReceiver quitBtn;
-    void InitChoosePanel()
-    {
-        //选择面板打开
-        choosePanel.SetActive(true);
-        youkeBtn.onPinchDown.AddListener(LoadMainScence);
-        showdengluBtn.onPinchDown.AddListener(ShowDengluPanel);
-        quitBtn.onPinchDown.AddListener(QuitApp);
-    }
-
-    void QuitApp()
-    {
-        Application.Quit();
-    }
-
-    void LoadMainScence()
-    {
-        SceneManager.LoadScene("MainScence");
-    }
-
-    /// <summary>
-    /// 显示登录面板
-    /// </summary>
-    void ShowDengluPanel()
-    {
-        dengluzhuceTran.gameObject.SetActive(true);
-        _keyBoardManager.gameObject.SetActive(true);
-        ClickBtn(0);
-        choosePanel.SetActive(false);
-    }
-    #endregion
-
     #region 登录注册界面
     [Header("登录注册界面")]
 	//切换时的颜色
@@ -75,12 +37,6 @@ public class UserUI : MonoBehaviour
 	/// </summary>
 	Text[] BtnText;
 	
-	/// <summary>
-	/// 键盘控制脚本
-	/// </summary>
-	[SerializeField]
-	KeyBoardManager _keyBoardManager;
-
 	/// <summary>
 	/// 账号信息与后台交互
 	/// </summary>
@@ -127,17 +83,27 @@ public class UserUI : MonoBehaviour
 	public Text dumiaoText;
 	BoxCollider dumiaoCol;
     
-	UserDataSupport yoopUserData;
-
     /// <summary>
     /// 返回上一个界面的按钮
     /// </summary>
     public OnTagetButton backtolastPanelBtn;
+    
+    public ScenceManager scenceManager;
+
+    private void OnDestroy()
+    {
+        scenceManager = null;
+        backtolastPanelBtn = null;
+        dumiaoCol = null;
+        dumiaoText = null;
+        backtolastBtn = null;
+        nextBtnBox = null;
+        okBtn = null;
+        nextBtn = null;
+    }
 
     void InitDengluZhuce()
 	{
-        yoopUserData = DontDestroyInstance.instance.transform.Find("UserDataSupport").GetComponent<UserDataSupport>();
-
         BtnText = new Text[BtnSet.Length];
 		for (int i = 0; i < BtnSet.Length; i++)
 		{
@@ -166,18 +132,17 @@ public class UserUI : MonoBehaviour
 		chongxinfasongBtn.OnClickDwon.AddListener(SendYanzhengmaAgain);
 
         //登陆面板关闭
-        dengluzhuceTran.gameObject.SetActive(false);
-        _keyBoardManager.gameObject.SetActive(false);
+        dengluzhuceTran.gameObject.SetActive(true);
+        EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
+        ClickBtn(0);
 
         backtolastPanelBtn.OnClickDwon.AddListener(BackToLastPanel);
     }
 
     void BackToLastPanel()
     {
-        dengluzhuceTran.gameObject.SetActive(false);
-        _keyBoardManager.gameObject.SetActive(false);
-
-        choosePanel.SetActive(true);
+        //dengluzhuceTran.gameObject.SetActive(false);
+        //_keyBoardManager.gameObject.SetActive(false);
     }
     
     void ResetInputText()
@@ -365,7 +330,7 @@ public class UserUI : MonoBehaviour
 					action = ConfirmOK;
 				else
 					action = ConfirmToNext;
-				_keyBoardManager.InitKeyboard(inputTexts[i],false, action);
+                EditorControl.Instance.keyBoardManager.InitKeyboard(inputTexts[i],false,action);
 			}
 			else
 			{
@@ -444,7 +409,7 @@ public class UserUI : MonoBehaviour
 	/// </summary>
 	bool OnRegistPW(string s)
 	{
-		Regex regex = new Regex(@"^[\@A-Za-z0-9\!\#\$\%\^\&\*\.\~]{6,22}$");
+		Regex regex = new Regex(@"^[\@A-Za-z0-9\!\#\$\%\^\&\*\.\~]{1,22}$");
 		return regex.IsMatch(s);
 	}
 	
@@ -602,21 +567,43 @@ public class UserUI : MonoBehaviour
 	/// <param name="isAutoHide"></param>
 	void SetLoginUI(UserData ud,float hideTime=0f)
 	{
-		yoopUserData.userData = ud;
         //切换为已登录状态
         //TODO
         //LogManager.Instance.ShowLoadingObj();
         curInputID = -1;
 
-        _keyBoardManager.gameObject.SetActive(false);
-        SceneManager.LoadScene("EditorScence");
+        dengluzhuceTran.gameObject.SetActive(false);
+        EditorControl.Instance.keyBoardManager.gameObject.SetActive(false);
+        EditorControl.Instance.gameObject.SetActive(true);
+        scenceManager.LoadUserScenceList(ud);
+
     }
 	#endregion
     
 	private void Start()
 	{
 		InitDengluZhuce();
-
-        InitChoosePanel();
+        EditorControl.Instance.gameObject.SetActive(false);
+        CheckLocalUserDataToSetLoginUI();
+    }
+    
+    void CheckLocalUserDataToSetLoginUI()
+    {
+        //开场本地有用户数据时，自动登录
+        if (userManager.CheckLocalUserData())
+        {
+            Debug.Log("MyLog::开始自动登录");
+            userManager.AutoLogin((ud, message) =>
+            {
+                SetDengluResult(ud, message);
+                if (!ud.state)
+                {
+                    userManager.Logout();
+                }
+                
+            });
+        }
+        else
+            userManager.Logout();
     }
 }

@@ -69,12 +69,8 @@ public class RoomControl : MonoBehaviour
         }
         objList.Clear();
 
-        roomDatas.roomName = null;
-        for (int i = 0; i < roomDatas.ObjectList.Count; i++)
-        {
-            roomDatas.ObjectList.Clear();
-            roomDatas.sPointsList.Clear();
-        }
+        roomDatas.Clear();
+        roomDatas = null;
 
         pointPrefab = null;
 
@@ -128,6 +124,28 @@ public class RoomControl : MonoBehaviour
         roomPos.y += 0.5f;
     }
 
+    void LoadPoint(List<SPoint> sPoints)
+    {
+        textMesh.transform.position = Vector3.zero;
+        
+        //生成四周锚点
+        for (int i = 0; i < sPoints.Count; i++)
+        {
+            GameObject obj = Instantiate(pointPrefab);
+
+            obj.transform.parent = this.transform;
+            obj.transform.localScale = Vector3.one * 0.1f;
+            obj.transform.localRotation = Quaternion.identity;
+            obj.transform.position = new Vector3(sPoints[i].posx, sPoints[i].posy, sPoints[i].posz);
+            
+            pointTranList.Add(obj.transform);
+            //计算提示文字的位置
+            textMesh.transform.position += obj.transform.position;
+        }
+        //放在中心位置
+        textMesh.transform.position /= sPoints.Count;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -170,12 +188,13 @@ public class RoomControl : MonoBehaviour
         //预览模式
         if (isPreview)
         {
+            //预览模式下不画线
             line.gameObject.SetActive(false);
             textMesh.SetActive(false);
         }
         else
         {
-            //画线
+            //编辑模式下画线
             line.positionCount = 5;
             line.SetPosition(0, new Vector3(xmin, y, zmin));
             line.SetPosition(1, new Vector3(xmin, y, zmax));
@@ -241,6 +260,44 @@ public class RoomControl : MonoBehaviour
             Debug.Log("MyLog::实例化3D预设："+e);
         }
     }
+
+    void LoadPrefab3D(List<ObjectData> ObjectList,Dictionary<string,GameObject> prefabDics)
+    {
+        try
+        {
+            //实例化房间内的物体
+            for (int i = 0; i < ObjectList.Count; i++)
+            {
+                if (prefabDics.ContainsKey(ObjectList[i].id))
+                {
+                    //生成物体
+                    GameObject obj = Instantiate(prefabDics[ObjectList[i].id]);
+                    obj.transform.parent = objParent;
+                    ObjectData objectData = ObjectList[i];
+                    obj.transform.position = new Vector3(objectData.posx, objectData.posy, objectData.posz);
+                    obj.transform.eulerAngles = new Vector3(objectData.eulerx, objectData.eulery, objectData.eulerz);
+                    obj.transform.localScale = new Vector3(objectData.scalex, objectData.scaley, objectData.scalez);
+                    //对应的UI变为不可点击
+                    EditorControl.Instance.prefabManager.DisableObj2DImage(roomDatas.ObjectList[i].id);
+
+                    GameObjectData gameObjectData = new GameObjectData(ObjectList[i].id, obj);
+
+                    objList.Add(gameObjectData);
+                    //赋值索引
+                    obj.GetComponent<ChangeSate>().index = objList.Count - 1;
+                }
+            }
+            
+            //更新选中状态，赋值索引
+            if (objList.Count>0)
+                SetShowObjNum(objList.Count - 1);
+        }
+        catch (Exception e)
+        {
+            Debug.Log("MyLog::实例化3D预设：" + e);
+        }
+    }
+
     /// <summary>
     /// 根据索引设置选中状态
     /// </summary>
@@ -277,8 +334,7 @@ public class RoomControl : MonoBehaviour
         curObjIndex = objList.Count - 1;
         if (curObjIndex!=-1)
             objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOn();
-
-        EditorControl.Instance.HasChange();
+        
         return id;
     }
 
@@ -328,30 +384,53 @@ public class RoomControl : MonoBehaviour
         //Debug.Log(roomDatas.sPointsList.Count);
     }
 
+    public void SetRoomFromData(RoomDatas roomDatas, Dictionary<string, GameObject> prefabDics)
+    {
+        LoadPoint(roomDatas.sPointsList);
+
+        LoadPrefab3D(roomDatas.ObjectList, prefabDics);
+    }
+
     /// <summary>
     /// 根据房间数据设置和生成物体和锚点
     /// </summary>
     /// <param name="roomDatas"></param>
     public void SetRoomData(RoomDatas roomDatas, Dictionary<string,GameObject> prefabDics)
     {
+        //是否为预览模式
         isPreview = true;
+
+        //根据房间角落位置，求出范围区间
+        //给初值
+        float y = 0;
         for (int i = 0; i < roomDatas.sPointsList.Count; i++)
         {
-            GameObject obj = Instantiate(pointPrefab);
-            
-            obj.transform.parent = this.transform;
-            obj.transform.localScale = Vector3.one * 0.1f;
-            obj.transform.localRotation = Quaternion.identity;
-            obj.transform.position = new Vector3(roomDatas.sPointsList[i].posx, roomDatas.sPointsList[i].posy, roomDatas.sPointsList[i].posz);
-            obj.SetActive(false);
+            if (i == 0)
+            {
+                xmin = roomDatas.sPointsList[i].posx;
+                xmax = roomDatas.sPointsList[i].posx;
+                zmin = roomDatas.sPointsList[i].posz;
+                zmax = roomDatas.sPointsList[i].posz;
 
-            pointTranList.Add(obj.transform);
+                y = roomDatas.sPointsList[i].posy;
+            }
+            //求区间
+            if (xmin > roomDatas.sPointsList[i].posx)
+                xmin = roomDatas.sPointsList[i].posx;
+            if (xmax < roomDatas.sPointsList[i].posx)
+                xmax = roomDatas.sPointsList[i].posx;
+            if (zmin > roomDatas.sPointsList[i].posz)
+                zmin = roomDatas.sPointsList[i].posz;
+            if (zmax < roomDatas.sPointsList[i].posz)
+                zmax = roomDatas.sPointsList[i].posz;
         }
 
+        //实例化房间内的物体
         for (int i = 0; i < roomDatas.ObjectList.Count; i++)
         {
             if (prefabDics.ContainsKey(roomDatas.ObjectList[i].id))
             {
+                //生成物体
                 GameObject obj = Instantiate(prefabDics[roomDatas.ObjectList[i].id]);
                 obj.transform.parent = objParent;
                 ObjectData objectData = roomDatas.ObjectList[i];

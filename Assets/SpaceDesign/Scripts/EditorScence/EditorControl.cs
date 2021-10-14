@@ -12,8 +12,6 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class EditorControl : MonoBehaviour
 {
-    UserDataSupport yoopUserData;
-
     #region 赋值相机
 
     public Transform uiTran;
@@ -46,11 +44,6 @@ public class EditorControl : MonoBehaviour
     public ButtonRayReceiver previewBtn;
 
     /// <summary>
-    /// 保存
-    /// </summary>
-    public ButtonRayReceiver saveBtn;
-
-    /// <summary>
     /// 返回编辑模式
     /// </summary>
     public ButtonRayReceiver backBtn;
@@ -58,10 +51,10 @@ public class EditorControl : MonoBehaviour
     /// <summary>
     /// 退出程序
     /// </summary>
-    public ButtonRayReceiver quitBtn;
+    public Button quitBtn;
     
-    LoadScence loadScence;
-    
+    LoadPreviewScence loadScence;
+
     /// <summary>
     /// 预览模式父节点
     /// </summary>
@@ -74,6 +67,52 @@ public class EditorControl : MonoBehaviour
     /// 房间管理
     /// </summary>
     public RoomManager roomManager;
+    /// <summary>
+    /// 场景管理
+    /// </summary>
+    public ScenceManager scenceManager;
+    /// <summary>
+    /// 返回到上一级目录
+    /// </summary>
+    public ButtonRayReceiver backtoTopBtn;
+
+    /// <summary>
+    /// 键盘管理
+    /// </summary>
+    public KeyBoardManager keyBoardManager;
+
+    /// <summary>
+    /// 创建时起名
+    /// </summary>
+    public SetName setName;
+
+    private void OnDestroy()
+    {
+        uiTran = null;
+        for (int i = 0; i < canvas.Length; i++)
+        {
+            canvas[i] = null;
+        }
+
+        editorUIObj = null;
+        previewUIObj = null;
+        previewBtn = null;
+        backBtn = null;
+        quitBtn = null;
+        loadScence = null;
+        previewParent = null;
+        prefabManager = null;
+        roomManager = null;
+        scenceManager = null;
+        backtoTopBtn = null;
+        keyBoardManager = null;
+        setName = null;
+        path = null;
+        tipObj = null;
+        tipText = null;
+
+        Instance = null;
+    }
 
     private void Awake()
     {
@@ -83,44 +122,63 @@ public class EditorControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        loadScence = GetComponent<LoadScence>();
-        BackToEditor();
-        ToEditRoom();
+        loadScence = GetComponent<LoadPreviewScence>();
+        
         InitSave();
         InitTip();
-
-        previewBtn.gameObject.SetActive(false);
-        saveBtn.gameObject.SetActive(false);
-
+        
         InitCanvas();
 
-        yoopUserData = DontDestroyInstance.instance.transform.Find("UserDataSupport").GetComponent<UserDataSupport>();
+        ToEditRoom();
+        BackToScenceList();
+
+        prefabManager.InitPrefabDic();
     }
     private void OnEnable()
     {
         previewBtn.onPinchDown.AddListener(LoadPreview);
-        saveBtn.onPinchDown.AddListener(SaveScenceData);
         backBtn.onPinchDown.AddListener(BackToEditor);
-        quitBtn.onPinchDown.AddListener(QuitScence);
+        quitBtn.onClick.AddListener(BackToStarScence);
+
+        backtoTopBtn.onPinchDown.AddListener(BackToScenceList);
     }
 
     private void OnDisable()
     {
         previewBtn.onPinchDown.RemoveListener(LoadPreview);
-        saveBtn.onPinchDown.RemoveListener(SaveScenceData);
         backBtn.onPinchDown.RemoveListener(BackToEditor);
-        quitBtn.onPinchDown.RemoveListener(QuitScence);
+        quitBtn.onClick.RemoveListener(BackToStarScence);
+
+        backtoTopBtn.onPinchDown.RemoveListener(BackToScenceList);
     }
-    
+
+    /// <summary>
+    /// 返回到场景列表目录
+    /// </summary>
+    void BackToScenceList()
+    {
+        roomManager.SaveRoomData();
+        scenceManager.gameObject.SetActive(true);
+        roomManager.gameObject.SetActive(false);
+        roomManager.editorParent.gameObject.SetActive(false);
+    }
+   
+    /// <summary>
+    /// 点击预览按钮
+    /// </summary>
     public void LoadPreview()
     {
+        if (roomManager.ScenceData == null)
+            return;
+
+        roomManager.SaveRoomData();
         roomManager.editorParent.gameObject.SetActive(false);
         previewParent.gameObject.SetActive(true);
 
         editorUIObj.SetActive(false);
         previewUIObj.SetActive(true);
 
-        loadScence.LoadGameObjectData();
+        loadScence.LoadGameObjectData(roomManager.ScenceData);
     }
 
     public void BackToEditor()
@@ -136,17 +194,23 @@ public class EditorControl : MonoBehaviour
     
     void QuitScence()
     {
-        uiTran.parent = null;
-        SceneManager.LoadScene(0);
-        //Application.Quit();
+        Application.Quit();
     }
+
+    void BackToStarScence()
+    {
+        SceneManager.LoadScene(0);
+    }
+
     /// <summary>
     /// 切换到房间管理
     /// </summary>
     public void ToEditRoom()
     {
+        scenceManager.gameObject.SetActive(false);
         prefabManager.gameObject.SetActive(false);
         roomManager.gameObject.SetActive(true);
+        roomManager.editorParent.gameObject.SetActive(true);
     }
     /// <summary>
     /// 切换到对象管理
@@ -185,38 +249,7 @@ public class EditorControl : MonoBehaviour
         path = GetPth();
         path = Path.Combine(path,"scence.scn");
     }
-
-    void SaveScenceData()
-    {
-        roomManager.SaveRoomData();
-        //BitConverter方式
-        MySerial(path, roomManager.scenceData);
-        previewBtn.gameObject.SetActive(true);
-        saveBtn.gameObject.SetActive(false);
-    }
-    /// <summary>
-    /// 有修改，保存按钮出现，预览按钮消失
-    /// </summary>
-    public void HasChange()
-    {
-        saveBtn.gameObject.SetActive(true);
-        previewBtn.gameObject.SetActive(false);
-    }
-
-    /// <summary>
-    /// 序列化（存储path路径下的文件），将数据存储到文件
-    /// </summary>
-    void MySerial(string path, ScenceData gameObjectDatas)
-    {
-        FileStream fs = new FileStream(path, FileMode.OpenOrCreate);
-        BinaryFormatter bf = new BinaryFormatter();
-        bf.Serialize(fs, gameObjectDatas);
-
-        fs.Flush();
-        fs.Close();
-        fs.Dispose();
-    }
-
+    
     /// <summary>
     /// 获取配置文件的路径
     /// </summary>

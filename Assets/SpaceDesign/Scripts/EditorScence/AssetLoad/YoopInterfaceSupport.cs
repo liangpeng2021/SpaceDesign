@@ -1,9 +1,11 @@
-﻿using Museum;
+﻿using LitJson;
+using Museum;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -31,7 +33,7 @@ namespace SpaceDesign
         /// 所有的接口地址
         /// </summary>
         public static Dictionary<InterfaceName, string> yoopInterfaceDic = new Dictionary<InterfaceName, string>();
-        
+
         private void Awake()
         {
             for (int i = 0; i < yoopInterfaces.Length; i++)
@@ -47,7 +49,7 @@ namespace SpaceDesign
         /// 获取后台数据
         /// </summary>
         /// <returns></returns>
-        public static IEnumerator GetHttpVideoData<T>(WWWForm wwwForm, InterfaceName interfaceName, Action<T> callback)
+        public static IEnumerator GetHttpData<T>(WWWForm wwwForm, InterfaceName interfaceName, Action<T> callback)
         {
             if (GameTools.NetWorkEnv == NetState.NoNet)
             {
@@ -72,7 +74,6 @@ namespace SpaceDesign
 
                 if (www.isDone && string.IsNullOrEmpty(www.error))
                 {
-
 #if UNITY_EDITOR
                     //if (interfaceName == InterfaceName.deleteGuankan
                     //	|| interfaceName == InterfaceName.cancelShoucang
@@ -84,8 +85,8 @@ namespace SpaceDesign
                     }
                     //Debug.Log("-------------");
 #endif
-                    yyd = JsonConvert.DeserializeObject<T>(www.downloadHandler.text);
-
+                    //yyd = JsonConvert.DeserializeObject<T>(www.downloadHandler.text);
+                    yyd = JsonMapper.ToObject<T>(www.downloadHandler.text);
                     if (yyd != null)
                         callback?.Invoke(yyd);
                 }
@@ -99,25 +100,67 @@ namespace SpaceDesign
             yield return 0;
         }
 
+        /// <summary>
+        /// 下载文件加载到内存
+        /// </summary>
+        /// <param name="fileUrl"></param>
+        /// <param name="callback"></param>
+        /// <param name="errorcallback"></param>
+        /// <returns></returns>
+        public static IEnumerator GetScenceFileFromURL(string fileUrl, Action<ScenceData> callback, Action<String> errorcallback)
+        {
+            if (GameTools.NetWorkEnv == NetState.NoNet)
+            {
+                //LogManager.Instance.ShowTipObj("网络连接失败，请检查网络设置", 2f);
+                yield break;
+            }
+
+            UnityWebRequest request = UnityWebRequest.Get(fileUrl);
+            yield return request.SendWebRequest();
+            if (request.isHttpError || request.isNetworkError)
+            {
+                errorcallback?.Invoke(request.error);
+            }
+            else
+            {
+                callback?.Invoke(MyDeSerialFromUrl(request.downloadHandler.data));
+            }
+
+            yield return null;
+        }
+
+        /// <summary>
+        /// 反序列化（读取path路径下的文件），将数据从文件读取出来
+        /// </summary>
+        static ScenceData MyDeSerialFromUrl(byte[] bytes)
+        {
+            ScenceData gameObjectDatas = null;
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                gameObjectDatas = bf.Deserialize(ms) as ScenceData;
+            }//关闭Stream
+
+            return gameObjectDatas;
+        }
+
         // 上传文件
         public static IEnumerator UploadFile<T>(WWWForm wwwForm, InterfaceName interfaceName, Action<T> callback)
         {
-            byte[] gifByte = File.ReadAllBytes("E:/Work/ffepgtest/gif/a.gif");
-            //根据自己长传的文件修改格式
-            wwwForm.AddBinaryData("file", gifByte, "myGif.mp4", "a/gif");
-
             using (UnityWebRequest www = UnityWebRequest.Post(yoopInterfaceDic[interfaceName], wwwForm))
             {
                 yield return www.SendWebRequest();
-
+                T yyd;
                 if (www.isNetworkError || www.isHttpError)
                 {
                     Debug.Log(www.error);
                 }
                 else
                 {
-                    string text = www.downloadHandler.text;
-                    Debug.Log("服务器返回值" + text);//正确打印服务器返回值
+                    //yyd = JsonConvert.DeserializeObject<T>(www.downloadHandler.text);
+                    yyd = JsonMapper.ToObject<T>(www.downloadHandler.text);
+                    if (yyd != null)
+                        callback?.Invoke(yyd);
                 }
             }
         }

@@ -14,10 +14,10 @@ public class EditCameraRay : MonoBehaviour
     
     RayPointerHandler _currayPointerHandler;
     RayPointerHandler _lastrayPointerHandler;
-    RayPointerHandler hitrayPointerHandler;       //用来临时存储碰触到的对象
-
-    bool isMouseDown;
     
+    bool isMouseDown;
+
+    RayPointerHandler hitpointhandler;
     // Update is called once per frame
     void Update()
     {
@@ -37,8 +37,8 @@ public class EditCameraRay : MonoBehaviour
                 line.SetPosition(0, ray.origin);
                 line.SetPosition(1, hit.point);
             }
-            //Debug.Log("RayIn");
-            hitrayPointerHandler = hit.collider.GetComponent<RayPointerHandler>();
+
+            RayPointerHandler hitrayPointerHandler = hit.collider.GetComponent<RayPointerHandler>();
             if (hitrayPointerHandler)
             {
                 _currayPointerHandler = hitrayPointerHandler;
@@ -53,8 +53,8 @@ public class EditCameraRay : MonoBehaviour
                 }
                 if (Input.GetMouseButtonDown(0))
                 {
-                    //Debug.Log("GetMouseButtonDown");
                     isMouseDown = true;
+                    hitpointhandler= hit.collider.GetComponent<RayPointerHandler>();
                     _currayPointerHandler.OnPinchDown(ray.origin, ray.direction, hit.point);
                 }
             }
@@ -67,18 +67,22 @@ public class EditCameraRay : MonoBehaviour
                     _lastrayPointerHandler = null;
                 }
             }
-
-            if (isMouseDown)
-            {
-                if (_currayPointerHandler)
-                {
-                    _currayPointerHandler.OnDragging(ray.origin, ray.direction);
-                }
-            }
+            
+            //if (isMouseDown)
+            //{
+            //    if (!hitpointhandler.gameObject.activeInHierarchy)
+            //    {
+            //        isMouseDown = false;
+            //        hitpointhandler = null;
+            //    }
+            //    if (hitpointhandler)
+            //    {
+            //        hitpointhandler.OnDragging(ray.origin, ray.direction);
+            //    }
+            //}
         }
         else
         {
-            //Debug.Log("RayOut");
             _currayPointerHandler = null;
             if (_lastrayPointerHandler != null)
             {
@@ -86,15 +90,12 @@ public class EditCameraRay : MonoBehaviour
                 _lastrayPointerHandler = null;
             }
         }
-        
+
         if (Input.GetMouseButtonUp(0))
         {
-            //Debug.Log("GetMouseButtonUp");
             isMouseDown = false;
-            if (_lastrayPointerHandler != null)
-            {
-                _lastrayPointerHandler.OnPinchUp();
-            }
+
+            hitpointhandler = null;
         }
 #else
         gameObject.SetActive(false);

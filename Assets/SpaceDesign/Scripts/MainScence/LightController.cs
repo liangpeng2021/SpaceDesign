@@ -21,7 +21,6 @@ public class LightController : MonoBehaviour
 
     public void SetLightOnOrOff()
     {
-        Debug.Log("MyLog::SetLightOnOrOff:");
         islightOn = !islightOn;
         if (islightOn)
             image.sprite = lightoff;

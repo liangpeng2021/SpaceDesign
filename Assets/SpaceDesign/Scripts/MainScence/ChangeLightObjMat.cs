@@ -39,7 +39,6 @@ public class ChangeLightObjMat : MonoBehaviour
 
     void ClickButtonRay(int num)
     {
-        Debug.Log("MyLog::ClickButtonRay:" +num);
         for (int i = 0; i < lightData.Length; i++)
         {
             lightData[i].image.enabled = (i == num);

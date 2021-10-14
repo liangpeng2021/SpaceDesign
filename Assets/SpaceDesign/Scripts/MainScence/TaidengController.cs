@@ -27,7 +27,7 @@ public class TaidengController : MonoBehaviour
     public GameObject payObj;
 
     bool showFirst = false;
-    BoundingBoxRayReceiverHelper boundingBoxRayReceiverHelper;
+    BoundingBox boundingBox;
     /// <summary>
     /// 立即购买按钮
     /// </summary>
@@ -40,8 +40,28 @@ public class TaidengController : MonoBehaviour
     /// 配送中
     /// </summary>
     public GameObject peisongObj;
-    // Start is called before the first frame update
-    void Start()
+
+    bool hideBoxScale = false;
+
+    private void Update()
+    {
+        if (!hideBoxScale && GetComponent<BoundingBox>())
+        {
+            boundingBox = GetComponent<BoundingBox>();
+            for (int i = 0; i < boundingBox.cornerObjects.Length; i++)
+            {
+                boundingBox.cornerObjects[i].SetActive(false);
+            }
+            hideBoxScale = true;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        
+    }
+
+    void Init()
     {
         firstObj.SetActive(true);
         secondObj.SetActive(false);
@@ -51,28 +71,43 @@ public class TaidengController : MonoBehaviour
 
         startpayRayReceiver.gameObject.SetActive(false);
         paySuccessObj.SetActive(false);
-
-        if (boundingBoxRayReceiverHelper == null)
-            boundingBoxRayReceiverHelper = GetComponent<BoundingBoxRayReceiverHelper>();
-        if (boundingBoxRayReceiverHelper)
-            GetComponent<BoundingBoxRayReceiverHelper>().onPointerEnter += PointEnter;
-        Debug.Log("MyLog::"+boundingBoxRayReceiverHelper);
+        showFirst = false;
     }
 
     private void OnEnable()
     {
         startpayRayReceiver.onPinchDown.AddListener(StartPay);
         justpayRayReceiver.onPinchDown.AddListener(PaySuccess);
+
+        if (boundingBox == null)
+            boundingBox = GetComponent<BoundingBox>();
+        if (boundingBox)
+        {
+            boundingBox.onTranslateStart.AddListener(PointEnter);
+            boundingBox.onScaleStart.AddListener(PointEnter);
+            boundingBox.onRotateStart.AddListener(PointEnter);
+        } 
+        else
+            Debug.Log("MyLog::找不到台灯BoundingBox");
+        Init();
     }
 
     private void OnDisable()
     {
         justpayRayReceiver.onPinchDown.RemoveListener(PaySuccess);
         startpayRayReceiver.onPinchDown.RemoveListener(StartPay);
+
+        if (boundingBox)
+        {
+            boundingBox.onTranslateStart.RemoveListener(PointEnter);
+            boundingBox.onScaleStart.RemoveListener(PointEnter);
+            boundingBox.onRotateStart.RemoveListener(PointEnter);
+        }
     }
 
     void PointEnter()
     {
+
         if (!showFirst)
         {
             firstObj.SetActive(false);
