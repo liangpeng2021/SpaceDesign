@@ -3,6 +3,7 @@ using Museum;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.IO;
 
 /// <summary>
 /// 验证功能与Yoop交互，数据类
@@ -45,26 +46,32 @@ public struct UserData
 
 public class UserManager : MonoBehaviour
 {
-    //用户本地帐号密码Key
-    private const string idKey = "UserID";
-    private const string pwKey = "UserPW";
-
-    /// <summary>
-    /// 本地用户信息
-    /// </summary>
-    string localuserName;
-    string localPassword;
-
-    /// <summary>
-	/// 检测用户是否登录过
-	/// </summary>
-	public bool CheckLocalUserData()
+    public class UserLocalData
     {
-        Debug.Log("MyLog::PlayerPrefs.HasKey："+ PlayerPrefs.HasKey(idKey)+"/"+ PlayerPrefs.HasKey(pwKey));
-        if (PlayerPrefs.HasKey(idKey) && PlayerPrefs.HasKey(pwKey))
+        /// <summary>
+        /// 本地用户信息
+        /// </summary>
+        public string localuserName;
+        public string localPassword;
+    }
+
+    UserLocalData userLocalData = new UserLocalData();
+
+    string userpath;
+    /// <summary>
+    /// 检测用户是否登录过
+    /// </summary>
+    public bool CheckLocalUserData()
+    {
+        if (userpath == null)
         {
-            localuserName = PlayerPrefs.GetString(idKey);
-            localPassword = GameTools.Decrypt(PlayerPrefs.GetString(pwKey));
+            userpath = EditorControl.GetPth();
+            userpath = Path.Combine(userpath, "user.json");
+        }
+        
+        userLocalData = JsonController.ParseJsonLitJson<UserLocalData>(userpath);
+        if (userLocalData != null)
+        {
             return true;
         }
         else
@@ -78,28 +85,34 @@ public class UserManager : MonoBehaviour
     /// </summary>
     public void SaveUserData(string userName, string passWord)
     {
-        localuserName = userName;
-        localPassword = passWord;
-        Debug.Log("MyLog::写入用户信息");
-        PlayerPrefs.SetString(idKey, userName);
-        PlayerPrefs.SetString(pwKey, GameTools.Encrypt(passWord));
+        if (userpath == null)
+        {
+            userpath = EditorControl.GetPth();
+            userpath = Path.Combine(userpath, "user.json");
+        }
+        if (userLocalData == null)
+            userLocalData = new UserLocalData();
+        userLocalData.localuserName = userName;
+        userLocalData.localPassword = GameTools.Encrypt(passWord);
+
+        JsonController.SaveJsonLitJson(userpath, userLocalData);
     }
+
     /// <summary>
 	/// 自动登录
 	/// </summary>
 	public void AutoLogin(System.Action<UserData, string> action)
     {
-        RequestLogin(localuserName, localPassword, action);
+        RequestLogin(userLocalData.localuserName, GameTools.Decrypt(userLocalData.localPassword), action);
     }
+
     /// <summary>
 	/// 注销用户
 	/// </summary>
 	public void Logout()
     {
-        localuserName = "";
-        localPassword = "";
-        PlayerPrefs.DeleteKey(idKey);
-        PlayerPrefs.DeleteKey(pwKey);
+        if (File.Exists(userpath))
+            File.Delete(userpath);
     }
 
     //   /// <summary>

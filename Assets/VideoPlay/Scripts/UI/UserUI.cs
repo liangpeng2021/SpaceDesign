@@ -132,8 +132,8 @@ public class UserUI : MonoBehaviour
 		chongxinfasongBtn.OnClickDwon.AddListener(SendYanzhengmaAgain);
 
         //登陆面板关闭
-        dengluzhuceTran.gameObject.SetActive(true);
-        EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
+        //dengluzhuceTran.gameObject.SetActive(true);
+        //EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
         ClickBtn(0);
 
         backtolastPanelBtn.OnClickDwon.AddListener(BackToLastPanel);
@@ -574,16 +574,18 @@ public class UserUI : MonoBehaviour
 
         dengluzhuceTran.gameObject.SetActive(false);
         EditorControl.Instance.keyBoardManager.gameObject.SetActive(false);
-        EditorControl.Instance.gameObject.SetActive(true);
+        EditorControl.Instance.uiTran.gameObject.SetActive(true);
         scenceManager.LoadUserScenceList(ud);
-
     }
 	#endregion
     
 	private void Start()
 	{
 		InitDengluZhuce();
-        EditorControl.Instance.gameObject.SetActive(false);
+
+        dengluzhuceTran.gameObject.SetActive(false);
+        EditorControl.Instance.keyBoardManager.gameObject.SetActive(false);
+        EditorControl.Instance.uiTran.gameObject.SetActive(false);
         CheckLocalUserDataToSetLoginUI();
     }
     
@@ -592,18 +594,22 @@ public class UserUI : MonoBehaviour
         //开场本地有用户数据时，自动登录
         if (userManager.CheckLocalUserData())
         {
-            Debug.Log("MyLog::开始自动登录");
             userManager.AutoLogin((ud, message) =>
             {
                 SetDengluResult(ud, message);
                 if (!ud.state)
                 {
                     userManager.Logout();
+                    dengluzhuceTran.gameObject.SetActive(true);
+                    EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
                 }
-                
             });
         }
         else
+        {
             userManager.Logout();
+            dengluzhuceTran.gameObject.SetActive(true);
+            EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
+        } 
     }
 }

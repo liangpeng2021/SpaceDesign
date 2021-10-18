@@ -26,51 +26,81 @@ public class LoadMainScence : MonoBehaviour
 
     public Canvas[] canvas;
 
-    #region test
-    public Button testlaqi;
-    void ClickLaqi()
+    #region 拉起其他应用
+    /// <summary>
+    /// 奇幻森林按钮
+    /// </summary>
+    public ButtonRayReceiver artowermotionBtn;
+    /// <summary>
+    /// 忒依亚传说
+    /// </summary>
+    public ButtonRayReceiver omobaBtn;
+    /// <summary>
+    /// AR动物园
+    /// </summary>
+    public ButtonRayReceiver findanimalsBtn;
+
+    /// <summary>
+    /// 测试demo
+    /// </summary>
+    public ButtonRayReceiver testBtn;
+
+    /// <summary>
+    /// 奇幻森林
+    /// </summary>
+    void ClickLaqiArtowermotion()
     {
-        Debug.Log("MyLog::ClickLaqi:"+ CallApp("com.LenQiy.TestInput"));
+        AppManager.StartApp("com.gabor.artowermotion");
+    }
+    /// <summary>
+    /// 忒依亚传说（moba)
+    /// </summary>
+    void ClickLaqiOmoba()
+    {
+        AppManager.StartApp("com.baymax.omoba");
+    }
+    /// <summary>
+    /// AR动物园
+    /// </summary>
+    void ClickLaqiFindanimals()
+    {
+        AppManager.StartApp("com.xyani.findanimals");
+        //Debug.Log("MyLog::ClickLaqi:"+ CallApp("com.LenQiy.TestInput"));
     }
 
-    public bool CallApp(string packageName)
+    void ClickTestInput()
     {
-        try
-        {
-            using (AndroidJavaClass player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-            using (AndroidJavaObject curActivity = player.GetStatic<AndroidJavaObject>("currentActivity"))
-            using (AndroidJavaObject packMag = curActivity.Call<AndroidJavaObject>("getPackageManager"))
-            using (AndroidJavaObject intent = packMag.Call<AndroidJavaObject>("getLaunchIntentForPackage", packageName))
-            {
-                Debug.Log("MyLog::intent:"+ intent);
-                if (intent != null)
-                {
-                    curActivity.Call("startActivity", intent);
-                    return true;
-                }
-            }
-            Debug.Log("MyLog::未执行");
-            return false;
-            //debugText.text += "\n拉起成功";
-        }
-        catch
-        {
-            Debug.Log("MyLog::using失败");
-            return false;
-        }
+        AppManager.StartApp("com.LenQiy.TestInput");
     }
+
+    void AddLaqiEvent()
+    {
+        findanimalsBtn.onPinchDown.AddListener(ClickLaqiFindanimals);
+        omobaBtn.onPinchDown.AddListener(ClickLaqiOmoba);
+        artowermotionBtn.onPinchDown.AddListener(ClickLaqiArtowermotion);
+        testBtn.onPinchDown.AddListener(ClickTestInput);
+    }
+
+    void RemoveLaqiEvent()
+    {
+        artowermotionBtn.onPinchDown.RemoveAllListeners();
+        omobaBtn.onPinchDown.RemoveAllListeners();
+        findanimalsBtn.onPinchDown.RemoveAllListeners();
+        testBtn.onPinchDown.RemoveAllListeners();
+    }
+
     #endregion
 
     private void OnEnable()
     {
         backto.onClick.AddListener(QuitApp);
-        testlaqi.onClick.AddListener(ClickLaqi);
+        AddLaqiEvent();
     }
 
     private void OnDisable()
     {
         backto.onClick.RemoveListener(QuitApp);
-        testlaqi.onClick.RemoveListener(ClickLaqi);
+        RemoveLaqiEvent();
     }
 
     void BackToLoginScence()
@@ -106,6 +136,10 @@ public class LoadMainScence : MonoBehaviour
             canvas[i] = null;
         }
         canvas = null;
+
+        artowermotionBtn = null;
+        omobaBtn = null;
+        findanimalsBtn = null;
     }
 
     private void Start()
@@ -128,20 +162,24 @@ public class LoadMainScence : MonoBehaviour
         //BitConverter方式
         string path = EditorControl.GetPth();
         path = Path.Combine(path, "scence.scn");
-        Debug.Log("MyLog::path" + path);
+        //Debug.Log("MyLog::path" + path);
         objectDatas = MyDeSerial(path);
 
         if (objectDatas == null)
         {
-            Debug.Log("MyLog::配置数据为空");
             return;
         }
-        Debug.Log("MyLog::objectDatas："+ objectDatas);
+
         for (int i = 0; i < objectDatas.roomDatasList.Count; i++)
         {
             GameObject obj = Instantiate(roomPrefab);
             RoomControl roomControl = obj.GetComponent<RoomControl>();
-            roomControl.SetRoomData(objectDatas.roomDatasList[i], prefabDic);
+            if (objectDatas.roomDatasList[i] != null)
+                roomControl.SetRoomData(objectDatas.roomDatasList[i], prefabDic);
+            else
+            {
+                Debug.Log("MyLog::第" + i.ToString()+"房间为空");
+            }
         }
         Debug.Log("MyLog::objectDatas.roomDatasList.Count:" + objectDatas.roomDatasList.Count);
     }
@@ -150,17 +188,13 @@ public class LoadMainScence : MonoBehaviour
     {
         if (!File.Exists(path))
         {
-            Debug.Log("MyLog::!File.Exists(path)：null");
             return null;
         }
         ScenceData gameObjectDatas = null;
         using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate))
         {
-            Debug.Log("MyLog::fileStream:"+ fileStream);
             BinaryFormatter bf = new BinaryFormatter();
             gameObjectDatas = bf.Deserialize(fileStream) as ScenceData;
-            Debug.Log("MyLog::gameObjectDatas.Label:" + gameObjectDatas.Label);
-            Debug.Log("MyLog::gameObjectDatas.roomDatasList:" + gameObjectDatas.roomDatasList);
         }
 
         return gameObjectDatas;
