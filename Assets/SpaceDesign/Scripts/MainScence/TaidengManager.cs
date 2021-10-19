@@ -30,7 +30,7 @@ public class TaidengManager : MonoBehaviour
     void Start()
     {
         animIconFar.enabled = true;
-        taidengObj.transform.parent = XR.XRCameraManager.Instance.stereoCamera.transform;
+        taidengObj.transform.parent = MyImageTarget.Instance.child;
 
         taidengObj.SetActive(false);
     }
@@ -100,9 +100,13 @@ public class TaidengManager : MonoBehaviour
         {
             yield return IEMiddleToFar();
         }
-        else if (lastPPS == PlayerPosState.near && curPlayerPosState == PlayerPosState.Middle)
+        else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.near)
         {
             yield return IEMiddleToNear();
+        }
+        else if (lastPPS == PlayerPosState.near && curPlayerPosState == PlayerPosState.Middle)
+        {
+            yield return IENearToMidle();
         }
 
         yield return 0;
@@ -115,8 +119,6 @@ public class TaidengManager : MonoBehaviour
     /// </summary>
     IEnumerator IEMiddleToNear()
     {
-        animIconFar.enabled = false;
-
         for (int i = 0; i < animIconMiddle.Length; i++)
         {
             animIconMiddle[i].enabled = false;
@@ -132,6 +134,38 @@ public class TaidengManager : MonoBehaviour
                 animIconFar.transform.localPosition = targetPos;
                 animIconFar.transform.localScale = Vector3.zero;
                 taidengObj.SetActive(true);
+
+                MyImageTarget.Instance.TrackStop();
+                MyImageTarget.Instance.TrackStart("Model1", "3c11f9a3e98c523a45f23f07b76586ab_28062021145112");
+                break;
+            }
+
+            yield return 0;
+        }
+    }
+
+    /// <summary>
+    /// 近距离=>中距离
+    /// </summary>
+    IEnumerator IENearToMidle()
+    {
+        MyImageTarget.Instance.TrackStop();
+        taidengObj.SetActive(false);
+        
+        while (true)
+        {
+            animIconFar.transform.localPosition = Vector3.MoveTowards(animIconFar.transform.localPosition, Vector3.zero, fIconMoveSpeed * Time.deltaTime);
+            animIconFar.transform.localScale = Vector3.MoveTowards(animIconFar.transform.localScale, Vector3.one, fIconMoveSpeed * Time.deltaTime);
+            float _fDis = Vector3.Distance(animIconFar.transform.localScale, Vector3.one);
+            if (_fDis < fThreshold)
+            {
+                animIconFar.transform.localPosition = Vector3.zero;
+                animIconFar.transform.localScale = Vector3.one;
+
+                for (int i = 0; i < animIconMiddle.Length; i++)
+                {
+                    animIconMiddle[i].enabled = true;
+                }
                 break;
             }
 
@@ -150,7 +184,7 @@ public class TaidengManager : MonoBehaviour
         {
             animIconMiddle[i].enabled = true;
         }
-
+       
         yield return 0;
     }
     /// <summary>
