@@ -45,9 +45,9 @@ public class TaidengController : MonoBehaviour
 
     private void Update()
     {
-        if (!hideBoxScale && GetComponent<BoundingBox>())
+        boundingBox = GetComponent<BoundingBox>();
+        if (!hideBoxScale && boundingBox)
         {
-            boundingBox = GetComponent<BoundingBox>();
             for (int i = 0; i < boundingBox.cornerObjects.Length; i++)
             {
                 boundingBox.cornerObjects[i].SetActive(false);
@@ -58,7 +58,12 @@ public class TaidengController : MonoBehaviour
 
     private void OnDestroy()
     {
-        
+        startpayRayReceiver = null;
+        firstObj = null;
+        secondObj = null;
+        payObj = null;
+        boundingBox = null;
+        justpayRayReceiver = null;
     }
 
     void Init()
