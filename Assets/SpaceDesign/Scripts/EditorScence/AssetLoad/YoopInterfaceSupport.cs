@@ -29,10 +29,12 @@ namespace SpaceDesign
         [Header("Yoop后台接口地址")]
         public YoopInterface[] yoopInterfaces;
 
+        public static YoopInterfaceSupport Instance;
+
         /// <summary>
         /// 所有的接口地址
         /// </summary>
-        public static Dictionary<InterfaceName, string> yoopInterfaceDic = new Dictionary<InterfaceName, string>();
+        public Dictionary<InterfaceName, string> yoopInterfaceDic = new Dictionary<InterfaceName, string>();
 
         private void Awake()
         {
@@ -43,13 +45,15 @@ namespace SpaceDesign
                     yoopInterfaceDic.Add(yoopInterfaces[i]._interfaceName, yoopInterfaces[i]._url);
                 }
             }
+
+            Instance = this;
         }
 
         /// <summary>
         /// 获取后台数据
         /// </summary>
         /// <returns></returns>
-        public static IEnumerator GetHttpData<T>(WWWForm wwwForm, InterfaceName interfaceName, Action<T> callback)
+        public IEnumerator GetHttpData<T>(WWWForm wwwForm, InterfaceName interfaceName, Action<T> callback)
         {
             if (GameTools.NetWorkEnv == NetState.NoNet)
             {
@@ -145,7 +149,7 @@ namespace SpaceDesign
         }
 
         // 上传文件
-        public static IEnumerator UploadFile<T>(WWWForm wwwForm, InterfaceName interfaceName, Action<T> callback)
+        public IEnumerator UploadFile<T>(WWWForm wwwForm, InterfaceName interfaceName, Action<T> callback)
         {
             using (UnityWebRequest www = UnityWebRequest.Post(yoopInterfaceDic[interfaceName], wwwForm))
             {
@@ -163,6 +167,23 @@ namespace SpaceDesign
                         callback?.Invoke(yyd);
                 }
             }
+        }
+
+        public static IEnumerator SendDataToCPE(string url, Action<string> callback)
+        {
+            UnityWebRequest request = UnityWebRequest.Get(url);
+            yield return request.SendWebRequest();
+
+            if (request.isHttpError || request.isNetworkError)
+            {
+                Debug.Log("MyLog::request.error:" + request.error);
+            }
+            else
+            {
+                callback?.Invoke(request.downloadHandler.text);
+            }
+
+            yield return null;
         }
     }
 }

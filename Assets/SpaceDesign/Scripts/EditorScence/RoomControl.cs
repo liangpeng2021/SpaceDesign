@@ -57,7 +57,7 @@ public class RoomControl : MonoBehaviour
     /// 是否为预览模式
     /// </summary>
     bool isPreview = false;
-
+    
     private void OnDestroy()
     {
         //Debug.Log("删除房间");
@@ -90,16 +90,17 @@ public class RoomControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        eyeTran = XRCameraManager.Instance.stereoCamera.transform;
+        if (eyeTran == null)
+            eyeTran = XRCameraManager.Instance.stereoCamera.transform;
         line.startWidth = 0.01f;
         line.endWidth = 0.01f;
     }
 
     public void CreatePoint()
     {
-        float startMax = 1f;
+        float startMax = 5f;
 #if UNITY_EDITOR
-        startMax = 1f;
+        startMax = 5f;
 #else
 
 #endif
@@ -122,6 +123,13 @@ public class RoomControl : MonoBehaviour
         pointTranList[3].position = roomPos + new Vector3(startMax, 0, -startMax);
 
         roomPos.y += 0.5f;
+    }
+    /// <summary>
+    /// 编辑模式下设置线隐藏和出现
+    /// </summary>
+    public void SetLineActive(bool active)
+    {
+        line.gameObject.SetActive(active);
     }
 
     void LoadPoint(List<SPoint> sPoints)
@@ -178,13 +186,7 @@ public class RoomControl : MonoBehaviour
             if (zmax < pointTranList[i].position.z)
                 zmax = pointTranList[i].position.z;
         }
-        // 判断眼镜是否在房间里
-        if (IsInRoom(eyeTran.position))
-        {
-            objParent.gameObject.SetActive(true);
-        }
-        else
-            objParent.gameObject.SetActive(false);
+        SetObjActive();
         //预览模式
         if (isPreview)
         {
@@ -209,6 +211,24 @@ public class RoomControl : MonoBehaviour
                 textMesh.SetActive(true);
         }
         
+    }
+
+    void SetObjActive()
+    {
+        if (eyeTran == null)
+            eyeTran = XRCameraManager.Instance.stereoCamera.transform;
+        // 判断眼镜是否在房间里
+        if (IsInRoom(eyeTran.position))
+        {
+            if (!isPreview && !EditorControl.Instance.prefabManager.gameObject.activeInHierarchy)
+            {
+                objParent.gameObject.SetActive(false);
+            }
+            else
+                objParent.gameObject.SetActive(true);
+        }
+        else
+            objParent.gameObject.SetActive(false);
     }
 
     bool IsObjInRoom()
@@ -389,6 +409,8 @@ public class RoomControl : MonoBehaviour
         LoadPoint(roomDatas.sPointsList);
 
         LoadPrefab3D(roomDatas.ObjectList, prefabDics);
+
+        SetObjActive();
     }
 
     /// <summary>

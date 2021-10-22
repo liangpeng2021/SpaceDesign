@@ -30,8 +30,7 @@ public class TaidengManager : MonoBehaviour
     void Start()
     {
         animIconFar.enabled = true;
-        taidengObj.transform.parent = MyImageTarget.Instance.child;
-
+        
         taidengObj.SetActive(false);
     }
     void OnEnable()
@@ -76,9 +75,9 @@ public class TaidengManager : MonoBehaviour
         }
         else
         {
-            if (lastPPS == PlayerPosState.near)
-                return;
-            curPlayerPosState = PlayerPosState.near;
+            //if (lastPPS == PlayerPosState.near)
+            //    return;
+            //curPlayerPosState = PlayerPosState.near;
         }
         
         StartCoroutine("IERefreshPos", lastPPS);
@@ -100,14 +99,14 @@ public class TaidengManager : MonoBehaviour
         {
             yield return IEMiddleToFar();
         }
-        else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.near)
-        {
-            yield return IEMiddleToNear();
-        }
-        else if (lastPPS == PlayerPosState.near && curPlayerPosState == PlayerPosState.Middle)
-        {
-            yield return IENearToMidle();
-        }
+        //else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.near)
+        //{
+        //    yield return IEMiddleToNear();
+        //}
+        //else if (lastPPS == PlayerPosState.near && curPlayerPosState == PlayerPosState.Middle)
+        //{
+        //    yield return IENearToMidle();
+        //}
 
         yield return 0;
         //UI变化结束

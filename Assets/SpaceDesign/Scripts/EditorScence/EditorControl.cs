@@ -19,10 +19,14 @@ public class EditorControl : MonoBehaviour
 
     void InitCanvas()
     {
-        uiTran.parent = XRCameraManager.Instance.stereoCamera.transform;
-        uiTran.localEulerAngles = Vector3.zero;
-        uiTran.localPosition = Vector3.zero;
-        uiTran.localScale = Vector3.one;
+        resetMenuParent = resetMenuBtn.transform.parent.parent;
+
+        stereoCameraTran = XRCameraManager.Instance.stereoCamera.transform;
+
+        resetMenuParent.parent = stereoCameraTran;
+        resetMenuParent.localEulerAngles = Vector3.zero;
+        resetMenuParent.localPosition = Vector3.zero;
+        resetMenuParent.localScale = Vector3.one;
 
         Camera eventCamera = XRCameraManager.Instance.eventCamera;
         for (int i = 0; i < canvas.Length; i++)
@@ -37,6 +41,12 @@ public class EditorControl : MonoBehaviour
 
     public GameObject editorUIObj;
     public GameObject previewUIObj;
+    /// <summary>
+    /// 菜单，点击复位所有按钮
+    /// </summary>
+    public ButtonRayReceiver resetMenuBtn;
+    Transform resetMenuParent;
+    Transform stereoCameraTran;
 
     /// <summary>
     /// 预览
@@ -46,7 +56,7 @@ public class EditorControl : MonoBehaviour
     /// <summary>
     /// 返回编辑模式
     /// </summary>
-    public ButtonRayReceiver backBtn;
+    public ButtonRayReceiver backToEditorBtn;
 
     /// <summary>
     /// 退出程序
@@ -85,6 +95,10 @@ public class EditorControl : MonoBehaviour
     /// 创建时起名
     /// </summary>
     public SetName setName;
+    [HideInInspector]
+    public Color chooseColor;
+    [HideInInspector]
+    public Color normalColor;
 
     private void OnDestroy()
     {
@@ -97,7 +111,7 @@ public class EditorControl : MonoBehaviour
         editorUIObj = null;
         previewUIObj = null;
         previewBtn = null;
-        backBtn = null;
+        backToEditorBtn = null;
         quitBtn = null;
         loadScence = null;
         previewParent = null;
@@ -122,6 +136,9 @@ public class EditorControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        ColorUtility.TryParseHtmlString("#6070FFFF", out chooseColor);
+        ColorUtility.TryParseHtmlString("#6B00B0FF", out normalColor);
+
         loadScence = GetComponent<LoadPreviewScence>();
         
         InitSave();
@@ -137,19 +154,42 @@ public class EditorControl : MonoBehaviour
     private void OnEnable()
     {
         previewBtn.onPinchDown.AddListener(LoadPreview);
-        backBtn.onPinchDown.AddListener(BackToEditor);
+        backToEditorBtn.onPinchDown.AddListener(BackToEditor);
         quitBtn.onClick.AddListener(BackToStarScence);
 
         backtoTopBtn.onPinchDown.AddListener(BackToScenceList);
+        resetMenuBtn.onPinchDown.AddListener(ResetMenuPos);
     }
 
     private void OnDisable()
     {
         previewBtn.onPinchDown.RemoveListener(LoadPreview);
-        backBtn.onPinchDown.RemoveListener(BackToEditor);
+        backToEditorBtn.onPinchDown.RemoveListener(BackToEditor);
         quitBtn.onClick.RemoveListener(BackToStarScence);
 
         backtoTopBtn.onPinchDown.RemoveListener(BackToScenceList);
+        resetMenuBtn.onPinchDown.RemoveAllListeners();
+    }
+
+    void ResetMenuPos()
+    {
+        uiTran.position = stereoCameraTran.position;
+        uiTran.forward = stereoCameraTran.forward;
+        uiTran.eulerAngles = new Vector3(0, uiTran.eulerAngles.y,0);
+    }
+
+    void Update()
+    {
+        Vector3 cameraPos = new Vector3(stereoCameraTran.position.x,0, stereoCameraTran.position.z);
+        Vector3 uipos = new Vector3(uiTran.position.x,0,uiTran.position.z);
+        
+        //判断距离超过3米或者夹角较大时出现复位按钮
+        if (Vector3.Distance(cameraPos, uipos)>3f || Vector3.Angle(stereoCameraTran.forward, uiTran.forward) >75f)
+        {
+            resetMenuParent.gameObject.SetActive(true);
+        }
+        else
+            resetMenuParent.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -268,13 +308,6 @@ public class EditorControl : MonoBehaviour
         return path;
     }
     #endregion
-
-    private void Update()
-    {
-        //SaveScenceData();
-
-        TestInput();
-    }
 
     #region 提示
     public GameObject tipObj;

@@ -79,5 +79,7 @@ public class ChangeSate : MonoBehaviour
         if (lightObj == null)
             return;
         lightObj.SetActive(isLightOn);
+        if (isLightOn)
+            EditorControl.Instance.prefabManager.SetDeleteObjPos(transform.position);
     }
 }

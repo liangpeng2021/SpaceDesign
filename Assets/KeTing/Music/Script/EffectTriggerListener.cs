@@ -15,7 +15,8 @@ namespace SpaceDesign.Music
     {
         public void OnPointerClick(PointerEventData eventData)
         {
-            MusicManage.Inst.EffectToMinUI();
+            print("1");
+            //MusicManage.Inst.EffectToMinUI();
         }
     }
 }

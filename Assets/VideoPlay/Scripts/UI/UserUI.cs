@@ -585,7 +585,7 @@ public class UserUI : MonoBehaviour
 
         dengluzhuceTran.gameObject.SetActive(false);
         EditorControl.Instance.keyBoardManager.gameObject.SetActive(false);
-        EditorControl.Instance.uiTran.gameObject.SetActive(false);
+
         CheckLocalUserDataToSetLoginUI();
     }
     

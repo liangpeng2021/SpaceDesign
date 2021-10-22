@@ -158,7 +158,7 @@ public class UserManager : MonoBehaviour
 		wwwFrom.AddField("username", username);
 		wwwFrom.AddField("password", password);
 
-        IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<UserData>(wwwFrom, InterfaceName.denglu,
+        IEnumerator enumerator = YoopInterfaceSupport.Instance.GetHttpData<UserData>(wwwFrom, InterfaceName.denglu,
             (ud) =>
             {
                 string showMesg = "";
@@ -210,7 +210,7 @@ public class UserManager : MonoBehaviour
 		wwwFrom.AddField("phone", phone);
 		//Debug.Log(phone);
 
-		IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<YanzhengData>(wwwFrom, interfaceName,
+		IEnumerator enumerator = YoopInterfaceSupport.Instance.GetHttpData<YanzhengData>(wwwFrom, interfaceName,
 			(rd) =>
 			{
 				string showMsg = "";
@@ -270,7 +270,7 @@ public class UserManager : MonoBehaviour
 		wwwForm.AddField("phone", phoneNum);
 		wwwForm.AddField("yzm", yanzhenma);
         
-        IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<UserData>(wwwForm, InterfaceName.zhuce,
+        IEnumerator enumerator = YoopInterfaceSupport.Instance.GetHttpData<UserData>(wwwForm, InterfaceName.zhuce,
             (rd) =>
             {
                 string showMsg = "";
@@ -334,7 +334,7 @@ public class UserManager : MonoBehaviour
 		wwwForm.AddField("yzm", yanzhengma);
 		wwwForm.AddField("password", password);
         
-        IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<UserData>(wwwForm, InterfaceName.findpassword,
+        IEnumerator enumerator = YoopInterfaceSupport.Instance.GetHttpData<UserData>(wwwForm, InterfaceName.findpassword,
             (rd) =>
             {
                 string showMsg = "";

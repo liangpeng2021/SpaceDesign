@@ -11,14 +11,207 @@ using UnityEngine.UI;
 /// </summary>
 public class ScenceManager : MonoBehaviour
 {
+    #region 翻页
+    /// <summary>
+    /// 每页数量
+    /// </summary>
+    int pageCount;
     /// <summary>
     /// 场景列表界面
     /// </summary>
-    public Transform scenceParentTran;
+    public ButtonRayReceiver[] scenceBtns;
+    Text[] texts;
+    Material[] materials;
+
     /// <summary>
-    /// 2D场景icon预设
+    /// 总页数
     /// </summary>
-    public GameObject scence2DPrefab;
+    int totalPageScenceNum = -1;
+    /// <summary>
+    /// 当前在编辑的场景所在页，每页3个
+    /// </summary>
+    int curPageScenceId = 0;
+    /// <summary>
+    /// 当前在编辑的场景在当前页的下标
+    /// </summary>
+    int curScenceBtnIndex = -1;
+
+    /// <summary>
+    /// 页数
+    /// </summary>
+    public Text pageNumText;
+    /// <summary>
+    /// 翻到上页
+    /// </summary>
+    public ButtonRayReceiver turnPageLastBtn;
+    /// <summary>
+    /// 翻到下页
+    /// </summary>
+    public ButtonRayReceiver turnPageNextBtn;
+    /// <summary>
+    /// 选中后出现对应按钮
+    /// </summary>
+    public Transform seletTran;
+    /// <summary>
+    /// 翻到上一页
+    /// </summary>
+    void TurnLastPage()
+    {
+        //选中状态去掉
+        if (curScenceBtnIndex > -1 && curScenceBtnIndex < materials.Length)
+            materials[curScenceBtnIndex].SetColor("_BaseColor", EditorControl.Instance.normalColor);
+        seletTran.gameObject.SetActive(false);
+        //下一页按钮打开
+        turnPageNextBtn.gameObject.SetActive(true);
+        //当前页数修改
+        curPageScenceId--;
+
+        for (int i = 0; i < scenceBtns.Length; i++)
+        {
+            //显示按钮
+            scenceBtns[i].gameObject.SetActive(true);
+            //更新名字
+            texts[i].text = scenceDataList[curPageScenceId * pageCount + i].Label;
+        }
+        //如果是第一页，关掉上一页按钮
+        if (curPageScenceId == 0)
+            turnPageLastBtn.gameObject.SetActive(false);
+        ///更新页数显示
+        pageNumText.text = (curPageScenceId + 1).ToString() + "/" + (totalPageScenceNum + 1).ToString();
+    }
+    /// <summary>
+    /// 翻到下一页
+    /// </summary>
+    void TurnNextPage()
+    {
+        //选中状态去掉
+        if (curScenceBtnIndex>-1 && curScenceBtnIndex< materials.Length)
+            materials[curScenceBtnIndex].SetColor("_BaseColor", EditorControl.Instance.normalColor);
+        seletTran.gameObject.SetActive(false);
+        //上一页按钮打开
+        turnPageLastBtn.gameObject.SetActive(true);
+        //当前页数修改
+        curPageScenceId++;
+        //当前页还剩多少个
+        int index = scenceDataList.Count - 1 - curPageScenceId * pageCount;
+
+        for (int i = 0; i < scenceBtns.Length; i++)
+        {
+            //没满的关掉
+            if (i > index)
+            {
+                scenceBtns[i].gameObject.SetActive(false);
+            }
+            else
+            {
+                //满的更新
+                scenceBtns[i].gameObject.SetActive(true);
+                texts[i].text = scenceDataList[curPageScenceId * pageCount + i].Label;
+            }
+        }
+        //如果是最后一页，下一页按钮关掉
+        if (curPageScenceId == totalPageScenceNum)
+            turnPageNextBtn.gameObject.SetActive(false);
+        //更新页数显示
+        pageNumText.text = (curPageScenceId + 1).ToString() + "/" + (totalPageScenceNum + 1).ToString();
+    }
+
+    /// <summary>
+    /// 设置页面内的按钮
+    /// </summary>
+    void SetScenceBtnState()
+    {
+        //控制按钮显示和隐藏
+        int index = (scenceDataList.Count - 1) % pageCount;
+
+        for (int i = 0; i < scenceBtns.Length; i++)
+        {
+            if (i > (scenceDataList.Count - 1 - curPageScenceId * pageCount))
+                scenceBtns[i].gameObject.SetActive(false);
+            else
+            {
+                scenceBtns[i].gameObject.SetActive(true);
+                
+                //名称赋值
+                texts[i].text = scenceDataList[curPageScenceId * pageCount + i].Label;
+            }
+        }
+
+        //翻页和页码更新
+        if (index >= 0)
+        {
+            if (curPageScenceId == 0)
+            {
+                turnPageLastBtn.gameObject.SetActive(false);
+            }
+            else
+                turnPageLastBtn.gameObject.SetActive(true);
+
+            if (curPageScenceId == totalPageScenceNum)
+                turnPageNextBtn.gameObject.SetActive(false);
+            else
+                turnPageNextBtn.gameObject.SetActive(true);
+
+            pageNumText.gameObject.SetActive(true);
+            pageNumText.text = (curPageScenceId + 1).ToString() + "/" + (totalPageScenceNum + 1).ToString();
+        }
+        else
+        {
+            pageNumText.gameObject.SetActive(false);
+            for (int i = 0; i < scenceBtns.Length; i++)
+            {
+                scenceBtns[i].gameObject.SetActive(false);
+            }
+
+            turnPageLastBtn.gameObject.SetActive(false);
+            turnPageNextBtn.gameObject.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 赋值总页数
+    /// </summary>
+    /// <param name="count"></param>
+    void SetTotalPageNum(int count)
+    {
+        if (count == 0)
+        {
+            totalPageScenceNum = -1;
+            return;
+        }
+
+        if (count % pageCount == 0)
+        {
+            totalPageScenceNum = count / pageCount - 1;
+        }
+        else
+            totalPageScenceNum = count / pageCount;
+    }
+
+    void InitPage()
+    {
+        pageCount = scenceBtns.Length;
+        texts = new Text[scenceBtns.Length];
+        materials = new Material[scenceBtns.Length];
+
+        for (int i = 0; i < scenceBtns.Length; i++)
+        {
+            texts[i] = scenceBtns[i].transform.Find("Text (TMP)").GetComponent<Text>();
+            materials[i] = scenceBtns[i].transform.Find("Cube/BackBoard").GetComponent<MeshRenderer>().material;
+        }
+
+        seletTran.gameObject.SetActive(false);
+        pageNumText.gameObject.SetActive(false);
+        turnPageLastBtn.gameObject.SetActive(false);
+        turnPageNextBtn.gameObject.SetActive(false);
+
+        for (int i = 0; i < scenceBtns.Length; i++)
+        {
+            scenceBtns[i].gameObject.SetActive(false);
+        }
+    }
+    #endregion
+
     /// <summary>
     /// 创建场景
     /// </summary>
@@ -40,21 +233,9 @@ public class ScenceManager : MonoBehaviour
     /// 删除场景数据
     /// </summary>
     public ButtonRayReceiver deleteScenceBtn;
-
-    /// <summary>
-    /// 当前在编辑的场景下标
-    /// </summary>
-    int curScenceId = -1;
-
-    int lastloadScenceID = -1;
-
+    
     [HideInInspector]
     public List<ScenceData> scenceDataList = new List<ScenceData>();
-    List<Image> scenceIconList = new List<Image>();
-    ///// <summary>
-    ///// 房间管理
-    ///// </summary>
-    //public RoomManager roomManager;
     
     /// <summary>
     /// 公共的场景文件URL地址
@@ -62,10 +243,20 @@ public class ScenceManager : MonoBehaviour
     string publicScenceUrl;
 
     UserData userData;
+    
+    private void Start()
+    {
+        InitPage();
+    }
+
     private void OnDestroy()
     {
-        scenceParentTran = null;
-        scence2DPrefab = null;
+        for (int i = 0; i < texts.Length; i++)
+        {
+            texts[i] = null;
+        }
+        texts = null;
+        
         createScenceBtn = null;
         downloadScenceBtn = null;
         uploadScenceBtn = null;
@@ -80,17 +271,14 @@ public class ScenceManager : MonoBehaviour
             scenceDataList[i] = null;
         }
         scenceDataList = null;
-
-        for (int i = 0; i < scenceIconList.Count; i++)
-        {
-            scenceIconList[i].GetComponent<ButtonRayReceiver>().onPinchDown.RemoveAllListeners();
-            Destroy(scenceIconList[i].gameObject);
-            scenceIconList[i] = null;
-        }
-        scenceIconList.Clear();
-        scenceIconList = null;
         
         userData.Clear();
+
+        for (int i = 0; i < scenceBtns.Length; i++)
+        {
+            scenceBtns[i] = null;
+        }
+        scenceBtns = null;
     }
 
     private void OnEnable()
@@ -110,6 +298,15 @@ public class ScenceManager : MonoBehaviour
         uploadScenceBtn.onPinchDown.AddListener(UploadScence);
         configScenceBtn.onPinchDown.AddListener(ConfigScence);
         deleteScenceBtn.onPinchDown.AddListener(DeleteScence);
+
+        for (int i = 0; i < scenceBtns.Length; i++)
+        {
+            int num = i;
+            scenceBtns[i].onPinchDown.AddListener(()=> { ShowScenceIcon(num); });
+        }
+
+        turnPageLastBtn.onPinchDown.AddListener(TurnLastPage);
+        turnPageNextBtn.onPinchDown.AddListener(TurnNextPage);
     }
 
     void RemoveScenceEvent()
@@ -119,6 +316,14 @@ public class ScenceManager : MonoBehaviour
         uploadScenceBtn.onPinchDown.RemoveListener(UploadScence);
         configScenceBtn.onPinchDown.RemoveListener(ConfigScence);
         deleteScenceBtn.onPinchDown.RemoveListener(DeleteScence);
+
+        for (int i = 0; i < scenceBtns.Length; i++)
+        {
+            scenceBtns[i].onPinchDown.RemoveAllListeners();
+        }
+
+        turnPageLastBtn.onPinchDown.RemoveAllListeners();
+        turnPageNextBtn.onPinchDown.RemoveAllListeners();
     }
 
     public void LoadUserScenceList(UserData ud)
@@ -127,10 +332,9 @@ public class ScenceManager : MonoBehaviour
 
         //公共地址
         publicScenceUrl = ud.scn_url;
-        //将上一个icon切换为非选中状态
-        if (scenceIconList.Count > 0)
-            scenceIconList[scenceIconList.Count - 1].color = Color.white;
-        
+        //赋值总页数
+        SetTotalPageNum(ud.scn_data.Length);
+
         for (int i = 0; i < ud.scn_data.Length; i++)
         {
             string label = ud.scn_data[i];
@@ -139,33 +343,10 @@ public class ScenceManager : MonoBehaviour
                 //回调
                 (sd) =>
                 {
-                    //表示非选中状态
-                    if (scenceIconList.Count > 0)
-                    {
-                        curScenceId = scenceIconList.Count - 1;
-                        scenceIconList[scenceIconList.Count - 1].color = Color.white;
-                    }
-
-                    //实例化2Dicon
-                    GameObject obj = Instantiate(scence2DPrefab);
-                    obj.transform.parent = scenceParentTran;
-                    obj.transform.localPosition = Vector3.zero;
-                    obj.transform.localEulerAngles = Vector3.zero;
-                    obj.transform.localScale = Vector3.one;
-                    obj.transform.GetChild(0).GetComponent<Text>().text = label;
-                    obj.name = label;
-
-                    scenceIconList.Add(obj.GetComponent<Image>());
-                    obj.GetComponent<ButtonRayReceiver>().onPinchDown.AddListener(() => { ShowScenceIcon(label); });
-
+                    //数据添加
                     scenceDataList.Add(sd);
-
-                    //表示选中状态
-                    if (scenceIconList.Count > 0)
-                    {
-                        curScenceId = scenceIconList.Count - 1;
-                        scenceIconList[scenceIconList.Count - 1].color = Color.green;
-                    }
+                    //修改场景按钮状态
+                    SetScenceBtnState();
                 }
                 ,
                 (str) =>
@@ -176,20 +357,26 @@ public class ScenceManager : MonoBehaviour
             ActionQueue.InitOneActionQueue().AddAction(_ieGetfile).StartQueue();
         }
     }
-
-    void ShowScenceIcon(string name)
+    
+    /// <summary>
+    /// 当前行，选中其中一列
+    /// </summary>
+    /// <param name="index"></param>
+    void ShowScenceIcon(int index)
     {
         //表示选中状态
-        for (int i = 0; i < scenceIconList.Count; i++)
+        seletTran.gameObject.SetActive(true);
+        for (int i = 0; i < scenceBtns.Length; i++)
         {
-            if (scenceIconList[i].gameObject.name.Equals(name))
+            if (i == index)
             {
-                curScenceId = i;
-                scenceIconList[i].color = Color.green;
+                curScenceBtnIndex = i;
+                seletTran.position = scenceBtns[i].transform.position;
+                materials[i].SetColor("_BaseColor",EditorControl.Instance.chooseColor);
             }
             else
             {
-                scenceIconList[i].color = Color.white;
+                materials[i].SetColor("_BaseColor", EditorControl.Instance.normalColor);
             }
         }
     }
@@ -204,6 +391,7 @@ public class ScenceManager : MonoBehaviour
             EditorControl.Instance.setName.gameObject.SetActive(true);
             EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
             transform.parent.gameObject.SetActive(false);
+            //EditorControl.Instance.editBtn.transform.parent.parent.gameObject.SetActive(false);
         }
         else
         {
@@ -211,6 +399,7 @@ public class ScenceManager : MonoBehaviour
             transform.parent.gameObject.SetActive(true);
             EditorControl.Instance.setName.gameObject.SetActive(false);
             EditorControl.Instance.keyBoardManager.gameObject.SetActive(false);
+            //EditorControl.Instance.editBtn.transform.parent.parent.gameObject.SetActive(true);
         }
     }
     void CreateScence()
@@ -222,30 +411,16 @@ public class ScenceManager : MonoBehaviour
                 ToOrBackName(false);
             },
         (name)=>{
-            if (scenceIconList.Count > 0)
-                scenceIconList[scenceIconList.Count - 1].color = Color.white;
-            //实例化icon
-            GameObject obj = Instantiate(scence2DPrefab);
-            obj.transform.parent = scenceParentTran;
-            obj.transform.localPosition = Vector3.zero;
-            obj.transform.localEulerAngles = Vector3.zero;
-            obj.transform.localScale = Vector3.one;
-            //表示选中状态
-            scenceIconList.Add(obj.GetComponent<Image>());
-            scenceIconList[scenceIconList.Count - 1].color = Color.green;
-
-            obj.transform.GetChild(0).GetComponent<Text>().text = name;
-            obj.name = name;
-
+            //数据添加
             ScenceData scenceData = new ScenceData();
             scenceData.Label = name;
-
             scenceDataList.Add(scenceData);
-            //当前选中对象
-            curScenceId = scenceIconList.Count - 1;
-            //添加事件
-            obj.GetComponent<ButtonRayReceiver>().onPinchDown.AddListener(() => { ShowScenceIcon(name); });
-
+            //赋值总页数
+            SetTotalPageNum(scenceDataList.Count);
+            
+            //控制整体按钮显示和隐藏
+            SetScenceBtnState();
+            
             //恢复到场景管理界面
             ToOrBackName(false);
         });
@@ -255,19 +430,18 @@ public class ScenceManager : MonoBehaviour
 
     void DownLoadScence()
     {
-        if (curScenceId == -1)
+        int curScenceId = (curPageScenceId * pageCount + curScenceBtnIndex);
+        if (curScenceId <= -1)
             return;
         EditorControl.Instance.ToEditRoom();
-        if (lastloadScenceID == curScenceId)
-            return;
-        lastloadScenceID = curScenceId;
         
         EditorControl.Instance.roomManager.LoadScenceData(scenceDataList[curScenceId]);
     }
 
     void UploadScence()
     {
-        if (curScenceId == -1)
+        int curScenceId = (curPageScenceId * pageCount + curScenceBtnIndex);
+        if (curScenceId <= -1)
             return;
         
         WWWForm wwwFrom = new WWWForm();
@@ -278,7 +452,7 @@ public class ScenceManager : MonoBehaviour
         //根据自己长传的文件修改格式
         wwwFrom.AddBinaryData("game_file", scenceByte,"scence.scn");
 
-        IEnumerator enumerator = YoopInterfaceSupport.UploadFile<YanzhengData>(wwwFrom, InterfaceName.uploadscencefile,
+        IEnumerator enumerator = YoopInterfaceSupport.Instance.UploadFile<YanzhengData>(wwwFrom, InterfaceName.uploadscencefile,
             (ud) =>
             {
                 if (ud.state)
@@ -297,7 +471,8 @@ public class ScenceManager : MonoBehaviour
     /// </summary>
     void ConfigScence()
     {
-        if (curScenceId == -1)
+        int curScenceId = (curPageScenceId * pageCount + curScenceBtnIndex);
+        if (curScenceId <= -1)
             return;
 
         //BitConverter方式
@@ -309,36 +484,46 @@ public class ScenceManager : MonoBehaviour
     /// </summary>
     void DeleteScence()
     {
-        if (curScenceId == -1)
+        int curScenceId = (curPageScenceId * pageCount + curScenceBtnIndex);
+        if (curScenceId <= -1)
             return;
-        
+
+        if (curScenceBtnIndex > -1 && curScenceBtnIndex < materials.Length)
+            materials[curScenceBtnIndex].SetColor("_BaseColor", EditorControl.Instance.normalColor);
+        //如果删的是第一个位置的，更新当前页
+        if (curScenceBtnIndex == 0)
+        {
+            curScenceBtnIndex = pageCount - 1;
+            curPageScenceId--;
+            if (curPageScenceId < 0)
+                curPageScenceId = 0;
+        }
         //删除服务器数据
         WWWForm wwwFrom = new WWWForm();
         wwwFrom.AddField("username", userData.username);
 
         wwwFrom.AddField("label", scenceDataList[curScenceId].Label);
-        
-        IEnumerator enumerator = YoopInterfaceSupport.GetHttpData<YanzhengData>(wwwFrom, InterfaceName.deletescencefile,
+
+        //删除链表中的数据
+        scenceDataList[curScenceId].Clear();
+        scenceDataList.RemoveAt(curScenceId);
+
+        //赋值总页数
+        SetTotalPageNum(scenceDataList.Count);
+        //如果总页数到头了
+        if (scenceDataList.Count == 0)
+        {
+            curScenceBtnIndex = -1;
+        }
+        SetScenceBtnState();
+        seletTran.gameObject.SetActive(false);
+
+        IEnumerator enumerator = YoopInterfaceSupport.Instance.GetHttpData<YanzhengData>(wwwFrom, InterfaceName.deletescencefile,
             (ud) =>
             {
                 if (ud.state)
                 {
-                    //删除链表中的数据
-                    scenceDataList[curScenceId].Clear();
-                    scenceDataList.RemoveAt(curScenceId);
-
-                    //删除icon
-                    //清除点击事件
-                    scenceIconList[curScenceId].GetComponent<ButtonRayReceiver>().onPinchDown.RemoveAllListeners();
-                    Destroy(scenceIconList[curScenceId].gameObject);
-                    scenceIconList.RemoveAt(curScenceId);
-
-                    //选中其他对象
-                    if (scenceIconList.Count > 0)
-                    {
-                        curScenceId = scenceIconList.Count - 1;
-                        scenceIconList[scenceIconList.Count - 1].color = Color.green;
-                    }
+                    EditorControl.Instance.ShowTipTime("删除场景成功", 2f);
                 }
                 else
                 {
@@ -347,7 +532,7 @@ public class ScenceManager : MonoBehaviour
             });
         ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
     }
-
+    
     /// <summary>
     /// 序列化（存储path路径下的文件），将数据存储到文件
     /// </summary>

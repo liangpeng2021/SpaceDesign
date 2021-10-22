@@ -4,6 +4,7 @@
 
  */
 
+using OXRTK.ARHandTracking;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -91,65 +92,108 @@ namespace SpaceDesign.Music
 
         void Start()
         {
+            Canvas[] _canvasAry = transform.GetComponentsInChildren<Canvas>();
+            foreach (Canvas v in _canvasAry)
+            {
+                v.worldCamera = XR.XRCameraManager.Instance.eventCamera;
+            }
+
             //播放的循环，不用该值控制
             audioSource.loop = false;
 
-            btnLeftMin.onClick.AddListener(OnLeft);
-            btnLeftMax.onClick.AddListener(OnLeft);
-            btnRightMin.onClick.AddListener(OnRight);
-            btnRightMax.onClick.AddListener(OnRight);
-            btnPlayMin.onClick.AddListener(OnPlay);
-            btnPlayMax.onClick.AddListener(OnPlay);
-            btnPauseMin.onClick.AddListener(OnPause);
-            btnPauseMax.onClick.AddListener(OnPause);
+            //btnLeftMin.onClick.AddListener(OnLeft);
+            //btnLeftMax.onClick.AddListener(OnLeft);
+            //btnRightMin.onClick.AddListener(OnRight);
+            //btnRightMax.onClick.AddListener(OnRight);
+            //btnPlayMin.onClick.AddListener(OnPlay);
+            //btnPlayMax.onClick.AddListener(OnPlay);
+            //btnPauseMin.onClick.AddListener(OnPause);
+            //btnPauseMax.onClick.AddListener(OnPause);
 
             //btnStateMax.onClick.AddListener(OnState);
-            btnStateAllloop.onClick.AddListener(OnState);
-            btnStateOneloop.onClick.AddListener(OnState);
-            btnStateOrder.onClick.AddListener(OnState);
+            //btnStateAllloop.onClick.AddListener(OnState);
+            //btnStateOneloop.onClick.AddListener(OnState);
+            //btnStateOrder.onClick.AddListener(OnState);
 
-            btnMoreMusicMin.onClick.AddListener(() => { StartCoroutine(IEMinToMax()); });
+            //btnMoreMusicMin.onClick.AddListener(OnMoreMusicMin);
 
-            btnVolumeMax.onClick.AddListener(OnBtnVolume);
-            slidVolumeMax.onValueChanged.AddListener(OnSliderVolume);
+            //btnVolumeMax.onClick.AddListener(OnBtnVolume);
+            //slidVolumeMax.onValueChanged.AddListener(OnSliderVolume);
 
-            //=====================MaxUI里面拖拽进度条===================================
-            EventTrigger _trigger = slidMusicMax.GetComponent<EventTrigger>();
-            if (_trigger == null)
-                _trigger = slidMusicMax.gameObject.AddComponent<EventTrigger>();
+            ////=====================MaxUI里面拖拽进度条===================================
+            //EventTrigger _trigger = slidMusicMax.GetComponent<EventTrigger>();
+            //if (_trigger == null)
+            //    _trigger = slidMusicMax.gameObject.AddComponent<EventTrigger>();
 
-            EventTrigger.Entry _entry = new EventTrigger.Entry
-            {
-                eventID = EventTriggerType.PointerDown,
-                callback = new EventTrigger.TriggerEvent(),
-            };
-            _entry.callback.AddListener(x => { bSlideDragging = true; });
-            _trigger.triggers.Add(_entry);
+            //EventTrigger.Entry _entry = new EventTrigger.Entry
+            //{
+            //    eventID = EventTriggerType.PointerDown,
+            //    callback = new EventTrigger.TriggerEvent(),
+            //};
+            //_entry.callback.AddListener(x => { bSlideDragging = true; });
+            //_trigger.triggers.Add(_entry);
 
-            _entry = new EventTrigger.Entry
-            {
-                eventID = EventTriggerType.PointerUp,
-                callback = new EventTrigger.TriggerEvent(),
-            };
-            _entry.callback.AddListener(x => { bSlideDragging = false; audioSource.time = slidMusicMax.value * fTotalPlayTime; });
-            _trigger.triggers.Add(_entry);
-            //===========================================================================
+            //_entry = new EventTrigger.Entry
+            //{
+            //    eventID = EventTriggerType.PointerUp,
+            //    callback = new EventTrigger.TriggerEvent(),
+            //};
+            //_entry.callback.AddListener(x => { bSlideDragging = false; audioSource.time = slidMusicMax.value * fTotalPlayTime; });
+            //_trigger.triggers.Add(_entry);
+            ////===========================================================================
+
+            ////===========================================================================
+            ////特效点击触发
+            //_trigger = objEffect.GetComponent<EventTrigger>();
+            //if (_trigger == null)
+            //    _trigger = objEffect.AddComponent<EventTrigger>();
+
+            //_entry = new EventTrigger.Entry
+            //{
+            //    eventID = EventTriggerType.PointerClick,
+            //    callback = new EventTrigger.TriggerEvent(),
+            //};
+            //_entry.callback.AddListener(x =>
+            //{
+            //    if (curPlayerPosState == PlayerPosState.Middle)
+            //        StartCoroutine(IEFarToMiddle());
+            //});
+            //_trigger.triggers.Add(_entry);
+            ////===========================================================================
+
+
+            ////===========================================================================
+            ////Icon点击触发
+            //_trigger = traIcon.GetComponent<EventTrigger>();
+            //if (_trigger == null)
+            //    _trigger = traIcon.gameObject.AddComponent<EventTrigger>();
+
+            //_entry = new EventTrigger.Entry
+            //{
+            //    eventID = EventTriggerType.PointerClick,
+            //    callback = new EventTrigger.TriggerEvent(),
+            //};
+            //_entry.callback.AddListener(x => { StartCoroutine(IEFarToMiddle()); });
+            //_trigger.triggers.Add(_entry);
+            ////===========================================================================
 
             //开始的时候刷新一下数据
             _SetCurMusicNum(1);
             OnLeft();
             OnRight();
 
-            //赋值Canvas的worldCamera
-            Canvas[] _canvasAry = transform.GetComponentsInChildren<Canvas>();
-            foreach (Canvas v in _canvasAry)
-            {
-                v.worldCamera = XR.XRCameraManager.Instance.eventCamera;
-            }
         }
 
         void Update()
         {
+            //if (Input.GetKeyDown(KeyCode.Z))
+            //{
+            //    OnLeft();
+            //}
+            //if (Input.GetKeyDown(KeyCode.X))
+            //{
+            //    OnRight();
+            //}
             //if (Input.GetMouseButtonDown(0))
             //{
             //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -163,7 +207,7 @@ namespace SpaceDesign.Music
 
             if (bPlaying)
             {
-                imgSliderMin.fillAmount = slidMusicMax.value;
+                imgSliderMin.fillAmount = pinchSliderMusicMax.sliderValue;//slidMusicMax.value;
                 //traSliderMinPoint.localEulerAngles = new Vector3(0, 0, -180 * imgSliderMin.fillAmount);
 
                 //播放中，中距离，小UI，倒计时，自动变音符特效对象
@@ -243,6 +287,104 @@ namespace SpaceDesign.Music
                 _SetCurPlayTime(false);
             }
             #endregion
+
+            if (iImgCenterEnterOrExit == 0)
+            {
+                float _f = Vector3.Distance(traImgCenter.localScale, v3ImgCenterEnter);
+                if (_f > 0.01f)
+                {
+                    traImgCenter.localScale = Vector3.Lerp(traImgCenter.localScale, v3ImgCenterEnter, 0.1f);
+                }
+                else
+                {
+                    //bImgCenterEnter = false;
+                    traImgCenter.localScale = v3ImgCenterEnter;
+                }
+
+            }
+            else if (iImgCenterEnterOrExit == 1)
+            {
+                float _f = Vector3.Distance(traImgCenter.localScale, Vector3.one);
+                if (_f > 0.01f)
+                {
+                    traImgCenter.localScale = Vector3.Lerp(traImgCenter.localScale, Vector3.one, 0.1f);
+                }
+                else
+                {
+                    iImgCenterEnterOrExit = -1;
+                    //bImgCenterExit = false;
+                    traImgCenter.localScale = Vector3.one;
+                }
+            }
+            //if (iImgCenterEnterOrExit == 1 && iUpCenterPos != -1)
+            //{
+            //    switch (iUpCenterPos)
+            //    {
+            //        case 0: OnLeft(); break;
+            //        case 1: OnLeft(); OnLeft(); break;
+            //        case 2: OnRight(); break;
+            //        case 3: OnRight(); OnRight(); break;
+            //    }
+            //    iUpCenterPos = -1;
+            //}
+        }
+
+        /// <summary>
+        /// 七张音乐图的，中间图片对象
+        /// </summary>
+        public Transform traImgCenter;
+
+        //抬起在中新图片的左右（0-左短，1-左长，2-右短，3-右长）
+        public int iUpCenterPos = -1;
+        //中心图片进入或离开（0-进入，1-离开）
+        public int iImgCenterEnterOrExit = -1;
+
+        /// <summary>
+        /// 按下中心图片的放大
+        /// </summary>
+        private Vector3 v3ImgCenterEnter = new Vector3(1.2f, 1.2f, 1.2f);
+
+        /// <summary>
+        /// 中间图片进入或离开
+        /// </summary>
+        public void CenterImgEnterOrExit(bool b)
+        {
+            iImgCenterEnterOrExit = b ? 0 : 1;
+        }
+
+        /// <summary>
+        /// 音乐进度条按下
+        /// </summary>
+        public void SliderMusicMaxPointerDown()
+        {
+            bSlideDragging = true;
+        }
+
+        /// <summary>
+        /// 音乐进度条抬起
+        /// </summary>
+        public void SliderMusicMaxPointerUp()
+        {
+            bSlideDragging = false;
+            audioSource.time = (pinchSliderMusicMax.sliderValue * fTotalPlayTime);
+        }
+
+        /// <summary>
+        /// 点击Button，触发从远到近的动画
+        /// </summary>
+        public void ClickFarToMiddle()
+        {
+            if (curPlayerPosState == PlayerPosState.Middle)
+                StartCoroutine(IEFarToMiddle());
+        }
+
+
+        /// <summary>
+        /// 更多音乐响应
+        /// </summary>
+        public void OnMoreMusicMin()
+        {
+            StartCoroutine(IEMinToMax());
         }
 
         /// <summary>
@@ -402,7 +544,10 @@ namespace SpaceDesign.Music
         {
             fCurPlayTime = audioSource.time;
             if (bSetSlider)
-                slidMusicMax.SetValueWithoutNotify(fCurPlayTime / fTotalPlayTime);
+            {
+                //slidMusicMax.SetValueWithoutNotify(fCurPlayTime / fTotalPlayTime);
+                pinchSliderMusicMax.sliderValue = (fCurPlayTime / fTotalPlayTime);
+            }
             //print($"{((int)(_f / 60))}----{((int)(_f % 60))}");
             textCurPlayTime.text = ((int)(fCurPlayTime / 60)).ToString("D2") + ":" + ((int)(fCurPlayTime % 60)).ToString("D2");
         }
@@ -885,9 +1030,13 @@ namespace SpaceDesign.Music
         //音量按钮
         public Button btnVolumeMax;
         //音乐播放的进度条
-        public Slider slidMusicMax;
+        //public Slider slidMusicMax;
+        //音乐播放的进度条
+        public PinchSlider pinchSliderMusicMax;
         //音量控制条
-        public Slider slidVolumeMax;
+        //public Slider slidVolumeMax;
+        //音量控制条
+        public PinchSlider pinchSliderVolumMax;
         //进度条手动拖拽中
         public bool bSlideDragging;
 
@@ -923,22 +1072,24 @@ namespace SpaceDesign.Music
             fMinToEffectTemp = 0;
         }
 
-        void OnBtnVolume()
+        public void OnBtnVolume()
         {
             RestartTimeMaxToMin();
 
             if (audioSource.volume > 0.01f)
             {
                 audioSource.volume = 0;
-                slidVolumeMax.SetValueWithoutNotify(0);
+                pinchSliderVolumMax.sliderValue = 0;
+                //slidVolumeMax.SetValueWithoutNotify(0);
             }
             else
             {
                 audioSource.volume = 1;
-                slidVolumeMax.SetValueWithoutNotify(1);
+                pinchSliderVolumMax.sliderValue = 1;
+                //slidVolumeMax.SetValueWithoutNotify(1);
             }
         }
-        void OnSliderVolume(float f)
+        public void OnSliderVolume(float f)
         {
             RestartTimeMaxToMin();
             audioSource.volume = f;
@@ -980,11 +1131,12 @@ namespace SpaceDesign.Music
         #endregion
 
         #region 音符特效
+        //播放过程中的特效（音响周围的特效）
         public GameObject objEffect;
-        public void EffectToMinUI()
-        {
-            StartCoroutine(IEFarToMiddle());
-        }
+        //public void EffectToMinUI()
+        //{
+        //    StartCoroutine(IEFarToMiddle());
+        //}
 
         #endregion
     }

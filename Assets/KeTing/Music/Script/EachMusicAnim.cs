@@ -95,7 +95,6 @@ namespace SpaceDesign.Music
             //SetPropBlock(_c);
             //===========================================================================
         }
-
         /// <summary>
         /// 刷新位置
         /// </summary>
@@ -135,6 +134,7 @@ namespace SpaceDesign.Music
 
             traChild.localPosition = Vector3.Lerp(traChild.localPosition, Vector3.zero, _fPosSpeed);
             traChild.localRotation = Quaternion.Lerp(traChild.localRotation, Quaternion.identity, _fRotSpeed);
+            traChild.localScale = Vector3.Lerp(traChild.localScale, v3Scale, _fPosSpeed);
 
             float _f1 = Vector3.Distance(traChild.localPosition, Vector3.zero);
             float _f2 = Vector3.Distance(traChild.localEulerAngles, Vector3.zero);
@@ -142,6 +142,7 @@ namespace SpaceDesign.Music
             {
                 traChild.localPosition = Vector3.zero;
                 traChild.localEulerAngles = Vector3.zero;
+                traChild.localScale = v3Scale;
                 _bFinish = true;
             }
 
@@ -149,6 +150,7 @@ namespace SpaceDesign.Music
 
             return _bFinish;
         }
+        Vector3 v3Scale = new Vector3(320f, 320f, 1f);
 
         //优化render
         public MaterialPropertyBlock matPropBlock;

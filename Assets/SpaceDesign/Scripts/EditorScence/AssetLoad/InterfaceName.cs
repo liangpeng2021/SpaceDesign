@@ -14,5 +14,7 @@ namespace SpaceDesign
         findpasswordyanzheng,//找回密码验证码
 
         deletescencefile,//删除配置文件
+
+        cpeipport,//CPE接口公共部分
     }
 }

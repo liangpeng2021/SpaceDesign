@@ -206,14 +206,14 @@ public class LoadMainScence : MonoBehaviour
     private void Update()
     {
         timeCount += Time.deltaTime;
-        if (timeCount < 1f)
+        if (timeCount < 3f)
         {
             if (XRInput.Instance.GetMouseButtonDown(0) || Input.GetMouseButtonDown(0))
             {
                 clickNum++;
             }
             //1秒内连续点击超过3次，进入编辑模式
-            if (clickNum > 2)
+            if (clickNum > 5)
             {
                 timeCount = 0;
                 clickNum = 0;

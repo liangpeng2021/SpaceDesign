@@ -9,30 +9,253 @@ using UnityEngine.UI;
 /// </summary>
 public class RoomManager : MonoBehaviour
 {
+    #region 翻页
+    /// <summary>
+    /// 每页数量
+    /// </summary>
+    int pageCount;
+    /// <summary>
+    /// 场景列表界面
+    /// </summary>
+    public ButtonRayReceiver[] roomBtns;
+    Text[] texts;
+    Material[] materials;
+
+    /// <summary>
+    /// 总页数
+    /// </summary>
+    int totalPageRoomNum = -1;
+    /// <summary>
+    /// 当前在编辑的场景所在页，每页3个
+    /// </summary>
+    int curPageRoomId = 0;
+    /// <summary>
+    /// 当前在编辑的场景在当前页的下标
+    /// </summary>
+    int curRoomBtnIndex = -1;
+
+    /// <summary>
+    /// 页数
+    /// </summary>
+    public Text pageNumText;
+    /// <summary>
+    /// 翻到上页
+    /// </summary>
+    public ButtonRayReceiver turnPageLastBtn;
+    /// <summary>
+    /// 翻到下页
+    /// </summary>
+    public ButtonRayReceiver turnPageNextBtn;
+    /// <summary>
+    /// 选中后出现对应按钮
+    /// </summary>
+    public Transform seletTran;
+    /// <summary>
+    /// 重置页面和按钮
+    /// </summary>
+
+    private void ResetPage()
+    {
+        if (!isInitPage)
+            InitPage();
+
+        seletTran.gameObject.SetActive(false);
+        pageNumText.gameObject.SetActive(false);
+        turnPageLastBtn.gameObject.SetActive(false);
+        turnPageNextBtn.gameObject.SetActive(false);
+
+        for (int i = 0; i < roomBtns.Length; i++)
+        {
+            roomBtns[i].gameObject.SetActive(false);
+        }
+        if (curRoomBtnIndex > -1 && curRoomBtnIndex < roomBtns.Length)
+        {
+            materials[curRoomBtnIndex].SetColor("_BaseColor", EditorControl.Instance.normalColor);
+        }
+        curRoomBtnIndex = -1;
+        curPageRoomId = 0;
+        totalPageRoomNum = -1;
+    }
+
+    /// <summary>
+    /// 翻到上一页
+    /// </summary>
+    void TurnLastPage()
+    {
+        //选中状态去掉
+        if (curRoomBtnIndex > -1 && curRoomBtnIndex < materials.Length)
+            materials[curRoomBtnIndex].SetColor("_BaseColor", EditorControl.Instance.normalColor);
+        seletTran.gameObject.SetActive(false);
+        //下一页按钮打开
+        turnPageNextBtn.gameObject.SetActive(true);
+        //当前页数修改
+        curPageRoomId--;
+
+        for (int i = 0; i < roomBtns.Length; i++)
+        {
+            //显示按钮
+            roomBtns[i].gameObject.SetActive(true);
+            //更新名字
+            texts[i].text = curScenceData.roomDatasList[curPageRoomId * pageCount + i].roomName;
+        }
+        //如果是第一页，关掉上一页按钮
+        if (curPageRoomId == 0)
+            turnPageLastBtn.gameObject.SetActive(false);
+        ///更新页数显示
+        pageNumText.text = (curPageRoomId + 1).ToString() + "/" + (totalPageRoomNum + 1).ToString();
+    }
+    /// <summary>
+    /// 翻到下一页
+    /// </summary>
+    void TurnNextPage()
+    {
+        //选中状态去掉
+        if (curRoomBtnIndex > -1 && curRoomBtnIndex < materials.Length)
+            materials[curRoomBtnIndex].SetColor("_BaseColor", EditorControl.Instance.normalColor);
+        seletTran.gameObject.SetActive(false);
+        //上一页按钮打开
+        turnPageLastBtn.gameObject.SetActive(true);
+        //当前页数修改
+        curPageRoomId++;
+        //当前页还剩多少个
+        int index = curScenceData.roomDatasList.Count - 1 - curPageRoomId * pageCount;
+
+        for (int i = 0; i < roomBtns.Length; i++)
+        {
+            //没满的关掉
+            if (i > index)
+            {
+                roomBtns[i].gameObject.SetActive(false);
+            }
+            else
+            {
+                //满的更新
+                roomBtns[i].gameObject.SetActive(true);
+                texts[i].text = curScenceData.roomDatasList[curPageRoomId * pageCount + i].roomName;
+            }
+        }
+        //如果是最后一页，下一页按钮关掉
+        if (curPageRoomId == totalPageRoomNum)
+            turnPageNextBtn.gameObject.SetActive(false);
+        //更新页数显示
+        pageNumText.text = (curPageRoomId + 1).ToString() + "/" + (totalPageRoomNum + 1).ToString();
+    }
+
+    /// <summary>
+    /// 设置页面内的按钮
+    /// </summary>
+    void SetRoomBtnState()
+    {
+        //控制按钮显示和隐藏
+        int index;
+        if ((curScenceData.roomDatasList.Count - 1) <= 0)
+            index = curScenceData.roomDatasList.Count - 1;
+        else
+            index = (curScenceData.roomDatasList.Count - 1) % pageCount;
+
+        for (int i = 0; i < roomBtns.Length; i++)
+        {
+            if (i > (curScenceData.roomDatasList.Count - 1 - curPageRoomId * pageCount))
+                roomBtns[i].gameObject.SetActive(false);
+            else
+            {
+                roomBtns[i].gameObject.SetActive(true);
+                //名称赋值
+                texts[i].text = curScenceData.roomDatasList[curPageRoomId * pageCount + i].roomName;
+            }
+        }
+
+        //翻页和页码更新
+        if (index >= 0)
+        {
+            if (curPageRoomId == 0)
+            {
+                turnPageLastBtn.gameObject.SetActive(false);
+            }
+            else
+                turnPageLastBtn.gameObject.SetActive(true);
+
+            if (curPageRoomId == totalPageRoomNum)
+                turnPageNextBtn.gameObject.SetActive(false);
+            else
+                turnPageNextBtn.gameObject.SetActive(true);
+
+            pageNumText.gameObject.SetActive(true);
+            pageNumText.text = (curPageRoomId + 1).ToString() + "/" + (totalPageRoomNum + 1).ToString();
+        }
+        else
+        {
+            pageNumText.gameObject.SetActive(false);
+            for (int i = 0; i < roomBtns.Length; i++)
+            {
+                roomBtns[i].gameObject.SetActive(false);
+            }
+
+            turnPageLastBtn.gameObject.SetActive(false);
+            turnPageNextBtn.gameObject.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 赋值总页数
+    /// </summary>
+    /// <param name="count"></param>
+    void SetTotalPageNum(int count)
+    {
+        if (count <= 0)
+        {
+            totalPageRoomNum = -1;
+            return;
+        }
+
+        if (count % pageCount == 0)
+        {
+            totalPageRoomNum = count / pageCount - 1;
+        }
+        else
+            totalPageRoomNum = count / pageCount;
+    }
+
+    bool isInitPage=false;
+    void InitPage()
+    {
+        pageCount = roomBtns.Length;
+        texts = new Text[roomBtns.Length];
+        materials = new Material[roomBtns.Length];
+
+        for (int i = 0; i < roomBtns.Length; i++)
+        {
+            texts[i] = roomBtns[i].transform.Find("Text (TMP)").GetComponent<Text>();
+            materials[i] = roomBtns[i].transform.Find("Cube/BackBoard").GetComponent<MeshRenderer>().material;
+        }
+
+        seletTran.gameObject.SetActive(false);
+        pageNumText.gameObject.SetActive(false);
+        turnPageLastBtn.gameObject.SetActive(false);
+        turnPageNextBtn.gameObject.SetActive(false);
+
+        for (int i = 0; i < roomBtns.Length; i++)
+        {
+            roomBtns[i].gameObject.SetActive(false);
+        }
+
+        isInitPage = true;
+    }
+
+    #endregion
+
     /// <summary>
     /// 编辑模式3D物体父节点
     /// </summary>
     public Transform editorParent;
     
     #region 房间管理
-    /// <summary>
-    /// 房间列表界面
-    /// </summary>
-    public Transform roomIconParentTran;
-    /// <summary>
-    /// 2D房间预设
-    /// </summary>
-    public GameObject room2DPrefab;
-
+    
     /// <summary>
     /// 房间预设
     /// </summary>
     public GameObject room3DPrefab;
-    /// <summary>
-    /// 当前在编辑的房间
-    /// </summary>
-    [HideInInspector]
-    public int curRoomListId=-1;
+    
     /// <summary>
     /// 创建房间
     /// </summary>
@@ -51,7 +274,7 @@ public class RoomManager : MonoBehaviour
     //int roomNum=0;
     [HideInInspector]
     public List<RoomControl> room3DList =new List<RoomControl>();
-    List<Image> roomIconList = new List<Image>();
+    int last3DroomID = -1;
 
     /// <summary>
     /// 场景数据
@@ -75,6 +298,15 @@ public class RoomManager : MonoBehaviour
         createRoomBtn.onPinchDown.AddListener(Create2DRoom);
         editRoomBtn.onPinchDown.AddListener(EditObj);
         deleteRoomBtn.onPinchDown.AddListener(DeleteRoom);
+
+        for (int i = 0; i < roomBtns.Length; i++)
+        {
+            int num = i;
+            roomBtns[i].onPinchDown.AddListener(() => { ShowRoom(num); });
+        }
+
+        turnPageLastBtn.onPinchDown.AddListener(TurnLastPage);
+        turnPageNextBtn.onPinchDown.AddListener(TurnNextPage);
     }
 
     void RemoveRoomEvent()
@@ -82,6 +314,14 @@ public class RoomManager : MonoBehaviour
         createRoomBtn.onPinchDown.RemoveListener(Create2DRoom);
         editRoomBtn.onPinchDown.RemoveListener(EditObj);
         deleteRoomBtn.onPinchDown.RemoveListener(DeleteRoom);
+
+        for (int i = 0; i < roomBtns.Length; i++)
+        {
+            roomBtns[i].onPinchDown.RemoveAllListeners();
+        }
+
+        turnPageLastBtn.onPinchDown.RemoveAllListeners();
+        turnPageNextBtn.onPinchDown.RemoveAllListeners();
     }
     /// <summary>
     /// 去到起名界面，或者从起名界面回来
@@ -95,6 +335,7 @@ public class RoomManager : MonoBehaviour
             EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
             editorParent.gameObject.SetActive(false);
             transform.parent.gameObject.SetActive(false);
+            //EditorControl.Instance.editBtn.transform.parent.parent.gameObject.SetActive(false);
         }
         else
         {
@@ -103,6 +344,7 @@ public class RoomManager : MonoBehaviour
             editorParent.gameObject.SetActive(true);
             EditorControl.Instance.setName.gameObject.SetActive(false);
             EditorControl.Instance.keyBoardManager.gameObject.SetActive(false);
+            //EditorControl.Instance.editBtn.transform.parent.parent.gameObject.SetActive(true);
         }
     }
 
@@ -117,25 +359,12 @@ public class RoomManager : MonoBehaviour
                 ToOrBackName(false);
             },
         (roomName) => {
-            if (roomIconList.Count > 0)
-                roomIconList[roomIconList.Count - 1].color = Color.white;
-
-            GameObject obj = Instantiate(room2DPrefab);
-            obj.transform.parent = roomIconParentTran;
-            obj.transform.localPosition = Vector3.zero;
-            obj.transform.localEulerAngles = Vector3.zero;
-            obj.transform.localScale = Vector3.one;
-            //表示选中状态
-            roomIconList.Add(obj.GetComponent<Image>());
-            roomIconList[roomIconList.Count - 1].color = Color.green;
-
-            int index = roomIconList.Count - 1;
-
-            obj.transform.GetChild(0).GetComponent<Text>().text = roomName;
             Create3DRoom(roomName);
+            //赋值总页数
+            SetTotalPageNum(curScenceData.roomDatasList.Count);
 
-            obj.name = roomName;
-            obj.GetComponent<ButtonRayReceiver>().onPinchDown.AddListener(() => { ShowRoom(index); });
+            //控制整体按钮显示和隐藏
+            SetRoomBtnState();
 
             //恢复界面
             ToOrBackName(false);
@@ -150,9 +379,6 @@ public class RoomManager : MonoBehaviour
     /// <param name="name"></param>
     void Create3DRoom(string name)
     {
-        //if (room3DList.Count > 0)
-        //    room3DList[room3DList.Count - 1].gameObject.SetActive(false);
-
         GameObject obj = Instantiate(room3DPrefab);
         obj.transform.parent = editorParent;
         
@@ -166,9 +392,8 @@ public class RoomManager : MonoBehaviour
         curScenceData.roomDatasList.Add(roomControl.roomDatas);
 
         room3DList.Add(roomControl);
-        curRoomListId = room3DList.Count - 1;
-        //设置选中状态
-        ShowRoom(curRoomListId);
+
+        room3DList[room3DList.Count - 1].SetLineActive(false);
     }
 
     /// <summary>
@@ -178,34 +403,23 @@ public class RoomManager : MonoBehaviour
     void ShowRoom(int roomid)
     {
         //表示选中状态
-        //Debug.Log(name);
-        //for (int i = 0; i < roomIconList.Count; i++)
-        //{
-        //    if (roomIconList[i].gameObject.name.Equals(name))
-        //    {
-        //        curRoomListId = i;
-        //        roomIconList[i].color = Color.green;
-        //        room3DList[i].gameObject.SetActive(true);
-        //    }
-        //    else
-        //    {
-        //        roomIconList[i].color = Color.white;
-        //        room3DList[i].gameObject.SetActive(false);
-        //    }
-        //}
+        seletTran.gameObject.SetActive(true);
 
-        for (int i = 0; i < roomIconList.Count; i++)
+        if (last3DroomID > -1 && last3DroomID < room3DList.Count)
+            room3DList[last3DroomID].SetLineActive(false);
+        for (int i = 0; i < roomBtns.Length; i++)
         {
             if (i== roomid)
             {
-                curRoomListId = i;
-                roomIconList[i].color = Color.green;
-                room3DList[i].gameObject.SetActive(true);
+                curRoomBtnIndex = i;
+                seletTran.position = roomBtns[i].transform.position;
+                materials[i].SetColor("_BaseColor", EditorControl.Instance.chooseColor);
+                room3DList[curPageRoomId*pageCount+i].SetLineActive(true);
+                last3DroomID = curPageRoomId * pageCount + i;
             }
             else
             {
-                roomIconList[i].color = Color.white;
-                room3DList[i].gameObject.SetActive(false);
+                materials[i].SetColor("_BaseColor", EditorControl.Instance.normalColor);
             }
         }
     }
@@ -214,9 +428,9 @@ public class RoomManager : MonoBehaviour
     /// </summary>
     void EditObj()
     {
+        int curRoomListId= (curPageRoomId * pageCount + curRoomBtnIndex);
         if (curRoomListId == -1)
             return;
-        
         EditorControl.Instance.ToEditObj();
     }
     
@@ -225,22 +439,42 @@ public class RoomManager : MonoBehaviour
     /// </summary>
     void DeleteRoom()
     {
+        int curRoomListId = (curPageRoomId * pageCount + curRoomBtnIndex);
         if (curRoomListId == -1)
             return;
         if (curRoomListId < room3DList.Count && curScenceData.roomDatasList.Contains(room3DList[curRoomListId].roomDatas))
         {
+            //删除时取消选中状态
+            if (curRoomBtnIndex > -1 && curRoomBtnIndex < materials.Length)
+                materials[curRoomBtnIndex].SetColor("_BaseColor", EditorControl.Instance.normalColor);
+            //如果删的是第一个位置的，更新当前页
+            if (curRoomBtnIndex == 0)
+            {
+                curRoomBtnIndex = pageCount - 1;
+                curPageRoomId--;
+                if (curPageRoomId < 0)
+                    curPageRoomId = 0;
+            }
+
             curScenceData.roomDatasList.Remove(room3DList[curRoomListId].roomDatas);
 
             //恢复房间内的物体的UI
             room3DList[curRoomListId].ResetObjUI();
-
-            Destroy(roomIconList[curRoomListId].gameObject);
-            roomIconList.RemoveAt(curRoomListId);
+            
             Destroy(room3DList[curRoomListId].gameObject);
             room3DList.RemoveAt(curRoomListId);
 
-            if (roomIconList.Count>0)
-                ShowRoom(roomIconList.Count - 1);
+            //赋值总页数
+            SetTotalPageNum(curScenceData.roomDatasList.Count);
+            //如果总页数到头了
+            if (curScenceData.roomDatasList.Count == 0)
+            {
+                curRoomBtnIndex = -1;
+            }
+            SetRoomBtnState();
+            //删除时取消选中状态
+            seletTran.gameObject.SetActive(false);
+            last3DroomID = -1;
         }
     }
 
@@ -267,6 +501,7 @@ public class RoomManager : MonoBehaviour
     #region 管理房间内物体
     public void Create3DObj(Vector3 pos, string id, GameObject prefab3d)
     {
+        int curRoomListId = (curPageRoomId * pageCount + curRoomBtnIndex);
         if (curRoomListId == -1)
         {
             Debug.Log("MyLog::缺少curRoomControl");
@@ -280,6 +515,8 @@ public class RoomManager : MonoBehaviour
     /// </summary>
     public void ShowRoomObj(int index)
     {
+        int curRoomListId = (curPageRoomId * pageCount + curRoomBtnIndex);
+
         if (curRoomListId == -1)
         {
             Debug.Log("MyLog::缺少curRoomControl");
@@ -293,6 +530,7 @@ public class RoomManager : MonoBehaviour
     /// </summary>
     public string RemoveCurRoomObj()
     {
+        int curRoomListId = (curPageRoomId * pageCount + curRoomBtnIndex);
         if (curRoomListId == -1)
         {
             Debug.Log("MyLog::缺少curRoomControl");
@@ -302,6 +540,12 @@ public class RoomManager : MonoBehaviour
         return room3DList[curRoomListId].RemoveObj();
     }
     #endregion
+
+    private void Start()
+    {
+        if (!isInitPage)
+            InitPage();
+    }
 
     /// <summary>
     /// 编辑模式下根据场景数据加载房间
@@ -326,46 +570,21 @@ public class RoomManager : MonoBehaviour
             room3DList.Add(roomControl);
             
             roomControl.SetRoomFromData(scenceData.roomDatasList[i], EditorControl.Instance.prefabManager.editorPrefabDic);
-            //实例化2Dicon
-            Load2DRoomIcon(scenceData.roomDatasList[i].roomName);
         }
-
-        curRoomListId = room3DList.Count - 1;
-        ShowRoom(curRoomListId);
-    }
-
-    void Load2DRoomIcon(string name)
-    {
-        //实例化物体
-        GameObject obj = Instantiate(room2DPrefab);
-        obj.transform.parent = roomIconParentTran;
-        obj.transform.localPosition = Vector3.zero;
-        obj.transform.localEulerAngles = Vector3.zero;
-        obj.transform.localScale = Vector3.one;
-        //表示选中状态
-        roomIconList.Add(obj.GetComponent<Image>());
-
-        obj.name = name;
-        obj.transform.GetChild(0).GetComponent<Text>().text = name;
-
-        int index = roomIconList.Count - 1;
-        obj.GetComponent<ButtonRayReceiver>().onPinchDown.AddListener(() => { ShowRoom(index); });
+        //赋值总页数
+        SetTotalPageNum(curScenceData.roomDatasList.Count);
         
+        SetRoomBtnState();
     }
-
+    
     /// <summary>
     /// 销毁原来的房间，清空场景
     /// </summary>
     public void DestroyOldScence()
     {
-        //销毁房间2Dicon
-        for (int i = 0; i < roomIconList.Count; i++)
-        {
-            roomIconList[i].GetComponent<ButtonRayReceiver>().onPinchDown.RemoveAllListeners();
-            Destroy(roomIconList[i].gameObject);
-        }
-        roomIconList.Clear();
-        
+        //重置2Dicon
+        ResetPage();
+
         //销毁3D房间
         for (int i = 0; i < room3DList.Count; i++)
         {
@@ -378,7 +597,5 @@ public class RoomManager : MonoBehaviour
             curScenceData.Clear();
             curScenceData = null;
         }
-        //当前房间ID设为-1
-        curRoomListId = -1;
     }
 }

@@ -17,7 +17,6 @@ namespace SpaceDesign
     {
         Far,
         Middle,
-        near,
         Close,
     }
 

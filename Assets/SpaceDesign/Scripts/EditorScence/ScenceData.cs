@@ -41,7 +41,6 @@ public class ScenceData
                 roomDatasList[i].Clear();
             }
             roomDatasList.Clear();
-            roomDatasList = null;
         }
     }
 }
