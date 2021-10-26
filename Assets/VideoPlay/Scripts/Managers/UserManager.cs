@@ -4,6 +4,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.IO;
+using System;
+using LitJson;
 
 /// <summary>
 /// 验证功能与Yoop交互，数据类
@@ -101,9 +103,18 @@ public class UserManager : MonoBehaviour
     /// <summary>
 	/// 自动登录
 	/// </summary>
-	public void AutoLogin(System.Action<UserData, string> action)
+	public bool AutoLogin(System.Action<UserData, string> action,Action<string> errorAction)
     {
-        RequestLogin(userLocalData.localuserName, GameTools.Decrypt(userLocalData.localPassword), action);
+        try
+        {
+            RequestLogin(userLocalData.localuserName, GameTools.Decrypt(userLocalData.localPassword), action);
+            return true;
+        }
+        catch (Exception e)
+        {
+            errorAction?.Invoke(e.ToString());
+            return false;
+        }
     }
 
     /// <summary>
@@ -111,8 +122,21 @@ public class UserManager : MonoBehaviour
 	/// </summary>
 	public void Logout()
     {
+        if (userpath == null)
+        {
+            userpath = EditorControl.GetPth();
+            userpath = Path.Combine(userpath, "user.json");
+        }
+        if (userLocalData != null)
+        {
+            userLocalData.localuserName = "";
+            userLocalData.localPassword = "";
+        }
+
         if (File.Exists(userpath))
+        {
             File.Delete(userpath);
+        }
     }
 
     //   /// <summary>
@@ -148,60 +172,106 @@ public class UserManager : MonoBehaviour
     //	//	LogManager.Instance.AddLogMessage(showMsg);
     //	Debug.Log("showMsg:" + showMsg);
     //}
-
+    
     /// <summary>
     /// 开启请求登录的协程
     /// </summary>
     public void RequestLogin(string username,string password,System.Action<UserData, string> action)
 	{
-		WWWForm wwwFrom = new WWWForm();
+        WWWForm wwwFrom = new WWWForm();
 		wwwFrom.AddField("username", username);
 		wwwFrom.AddField("password", password);
+        Debug.Log(EditorControl.Instance);
+        EditorControl.Instance.ShowTipKeep("加载中...");
+        Action<UserData> acstion = (ud) =>
+         {
+             string showMesg = "";
+             bool isShow = false;
+             if (ud.state)
+             {
+                 EditorControl.Instance.HideTip();
+                 SaveUserData(username, password);
+             }
+             else
+             {
+                 switch (ud.error)
+                 {
+                     case "name_error":
+                         showMesg = "用户名错误";
+                         break;
+                     case "user_disabled":
+                         showMesg = "用户被禁用";
+                         break;
+                     case "pass_error":
+                         showMesg = "密码错误";
+                         break;
+                     case "para_null":
+                         showMesg = "用户名或密码不能为空";
+                         break;
+                     default:
+                         isShow = false;
+                         break;
+                 }
+             }
+             if (isShow)
+             {
+                //LogManager.Instance.AddLogMessage(/*"登录失败：" +*/ showMesg);
+                Debug.Log(/*"登录失败：" + */showMesg);
+             }
+             action?.Invoke(ud, showMesg);
+         };
 
         IEnumerator enumerator = YoopInterfaceSupport.Instance.GetHttpData<UserData>(wwwFrom, InterfaceName.denglu,
-            (ud) =>
-            {
-                string showMesg = "";
-                bool isShow = false;
-                if (ud.state)
-                {
-                    SaveUserData(username, password);
-                }
-                else
-                {
-                    switch (ud.error)
-                    {
-                        case "name_error":
-                            showMesg = "用户名错误";
-                            break;
-                        case "user_disabled":
-                            showMesg = "用户被禁用";
-                            break;
-                        case "pass_error":
-                            showMesg = "密码错误";
-                            break;
-                        case "para_null":
-                            showMesg = "用户名或密码不能为空";
-                            break;
-                        default:
-                            isShow = false;
-                            break;
-                    }
-                }
-                if (isShow)
-                {
-                    //LogManager.Instance.AddLogMessage(/*"登录失败：" +*/ showMesg);
-                    Debug.Log(/*"登录失败：" + */showMesg);
-                }
-                action?.Invoke(ud, showMesg);
-            });
+            acstion);
         ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
     }
+    //WWWForm wwwFrom;
+    //Action<UserData, string> callback;
+    //IEnumerator GetHttpData(/*WWWForm wwwForm, InterfaceName interfaceName*//*, Action<T> callback*/)
+    //{
+    //    if (GameTools.NetWorkEnv == NetState.NoNet)
+    //    {
+    //        Debug.Log("MyLog::网络连接失败，请检查网络设置");
+    //        yield break;
+    //    }
+    //    Debug.Log("MyLog::GetHttpData");
+    //    Debug.Log("MyLog::YoopInterfaceSupport.Instance:"+ YoopInterfaceSupport.Instance);
+    //    Debug.Log("MyLog::yoopInterfaceDic:" + YoopInterfaceSupport.Instance.yoopInterfaceDic);
+    //    Debug.Log("MyLog::yoopInterfaceDicCount:" + YoopInterfaceSupport.Instance.yoopInterfaceDic.Count);
+    //    Debug.Log("MyLog::yoopInterfaceDic:denglu:" + YoopInterfaceSupport.Instance.yoopInterfaceDic.ContainsKey(InterfaceName.denglu));
+    //    UnityWebRequest www = UnityWebRequest.Post(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.denglu], wwwFrom);
+    //    Debug.Log("MyLog::SendWebRequest");
+    //    www.timeout = 60;
+    //    yield return www.SendWebRequest();
+    //    UserData yyd;
+    //    try
+    //    {
+    //        Debug.Log("MyLog::22222");
+    //        if (www.error != null)
+    //        {
+    //            Debug.Log("MyLog::" + "|www.error:" + www.error);
+    //        }
 
-	/// <summary>
-	/// 验证手机号
-	/// </summary>
-	public void YanzhengPhone(string username, string phone,InterfaceName interfaceName, System.Action<YanzhengData,string> callback)
+    //        if (www.isDone && string.IsNullOrEmpty(www.error))
+    //        {
+    //            //yyd = JsonConvert.DeserializeObject<T>(www.downloadHandler.text);
+    //            Debug.Log("MyLog::www.downloadHandler.text:" + www.downloadHandler.text);
+    //            yyd = JsonMapper.ToObject<UserData>(www.downloadHandler.text);
+    //            callback?.Invoke(yyd,"123");
+    //        }
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        Debug.Log("MyLog::" + e);
+    //        //LogManager.Instance.ShowTipObj("网络超时，请稍后再试", 2f);
+    //    }
+    //    yield return 0;
+    //}
+
+    /// <summary>
+    /// 验证手机号
+    /// </summary>
+    public void YanzhengPhone(string username, string phone,InterfaceName interfaceName, System.Action<YanzhengData,string> callback)
 	{
 		WWWForm wwwFrom = new WWWForm();
 		//Debug.Log(username);

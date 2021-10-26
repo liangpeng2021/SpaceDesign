@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6951203597851450240}
   - component: {fileID: -4753647022482503337}
   m_Layer: 0
-  m_Name: canchu
+  m_Name: pengren
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46,7 +46,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.1, y: 0.1, z: 0.1}
+  m_Size: {x: 0.3, y: 0.3, z: 0.3}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6951203597851450241
 MonoBehaviour:
@@ -197,17 +197,17 @@ PrefabInstance:
     - target: {fileID: 7228163061431587369, guid: 2ddde7ebc985047488a1eb117fd012a5,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.1
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 7228163061431587369, guid: 2ddde7ebc985047488a1eb117fd012a5,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.1
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 7228163061431587369, guid: 2ddde7ebc985047488a1eb117fd012a5,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.1
+      value: 0.15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2ddde7ebc985047488a1eb117fd012a5, type: 3}

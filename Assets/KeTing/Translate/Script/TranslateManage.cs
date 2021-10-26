@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace SpaceDesign.Translate
@@ -32,7 +33,8 @@ namespace SpaceDesign.Translate
         bool bUIChanging = false;
         //运动阈值
         float fThreshold = 0.1f;
-
+        //对象初始位置
+        public Vector3 v3OriPos;
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
@@ -42,25 +44,77 @@ namespace SpaceDesign.Translate
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
         }
-
         void Start()
         {
-            btnCheckTranslate.onClick.AddListener(OnCheckTranslate);
-            btnQuit.onClick.AddListener(OnQuit);
+            //btnCheckTranslate.onClick.AddListener(OnCheckTranslate);
+            //btnQuit.onClick.AddListener(OnQuit);
+            ////===========================================================================
+            ////Icon点击触发
+            //EventTrigger _trigger = traIcon.GetComponent<EventTrigger>();
+            //if (_trigger == null)
+            //    _trigger = traIcon.gameObject.AddComponent<EventTrigger>();
+
+            //EventTrigger.Entry _entry = new EventTrigger.Entry
+            //{
+            //    eventID = EventTriggerType.PointerClick,
+            //    callback = new EventTrigger.TriggerEvent(),
+            //};
+            //_entry.callback.AddListener(x =>
+            //{
+            //    if (curPlayerPosState == PlayerPosState.Close)
+            //        StartCoroutine(IEMiddleToClose());
+            //});
+            //_trigger.triggers.Add(_entry);
+            ////===========================================================================
+
+            v3OriPos = this.transform.position;
+            //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
+            Invoke("SetIconParent",0.1f);
         }
+        void SetIconParent()
+        {
+            if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
+                traIconRoot.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
+            else
+                traIconRoot.SetParent(null);
+        }
+        //public Image2DTrackingLQ _i2dtlq;
+        //public Image2DTrackingLQ i2dtlq
+        //{
+        //    get
+        //    {
+        //        if (_i2dtlq == null)
+        //        {
+        //            _i2dtlq = FindObjectOfType<Image2DTrackingLQ>();
+        //            if (_i2dtlq == null)
+        //            {
+        //                Transform tra = Instantiate(traTrackingMagPrefab, XR.XRCameraManager.Instance.stereoCamera.transform);
+        //                tra.localPosition = Vector3.zero;
+        //                tra.localEulerAngles = Vector3.zero;
+        //                tra.localScale = Vector3.one;
+        //                _i2dtlq = FindObjectOfType<Image2DTrackingLQ>();
+        //            }
+        //        }
+        //        return _i2dtlq;
+        //    }
+        //}
+
+        //public Transform traTrackingMagPrefab;
+        public TextMesh tt;
 
         /// <summary>
         /// 刷新位置消息
         /// </summary>
         public void RefreshPos(Vector3 pos)
         {
-            if (bUIChanging == true)
-                return;
+            //if (bUIChanging == true)
+            //    return;
 
-            Vector3 _v3 = traModel.position;
+            Vector3 _v3 = v3OriPos;
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
+            tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 
@@ -175,31 +229,33 @@ namespace SpaceDesign.Translate
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fIconSpeed * 2f * Time.deltaTime);
-                traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traTotalUI.localScale, Vector3.one);
+                //traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, Vector3.one, fUISpeed * Time.deltaTime);
+                //float _fDis = Vector3.Distance(traTotalUI.localScale, Vector3.one);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, 0.1f);
+                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
                     traIcon.localScale = Vector3.zero;
-                    traTotalUI.localScale = Vector3.one;
+                    //traTotalUI.localScale = Vector3.one;
                     break;
                 }
                 yield return 0;
             }
 
-            if (bTranslateing == false)
-            {
-                //===========================================================================
+
+            //启动Mark
+            markTrackTranslate.enabled = true;
+            markTrackTranslate.StartTrack();
+            //i2dtlq.StarTrackTranslate(this.transform);
 
 
-
-                //这里应该从Oppo的Marker调用
-                StartCoroutine(IEMarker());
-
-
-
-                //===========================================================================
-            }
+            //if (bTranslateing == false)
+            //{
+            //    //===========================================================================
+            //    //这里应该从Oppo的Marker调用
+            //    StartCoroutine(IEMarker());
+            //    //===========================================================================
+            //}
 
             //UI变化结束
             bUIChanging = false;
@@ -217,18 +273,20 @@ namespace SpaceDesign.Translate
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * 2f * Time.deltaTime);
-                traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traTotalUI.localScale, Vector3.zero);
+                //traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+                //float _fDis = Vector3.Distance(traTotalUI.localScale, Vector3.zero);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, 0.1f);
+                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
                 if (_fDis < fThreshold)
                 {
                     traIcon.localScale = Vector3.one;
-                    traTotalUI.localScale = Vector3.zero;
+                    //traTotalUI.localScale = Vector3.zero;
                     break;
                 }
                 yield return 0;
             }
 
+            OnQuit();
 
             //UI变化结束
             bUIChanging = false;
@@ -236,6 +294,8 @@ namespace SpaceDesign.Translate
 
         #region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
         [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
+        //Icon的对象的总根节点
+        public Transform traIconRoot;
         //Icon的对象
         public Transform traIcon;
         //吸引态，上下移动动画
@@ -244,149 +304,175 @@ namespace SpaceDesign.Translate
         public Animator[] animIconMiddle;
         //Icon的移动速度
         public float fIconSpeed = 1;
+
+        /// <summary>
+        /// 点击Icon
+        /// </summary>
+        public void ClickIcon()
+        {
+            if (curPlayerPosState == PlayerPosState.Close)
+                StartCoroutine(IEMiddleToClose());
+        }
+
         #endregion
 
         #region 重交互，大UI，近距离（小于1.5米）
         [Header("===重交互，大UI，近距离（小于1.5米）")]
         //UI的变化速度
         public float fUISpeed = 5;
-        //小UI
-        public Transform traTotalUI;
+        //Mark追踪对象，杂志
+        public Image2DTrackingTranslate markTrackTranslate;
+        public GameObject timelineShow;
+        public GameObject timelineHide;
 
-        //定位动画
-        public Animator animMarker;
-        //扫描查看动画
-        public Animator animCheck;
-        //查看翻译按钮
-        public Button btnCheckTranslate;
-        //退出翻译按钮
-        public Button btnQuit;
-        //定位到的图片
-        public Image imgPicture;
-        //定位到的图片的翻译
-        public Image imgTranslate;
-        //正在显示翻译界面中
-        public bool bTranslateing;
+        ////小UI
+        //public Transform traTotalUI;
 
-        IEnumerator IEMarker()
-        {
-            //Marker动画开启
-            animMarker.gameObject.SetActive(true);
-            animMarker.enabled = true;
+        ////定位动画
+        //public Animator animMarker;
+        ////扫描查看动画
+        //public Animator animCheck;
+        ////查看翻译按钮
+        //public Button btnCheckTranslate;
+        ////退出翻译按钮
+        //public Button btnQuit;
+        ////定位到的图片
+        //public Image imgPicture;
+        ////定位到的图片的翻译
+        //public Image imgTranslate;
+        ////正在显示翻译界面中
+        //public bool bTranslateing;
 
-            //===========================================================================
-            //这里应该从Marker获取位置信息
+        //IEnumerator IEMarker()
+        //{
+        //    //Marker动画开启
+        //    animMarker.gameObject.SetActive(true);
+        //    animMarker.enabled = true;
 
-            yield return new WaitForSeconds(3);
+        //    //===========================================================================
+        //    //这里应该从Marker获取位置信息
 
-            //===========================================================================
-            Transform _traBtnCheckTranslate = btnCheckTranslate.transform;
-            Vector3 _v3 = Vector3.one;
-            while (true)
-            {
-                _traBtnCheckTranslate.localScale = Vector3.Lerp(_traBtnCheckTranslate.localScale, _v3, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(_traBtnCheckTranslate.localScale, _v3);
-                if (_fDis < fThreshold)
-                {
-                    _traBtnCheckTranslate.localScale = _v3;
-                    break;
-                }
-                yield return 0;
-            }
+        //    yield return new WaitForSeconds(3);
 
-            //Marker动画关闭
-            animMarker.enabled = false;
-            animMarker.gameObject.SetActive(false);
-        }
+        //    //===========================================================================
+        //    Transform _traBtnCheckTranslate = btnCheckTranslate.transform;
+        //    Vector3 _v3 = Vector3.one;
+        //    while (true)
+        //    {
+        //        _traBtnCheckTranslate.localScale = Vector3.Lerp(_traBtnCheckTranslate.localScale, _v3, fUISpeed * Time.deltaTime);
+        //        float _fDis = Vector3.Distance(_traBtnCheckTranslate.localScale, _v3);
+        //        if (_fDis < fThreshold)
+        //        {
+        //            _traBtnCheckTranslate.localScale = _v3;
+        //            break;
+        //        }
+        //        yield return 0;
+        //    }
+
+        //    //Marker动画关闭
+        //    animMarker.enabled = false;
+        //    animMarker.gameObject.SetActive(false);
+        //}
 
         /// <summary>
         /// 查看翻译按钮响应
         /// </summary>
-        void OnCheckTranslate()
+        public void OnCheckTranslate()
         {
-            StopAllCoroutines();
-            StartCoroutine("IECheckTranslate");
+            timelineShow.SetActive(true);
+            timelineHide.SetActive(false);
+            //i2dtlq.StopTrackTranslate(this.transform);
+            markTrackTranslate.StopTrack();
+            markTrackTranslate.enabled = false;
+            //StopAllCoroutines();
+            //StartCoroutine("IECheckTranslate");
         }
 
-        IEnumerator IECheckTranslate()
-        {
-            Transform _traBtnCheckTranslate = btnCheckTranslate.transform;
-            Vector3 _v3 = Vector3.zero;
-            while (true)
-            {
-                _traBtnCheckTranslate.localScale = Vector3.Lerp(_traBtnCheckTranslate.localScale, _v3, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(_traBtnCheckTranslate.localScale, _v3);
-                if (_fDis < fThreshold)
-                {
-                    _traBtnCheckTranslate.localScale = _v3;
-                    break;
-                }
-                yield return 0;
-            }
-            //扫描动画开启
-            animCheck.gameObject.SetActive(true);
-            animCheck.enabled = true;
-            yield return new WaitForSeconds(3);
-            //扫描动画关闭
-            animCheck.enabled = false;
-            animCheck.gameObject.SetActive(false);
+        //IEnumerator IECheckTranslate()
+        //{
+        //    Transform _traBtnCheckTranslate = btnCheckTranslate.transform;
+        //    Vector3 _v3 = Vector3.zero;
+        //    while (true)
+        //    {
+        //        _traBtnCheckTranslate.localScale = Vector3.Lerp(_traBtnCheckTranslate.localScale, _v3, fUISpeed * Time.deltaTime);
+        //        float _fDis = Vector3.Distance(_traBtnCheckTranslate.localScale, _v3);
+        //        if (_fDis < fThreshold)
+        //        {
+        //            _traBtnCheckTranslate.localScale = _v3;
+        //            break;
+        //        }
+        //        yield return 0;
+        //    }
+        //    //扫描动画开启
+        //    animCheck.gameObject.SetActive(true);
+        //    animCheck.enabled = true;
+        //    yield return new WaitForSeconds(3);
+        //    //扫描动画关闭
+        //    animCheck.enabled = false;
+        //    animCheck.gameObject.SetActive(false);
 
-            Transform _traImgTranslate = imgTranslate.transform;
-            _v3 = Vector3.one;
-            //while (true)
-            //{
-            //    _traImgTranslate.localScale = Vector3.Lerp(_traImgTranslate.localScale, _v3, fUISpeed * Time.deltaTime);
-            //    float _fDis = Vector3.Distance(_traImgTranslate.localScale, _v3);
-            //    if (_fDis < fThreshold)
-            //    {
-            //        _traImgTranslate.localScale = _v3;
-            //        break;
-            //    }
-            //    yield return 0;
-            //}
-            _traImgTranslate.localScale = _v3;
-            btnQuit.gameObject.SetActive(true);
+        //    Transform _traImgTranslate = imgTranslate.transform;
+        //    _v3 = Vector3.one;
+        //    //while (true)
+        //    //{
+        //    //    _traImgTranslate.localScale = Vector3.Lerp(_traImgTranslate.localScale, _v3, fUISpeed * Time.deltaTime);
+        //    //    float _fDis = Vector3.Distance(_traImgTranslate.localScale, _v3);
+        //    //    if (_fDis < fThreshold)
+        //    //    {
+        //    //        _traImgTranslate.localScale = _v3;
+        //    //        break;
+        //    //    }
+        //    //    yield return 0;
+        //    //}
+        //    _traImgTranslate.localScale = _v3;
+        //    btnQuit.gameObject.SetActive(true);
 
-            bTranslateing = true;
-        }
+        //    bTranslateing = true;
+        //}
 
         /// <summary>
         /// 关闭翻译界面响应
         /// </summary>
-        void OnQuit()
+        public void OnQuit()
         {
-            StopAllCoroutines();
-            StartCoroutine("IEQuit");
+            timelineShow.SetActive(false);
+            timelineHide.SetActive(true);
+            //i2dtlq.StopTrackTranslate(this.transform);
+            markTrackTranslate.StopTrack();
+            markTrackTranslate.enabled = false;
+
+            //StopAllCoroutines();
+            //StartCoroutine("IEQuit");
         }
 
-        IEnumerator IEQuit()
-        {
-            bTranslateing = false;
+        //IEnumerator IEQuit()
+        //{
+        //    bTranslateing = false;
 
-            btnQuit.gameObject.SetActive(false);
+        //    btnQuit.gameObject.SetActive(false);
 
-            //Marker动画开启
-            animMarker.gameObject.SetActive(false);
-            animMarker.enabled = false;
-            animCheck.gameObject.SetActive(false);
-            animCheck.enabled = false;
+        //    //Marker动画开启
+        //    animMarker.gameObject.SetActive(false);
+        //    animMarker.enabled = false;
+        //    animCheck.gameObject.SetActive(false);
+        //    animCheck.enabled = false;
 
-            Transform _traImgTranslate = imgTranslate.transform;
-            Vector3 _v3 = Vector3.zero;
-            _traImgTranslate.localScale = _v3;
-            //while (true)
-            //{
-            //    _traImgTranslate.localScale = Vector3.Lerp(_traImgTranslate.localScale, _v3, fUISpeed * Time.deltaTime);
-            //    float _fDis = Vector3.Distance(_traImgTranslate.localScale, _v3);
-            //    if (_fDis < fThreshold)
-            //    {
-            //        _traImgTranslate.localScale = _v3;
-            //        break;
-            //    }
-            //    yield return 0;
-            //}
-            yield return 0;
-        }
+        //    Transform _traImgTranslate = imgTranslate.transform;
+        //    Vector3 _v3 = Vector3.zero;
+        //    _traImgTranslate.localScale = _v3;
+        //    //while (true)
+        //    //{
+        //    //    _traImgTranslate.localScale = Vector3.Lerp(_traImgTranslate.localScale, _v3, fUISpeed * Time.deltaTime);
+        //    //    float _fDis = Vector3.Distance(_traImgTranslate.localScale, _v3);
+        //    //    if (_fDis < fThreshold)
+        //    //    {
+        //    //        _traImgTranslate.localScale = _v3;
+        //    //        break;
+        //    //    }
+        //    //    yield return 0;
+        //    //}
+        //    yield return 0;
+        //}
 
         #endregion
 

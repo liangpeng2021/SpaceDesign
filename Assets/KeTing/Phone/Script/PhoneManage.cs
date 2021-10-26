@@ -50,11 +50,30 @@ namespace SpaceDesign.Phone
         {
             fTalkTotalTime = (float)(videoPlayer.clip.length);
 
-            btnRingOff.onClick.AddListener(OnRingOff);
-            btnAnswer.onClick.AddListener(OnAnswer);
-            btnReCall.onClick.AddListener(OnReCall);
-            btnCallingOff.onClick.AddListener(OnRingOff);
-            btnTalkingOff.onClick.AddListener(OnTalkingOff);
+            //btnRingOff.onClick.AddListener(OnRingOff);
+            //btnAnswer.onClick.AddListener(OnAnswer);
+            //btnReCall.onClick.AddListener(OnReCall);
+            //btnCallingOff.onClick.AddListener(OnRingOff);
+            //btnTalkingOff.onClick.AddListener(OnTalkingOff);
+
+            ////===========================================================================
+            ////Icon点击触发
+            //EventTrigger _trigger = traIcon.GetComponent<EventTrigger>();
+            //if (_trigger == null)
+            //    _trigger = traIcon.gameObject.AddComponent<EventTrigger>();
+
+            //EventTrigger.Entry _entry = new EventTrigger.Entry
+            //{
+            //    eventID = EventTriggerType.PointerClick,
+            //    callback = new EventTrigger.TriggerEvent(),
+            //};
+            //_entry.callback.AddListener(x =>
+            //{
+            //    if (curPlayerPosState == PlayerPosState.Close)
+            //        StartCoroutine(IEMiddleToClose());
+            //});
+            //_trigger.triggers.Add(_entry);
+            ////===========================================================================
         }
 
         void Update()
@@ -93,6 +112,7 @@ namespace SpaceDesign.Phone
                 }
             }
         }
+        public TextMesh tt;
 
         /// <summary>
         /// 刷新位置消息
@@ -102,10 +122,11 @@ namespace SpaceDesign.Phone
             if (bUIChanging == true)
                 return;
 
-            Vector3 _v3 = traModel.position;
+            Vector3 _v3 = traIcon.position;
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
+            tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 
@@ -424,6 +445,16 @@ namespace SpaceDesign.Phone
         public Animator[] animIconMiddle;
         //Icon的移动速度
         public float fIconSpeed = 1;
+
+        /// <summary>
+        /// 点击Icon
+        /// </summary>
+        public void ClickIcon()
+        {
+            if (curPlayerPosState == PlayerPosState.Close)
+                StartCoroutine(IEMiddleToClose());
+        }
+
         #endregion
 
         #region 重交互，大UI，近距离（小于1.5米）
@@ -469,7 +500,8 @@ namespace SpaceDesign.Phone
         //通话总时长
         private float fTalkTotalTime;
 
-        void OnRingOff()
+
+        public void OnRingOff()
         {
             bCalling = false;
             StopAllCoroutines();
@@ -483,7 +515,7 @@ namespace SpaceDesign.Phone
             yield return IEMissedUI(true);
         }
 
-        void OnAnswer()
+        public void OnAnswer()
         {
             bCalling = false;
             StopAllCoroutines();
@@ -496,7 +528,7 @@ namespace SpaceDesign.Phone
             yield return IETalkingUI(true);
         }
 
-        void OnReCall()
+        public void OnReCall()
         {
             StopAllCoroutines();
             //StopCoroutine("_IEReCall");
@@ -508,7 +540,7 @@ namespace SpaceDesign.Phone
             yield return IEReCallUI(true);
         }
 
-        void OnTalkingOff()
+        public void OnTalkingOff()
         {
             videoPlayer.Stop();
             StopAllCoroutines();

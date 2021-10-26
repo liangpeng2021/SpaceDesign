@@ -124,14 +124,7 @@ public class RoomControl : MonoBehaviour
 
         roomPos.y += 0.5f;
     }
-    /// <summary>
-    /// 编辑模式下设置线隐藏和出现
-    /// </summary>
-    public void SetLineActive(bool active)
-    {
-        line.gameObject.SetActive(active);
-    }
-
+    
     void LoadPoint(List<SPoint> sPoints)
     {
         textMesh.transform.position = Vector3.zero;
@@ -264,7 +257,7 @@ public class RoomControl : MonoBehaviour
             GameObject obj = Instantiate(prefab3d);
 
             obj.transform.parent = objParent;
-            obj.transform.position = eyeTran.position+new Vector3(0,0,0.8f);
+            obj.transform.position = eyeTran.position+ eyeTran.forward*1.5f;
             obj.transform.rotation = Quaternion.identity;
             obj.transform.localScale = Vector3.one;
 
@@ -450,6 +443,9 @@ public class RoomControl : MonoBehaviour
         //实例化房间内的物体
         for (int i = 0; i < roomDatas.ObjectList.Count; i++)
         {
+            //Debug.Log(roomDatas.ObjectList[i].id);
+            //if ()
+
             if (prefabDics.ContainsKey(roomDatas.ObjectList[i].id))
             {
                 //生成物体

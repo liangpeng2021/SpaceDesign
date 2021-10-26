@@ -14,10 +14,6 @@ using XR;
 /// </summary>
 public class LoadMainScence : MonoBehaviour
 {
-    public Prefab3D[] prefab3Ds;
-
-    Dictionary<string, GameObject> prefabDic = new Dictionary<string, GameObject>();
-
     ScenceData objectDatas;
 
     public GameObject roomPrefab;
@@ -119,16 +115,7 @@ public class LoadMainScence : MonoBehaviour
         
         objectDatas.Clear();
         objectDatas = null;
-
-        prefabDic.Clear();
-
-        for (int i = 0; i < prefab3Ds.Length; i++)
-        {
-            prefab3Ds[i].id = null;
-            prefab3Ds[i].prefab3d = null;
-            prefab3Ds[i] = null;
-        }
-
+        
         backto = null;
 
         for (int i = 0; i < canvas.Length; i++)
@@ -149,11 +136,7 @@ public class LoadMainScence : MonoBehaviour
         {
             canvas[i].worldCamera = eventCamera;
         }
-
-        for (int i = 0; i < prefab3Ds.Length; i++)
-        {
-            prefabDic.Add(prefab3Ds[i].id, prefab3Ds[i].prefab3d);
-        }
+        
         LoadGameObjectData();
     }
     
@@ -175,13 +158,13 @@ public class LoadMainScence : MonoBehaviour
             GameObject obj = Instantiate(roomPrefab);
             RoomControl roomControl = obj.GetComponent<RoomControl>();
             if (objectDatas.roomDatasList[i] != null)
-                roomControl.SetRoomData(objectDatas.roomDatasList[i], prefabDic);
+                roomControl.SetRoomData(objectDatas.roomDatasList[i],LoadPrefab.Instance.prefabDic);
             else
             {
                 Debug.Log("MyLog::第" + i.ToString()+"房间为空");
             }
         }
-        Debug.Log("MyLog::objectDatas.roomDatasList.Count:" + objectDatas.roomDatasList.Count);
+        //Debug.Log("MyLog::objectDatas.roomDatasList.Count:" + objectDatas.roomDatasList.Count);
     }
 
     ScenceData MyDeSerial(string path)
@@ -206,14 +189,15 @@ public class LoadMainScence : MonoBehaviour
     private void Update()
     {
         timeCount += Time.deltaTime;
-        if (timeCount < 3f)
+        if (timeCount < 1f)
         {
             if (XRInput.Instance.GetMouseButtonDown(0) || Input.GetMouseButtonDown(0))
             {
                 clickNum++;
             }
+            
             //1秒内连续点击超过3次，进入编辑模式
-            if (clickNum > 5)
+            if (clickNum > 2)
             {
                 timeCount = 0;
                 clickNum = 0;

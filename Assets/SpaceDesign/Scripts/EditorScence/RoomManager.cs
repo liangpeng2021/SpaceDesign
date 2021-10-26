@@ -274,8 +274,7 @@ public class RoomManager : MonoBehaviour
     //int roomNum=0;
     [HideInInspector]
     public List<RoomControl> room3DList =new List<RoomControl>();
-    int last3DroomID = -1;
-
+    
     /// <summary>
     /// 场景数据
     /// </summary>
@@ -393,7 +392,7 @@ public class RoomManager : MonoBehaviour
 
         room3DList.Add(roomControl);
 
-        room3DList[room3DList.Count - 1].SetLineActive(false);
+        room3DList[room3DList.Count - 1].gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -405,8 +404,11 @@ public class RoomManager : MonoBehaviour
         //表示选中状态
         seletTran.gameObject.SetActive(true);
 
-        if (last3DroomID > -1 && last3DroomID < room3DList.Count)
-            room3DList[last3DroomID].SetLineActive(false);
+        for (int i = 0; i < room3DList.Count; i++)
+        {
+            room3DList[i].gameObject.SetActive(false);
+        }
+
         for (int i = 0; i < roomBtns.Length; i++)
         {
             if (i== roomid)
@@ -414,8 +416,7 @@ public class RoomManager : MonoBehaviour
                 curRoomBtnIndex = i;
                 seletTran.position = roomBtns[i].transform.position;
                 materials[i].SetColor("_BaseColor", EditorControl.Instance.chooseColor);
-                room3DList[curPageRoomId*pageCount+i].SetLineActive(true);
-                last3DroomID = curPageRoomId * pageCount + i;
+                room3DList[curPageRoomId*pageCount+i].gameObject.SetActive(true);
             }
             else
             {
@@ -474,7 +475,6 @@ public class RoomManager : MonoBehaviour
             SetRoomBtnState();
             //删除时取消选中状态
             seletTran.gameObject.SetActive(false);
-            last3DroomID = -1;
         }
     }
 
@@ -568,7 +568,7 @@ public class RoomManager : MonoBehaviour
             roomControl.roomDatas = scenceData.roomDatasList[i];
             
             room3DList.Add(roomControl);
-            
+
             roomControl.SetRoomFromData(scenceData.roomDatasList[i], EditorControl.Instance.prefabManager.editorPrefabDic);
         }
         //赋值总页数
@@ -591,11 +591,5 @@ public class RoomManager : MonoBehaviour
             Destroy(room3DList[i].gameObject);
         }
         room3DList.Clear();
-
-        if (curScenceData != null)
-        {
-            curScenceData.Clear();
-            curScenceData = null;
-        }
     }
 }

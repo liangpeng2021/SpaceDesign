@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using OXRTK.ARHandTracking;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using UnityEngine.UI;
 using XR;
 using UnityEngine.SceneManagement;
+using SpaceDesign;
 
 /// <summary>
 /// 控制编辑场景界面切换，/*create by 梁鹏 2021-9-14 */
@@ -62,8 +62,8 @@ public class EditorControl : MonoBehaviour
     /// 退出程序
     /// </summary>
     public Button quitBtn;
-    
-    LoadPreviewScence loadScence;
+    [HideInInspector]
+    public LoadPreviewScence loadPreviewScence;
 
     /// <summary>
     /// 预览模式父节点
@@ -113,7 +113,7 @@ public class EditorControl : MonoBehaviour
         previewBtn = null;
         backToEditorBtn = null;
         quitBtn = null;
-        loadScence = null;
+        loadPreviewScence = null;
         previewParent = null;
         prefabManager = null;
         roomManager = null;
@@ -139,7 +139,7 @@ public class EditorControl : MonoBehaviour
         ColorUtility.TryParseHtmlString("#6070FFFF", out chooseColor);
         ColorUtility.TryParseHtmlString("#6B00B0FF", out normalColor);
 
-        loadScence = GetComponent<LoadPreviewScence>();
+        loadPreviewScence = GetComponent<LoadPreviewScence>();
         
         InitSave();
         InitTip();
@@ -218,7 +218,7 @@ public class EditorControl : MonoBehaviour
         editorUIObj.SetActive(false);
         previewUIObj.SetActive(true);
 
-        loadScence.LoadGameObjectData(roomManager.ScenceData);
+        loadPreviewScence.LoadGameObjectData(roomManager.ScenceData);
     }
 
     public void BackToEditor()
@@ -229,7 +229,7 @@ public class EditorControl : MonoBehaviour
         editorUIObj.SetActive(true);
         previewUIObj.SetActive(false);
 
-        loadScence.ClearChild();
+        loadPreviewScence.ClearChild();
     }
     
     void QuitScence()
@@ -316,14 +316,13 @@ public class EditorControl : MonoBehaviour
     void InitTip()
     {
         HideTip();
-        if (tipText == null)
-            tipText = tipObj.transform.GetChild(0).GetComponent<Text>();
     }
 
     public void ShowTipKeep(string str)
     {
         tipObj.SetActive(true);
-        
+        if (tipText == null)
+            tipText = tipObj.transform.GetChild(0).GetComponent<Text>();
         tipText.text = str;
     }
 
@@ -334,7 +333,7 @@ public class EditorControl : MonoBehaviour
         Invoke("HideTip", time);
     }
 
-    void HideTip()
+    public void HideTip()
     {
         tipObj.SetActive(false);
     }

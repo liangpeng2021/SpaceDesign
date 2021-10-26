@@ -33,7 +33,7 @@ public class ScenceData
     public List<RoomDatas> roomDatasList = new List<RoomDatas>();
     public void Clear()
     {
-        Label = null;
+        //Debug.Log("Label:"+Label+ "Clear");
         if (roomDatasList != null)
         {
             for (int i = 0; i < roomDatasList.Count; i++)
@@ -53,21 +53,14 @@ public class RoomDatas
     public List<ObjectData> ObjectList = new List<ObjectData>();
     public void Clear()
     {
-        roomName = null;
         if (sPointsList != null)
         {
             sPointsList.Clear();
-            sPointsList = null;
         }
 
         if (ObjectList != null)
         {
-            for (int i = 0; i < ObjectList.Count; i++)
-            {
-                ObjectList[i].Clear();
-            }
             ObjectList.Clear();
-            ObjectList = null;
         }
     }
 }
@@ -98,10 +91,5 @@ public struct ObjectData
     public float scalex;
     public float scaley;
     public float scalez;
-
-    public void Clear()
-    {
-        id = null;
-    }
 }
 

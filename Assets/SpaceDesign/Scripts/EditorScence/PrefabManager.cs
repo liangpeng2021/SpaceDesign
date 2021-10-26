@@ -238,7 +238,7 @@ public class PrefabManager : MonoBehaviour
     public void SetDeleteObjPos(Vector3 pos)
     {
         deleteObjBtn.gameObject.SetActive(true);
-        deleteObjBtn.transform.position = pos + new Vector3(0,-0.12f,0);
+        deleteObjBtn.transform.position = pos + new Vector3(0,-0.2f,0);
         deleteObjBtn.transform.forward = XR.XRCameraManager.Instance.stereoCamera.transform.forward;
     }
 }

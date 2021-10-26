@@ -24,10 +24,6 @@ public class LoadPreviewScence : MonoBehaviour
     /// 生成的对象的父节点
     /// </summary>
     public Transform ObjParent;
-
-    public Prefab3D[] prefab3Ds;
-
-    Dictionary<string, GameObject> prefabDic = new Dictionary<string, GameObject>(); 
     
     public GameObject roomPrefab;
     
@@ -35,26 +31,9 @@ public class LoadPreviewScence : MonoBehaviour
     {
         roomPrefab = null;
         
-        prefabDic.Clear();
-        prefabDic = null;
-
         ObjParent = null;
-        for (int i = 0; i < prefab3Ds.Length; i++)
-        {
-            prefab3Ds[i].id = null;
-            prefab3Ds[i].prefab3d = null;
-            prefab3Ds[i] = null;
-        }
     }
-
-    private void Start()
-    {
-        for (int i = 0; i < prefab3Ds.Length; i++)
-        {
-            prefabDic.Add(prefab3Ds[i].id, prefab3Ds[i].prefab3d);
-        }
-    }
-
+    
     public void ClearChild()
     {
         int childCount = ObjParent.childCount;
@@ -83,7 +62,7 @@ public class LoadPreviewScence : MonoBehaviour
             GameObject obj = Instantiate(roomPrefab);
             RoomControl roomControl = obj.GetComponent<RoomControl>();
             obj.transform.parent = ObjParent;
-            roomControl.SetRoomData(objectDatas.roomDatasList[i], prefabDic);
+            roomControl.SetRoomData(objectDatas.roomDatasList[i],LoadPrefab.Instance.prefabDic);
         }
     }
 

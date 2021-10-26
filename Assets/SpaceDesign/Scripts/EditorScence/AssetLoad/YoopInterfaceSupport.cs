@@ -30,7 +30,7 @@ namespace SpaceDesign
         public YoopInterface[] yoopInterfaces;
 
         public static YoopInterfaceSupport Instance;
-
+        
         /// <summary>
         /// 所有的接口地址
         /// </summary>
@@ -57,7 +57,7 @@ namespace SpaceDesign
         {
             if (GameTools.NetWorkEnv == NetState.NoNet)
             {
-                //LogManager.Instance.ShowTipObj("网络连接失败，请检查网络设置", 2f);
+                EditorControl.Instance.ShowTipTime("网络连接失败", 2f);
                 yield break;
             }
 
@@ -70,9 +70,9 @@ namespace SpaceDesign
             {
                 if (www.error != null)
                 {
-                    Debug.Log(interfaceName + "|www.error:" + www.error);
+                    Debug.Log("MyLog::"+interfaceName + "|www.error:" + www.error);
                     Debug.Log(yoopInterfaceDic[interfaceName]);
-
+                    
                     //LogManager.Instance.ShowTipObj("网络超时，请稍后再试", 2.5f);
                 }
 
@@ -90,6 +90,7 @@ namespace SpaceDesign
                     //Debug.Log("-------------");
 #endif
                     //yyd = JsonConvert.DeserializeObject<T>(www.downloadHandler.text);
+                    //Debug.Log("MyLog::www.downloadHandler.text:"+www.downloadHandler.text);
                     yyd = JsonMapper.ToObject<T>(www.downloadHandler.text);
                     if (yyd != null)
                         callback?.Invoke(yyd);
@@ -97,7 +98,7 @@ namespace SpaceDesign
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Debug.Log("MyLog::" + e);
                 //LogManager.Instance.ShowTipObj("网络超时，请稍后再试", 2f);
             }
 

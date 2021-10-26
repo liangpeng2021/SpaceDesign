@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using OXRTK.ARHandTracking;
 
 ///b*[^:b#/]+.*$,用于统计代码行数,pico SDK 18327
@@ -143,6 +142,7 @@ public class UserUI : MonoBehaviour
     {
         //dengluzhuceTran.gameObject.SetActive(false);
         //_keyBoardManager.gameObject.SetActive(false);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
     
     void ResetInputText()
@@ -244,23 +244,24 @@ public class UserUI : MonoBehaviour
 	{
 		if (OnRegistPW(passwordText.text))
 		{
-			//Debug.Log("ConfirmOK");
-			if (curInputID == 1)
-				userManager.SendZhuceData(userNameText.text, phoneText.text, yanzhengmaText.text, passwordText.text,
-					(ud, mg) =>
-					{
-						SetZhuceResult(ud, mg);
-					});
-			else if (curInputID == 0)
-				userManager.RequestLogin(userNameText.text, passwordText.text,
-					(ud, mg) =>
-					{
-						SetDengluResult(ud, mg);
-					}
-					);
+            //Debug.Log("ConfirmOK");
+            if (curInputID == 1)
+                userManager.SendZhuceData(userNameText.text, phoneText.text, yanzhengmaText.text, passwordText.text,
+                    (ud, mg) =>
+                    {
+                        SetZhuceResult(ud, mg);
+                    });
+            else if (curInputID == 0)
+            {
+                Action<UserData,string> action = (ud, mg) =>
+                 {
+                     SetDengluResult(ud, mg);
+                 };
+
+                userManager.RequestLogin(userNameText.text, passwordText.text, action);
+            }
 			else
 			{
-				
 				userManager.SendChangePasswordData(phoneText.text, yanzhengmaText.text, passwordText.text,
 					(ud,mg)=>
 					{
@@ -575,13 +576,17 @@ public class UserUI : MonoBehaviour
         dengluzhuceTran.gameObject.SetActive(false);
         EditorControl.Instance.keyBoardManager.gameObject.SetActive(false);
         EditorControl.Instance.uiTran.gameObject.SetActive(true);
+        EditorControl.Instance.editorUIObj.SetActive(true);
+
         scenceManager.LoadUserScenceList(ud);
     }
 	#endregion
     
 	private void Start()
 	{
-		InitDengluZhuce();
+        EditorControl.Instance.editorUIObj.SetActive(false);
+        //userManager.Logout();
+        InitDengluZhuce();
 
         dengluzhuceTran.gameObject.SetActive(false);
         EditorControl.Instance.keyBoardManager.gameObject.SetActive(false);
@@ -599,17 +604,27 @@ public class UserUI : MonoBehaviour
                 SetDengluResult(ud, message);
                 if (!ud.state)
                 {
-                    userManager.Logout();
-                    dengluzhuceTran.gameObject.SetActive(true);
-                    EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
+                    LogoutContinueLogin();
                 }
+                else
+                    EditorControl.Instance.editorUIObj.SetActive(true);
+            },
+            (s)=>
+            {
+                Debug.Log("MyLog::自动登录失败：" + s);
+                LogoutContinueLogin();
             });
         }
         else
         {
-            userManager.Logout();
-            dengluzhuceTran.gameObject.SetActive(true);
-            EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
+            LogoutContinueLogin();
         } 
+    }
+
+    void LogoutContinueLogin()
+    {
+        userManager.Logout();
+        dengluzhuceTran.gameObject.SetActive(true);
+        EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
     }
 }

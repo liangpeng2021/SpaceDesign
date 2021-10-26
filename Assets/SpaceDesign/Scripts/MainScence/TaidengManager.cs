@@ -1,201 +1,360 @@
-﻿using SpaceDesign;
+﻿using OXRTK.ARHandTracking;
+using SpaceDesign;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 /// <summary>
 /// 管理台灯的部分效果，/*create by 梁鹏 2021-10-18 */
 /// </summary>
-public class TaidengManager : MonoBehaviour
+namespace SpaceDesign
 {
-    //人物和Icon的距离状态
-    public PlayerPosState curPlayerPosState = PlayerPosState.Far;
-    //Icon、UI等正在切换中
-    bool bUIChanging = false;
-    //运动阈值
-    float fThreshold = 0.05f;
-
-    //吸引态，上下移动动画
-    public Animator animIconFar;
-    //轻交互，半球动画+音符动画
-    public Animator[] animIconMiddle;
-    /// <summary>
-    /// 台灯和扫描片
-    /// </summary>
-    public GameObject taidengObj;
-
-    //Icon的移动速度
-    public float fIconMoveSpeed = 1;
-
-    // Start is called before the first frame update
-    void Start()
+    public class TaidengManager : MonoBehaviour
     {
-        animIconFar.enabled = true;
-        
-        taidengObj.SetActive(false);
-    }
-    void OnEnable()
-    {
-        PlayerManage.refreshPlayerPosEvt += RefreshPos;
-    }
-
-    void OnDisable()
-    {
-        PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-    }
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
-    /// <summary>
-    /// 刷新位置消息
-    /// </summary>
-    public void RefreshPos(Vector3 pos)
-    {
-        if (bUIChanging == true)
-            return;
-
-        Vector3 _v3 = transform.position;
-        _v3.y = pos.y;
-        float _dis = Vector3.Distance(_v3, pos);
-        
-        PlayerPosState lastPPS = curPlayerPosState;
-
-        if (_dis >= 5f)
+        static TaidengManager inst;
+        public static TaidengManager Inst
         {
-            if (lastPPS == PlayerPosState.Far)
-                return;
-            curPlayerPosState = PlayerPosState.Far;
-        }
-        else if (_dis < 5f && _dis > 1.5f)
-        {
-            if (lastPPS == PlayerPosState.Middle)
-                return;
-            curPlayerPosState = PlayerPosState.Middle;
-        }
-        else
-        {
-            //if (lastPPS == PlayerPosState.near)
-            //    return;
-            //curPlayerPosState = PlayerPosState.near;
-        }
-        
-        StartCoroutine("IERefreshPos", lastPPS);
-    }
-
-    /// <summary>
-    /// UI等刷新位置消息
-    /// </summary>
-    IEnumerator IERefreshPos(PlayerPosState lastPPS)
-    {
-        //UI开始变化
-        bUIChanging = true;
-
-        if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
-        {
-            yield return IEFarToMiddle();
-        }
-        else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Far)
-        {
-            yield return IEMiddleToFar();
-        }
-        //else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.near)
-        //{
-        //    yield return IEMiddleToNear();
-        //}
-        //else if (lastPPS == PlayerPosState.near && curPlayerPosState == PlayerPosState.Middle)
-        //{
-        //    yield return IENearToMidle();
-        //}
-
-        yield return 0;
-        //UI变化结束
-        bUIChanging = false;
-    }
-
-    /// <summary>
-    /// 中距离=>近距离
-    /// </summary>
-    IEnumerator IEMiddleToNear()
-    {
-        for (int i = 0; i < animIconMiddle.Length; i++)
-        {
-            animIconMiddle[i].enabled = false;
-        }
-        Vector3 targetPos = new Vector3(animIconFar.transform.localPosition.x, animIconFar.transform.localPosition.y-0.5f, animIconFar.transform.localPosition.z);
-        while (true)
-        {
-            animIconFar.transform.localPosition = Vector3.MoveTowards(animIconFar.transform.localPosition, targetPos, fIconMoveSpeed * Time.deltaTime);
-            animIconFar.transform.localScale = Vector3.MoveTowards(animIconFar.transform.localScale,Vector3.zero, fIconMoveSpeed * Time.deltaTime);
-            float _fDis = Vector3.Distance(animIconFar.transform.localScale, Vector3.zero);
-            if (_fDis < fThreshold)
+            get
             {
-                animIconFar.transform.localPosition = targetPos;
-                animIconFar.transform.localScale = Vector3.zero;
-                taidengObj.SetActive(true);
+                if (inst == null)
+                    inst = FindObjectOfType<TaidengManager>();
+                return inst;
+            }
+        }
+        //人物和Icon的距离状态
+        public PlayerPosState curPlayerPosState = PlayerPosState.Far;
+        //播放模型
+        public Transform traModel;
+        //Icon、UI等正在切换中
+        bool bUIChanging = false;
+        //运动阈值
+        float fThreshold = 0.1f;
+        //对象初始位置
+        public Vector3 v3OriPos;
+        /// <summary>
+        /// 无操作时间
+        /// </summary>
+        [HideInInspector]
+        public float noOperationTime=0;
+        
+        private void Update()
+        {
+            //2分钟无操作，关闭
+            //if (curPlayerPosState == PlayerPosState.Close)
+            //{
+            //    noOperationTime += Time.deltaTime;
+            //    if (noOperationTime > 60)
+            //    {
+            //        noOperationTime = 0;
+            //        OnQuit();
+            //    }
+            //}
+        }
 
-                MyImageTarget.Instance.TrackStop();
-                MyImageTarget.Instance.TrackStart("Model1", "3c11f9a3e98c523a45f23f07b76586ab_28062021145112");
-                break;
+        void OnEnable()
+        {
+            PlayerManage.refreshPlayerPosEvt += RefreshPos;
+            AddButtonRayEvent();
+        }
+
+        void OnDisable()
+        {
+            PlayerManage.refreshPlayerPosEvt -= RefreshPos;
+            RemoveButtonRayEvent();
+        }
+
+        void Start()
+        {
+            taidengController.gameObject.SetActive(false);
+            v3OriPos = this.transform.position;
+            timelineShow.SetActive(false);
+            //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
+
+#if !UNITY_EDITOR
+            Invoke("SetIconParent", 0.1f);
+#endif
+        }
+
+        void SetIconParent()
+        {
+            if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
+                traIconRoot.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
+            else
+                traIconRoot.SetParent(null);
+        }
+        
+        public TextMesh tt;
+
+        /// <summary>
+        /// 刷新位置消息
+        /// </summary>
+        public void RefreshPos(Vector3 pos)
+        {
+            if (bUIChanging)
+                return;
+            Vector3 _v3 = v3OriPos;
+            _v3.y = pos.y;
+            float _dis = Vector3.Distance(_v3, pos);
+            
+            tt.text = _dis.ToString();
+            
+            PlayerPosState lastPPS = curPlayerPosState;
+
+            if (_dis > 5f)
+            {
+                if (lastPPS == PlayerPosState.Far)
+                    return;
+                curPlayerPosState = PlayerPosState.Far;
+            }
+            else if (_dis <= 5f && _dis > 1.5f)
+            {
+                if (lastPPS == PlayerPosState.Middle)
+                    return;
+                curPlayerPosState = PlayerPosState.Middle;
+            }
+            else if (_dis <= 1.5f)
+            {
+                if (lastPPS == PlayerPosState.Close)
+                    return;
+                curPlayerPosState = PlayerPosState.Close;
+            }
+
+            StartCoroutine("IERefreshPos", lastPPS);
+        }
+        
+        /// <summary>
+        /// UI等刷新位置消息
+        /// </summary>
+        IEnumerator IERefreshPos(PlayerPosState lastPPS)
+        {
+            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            
+            if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
+            {
+                /// 远距离=>中距离
+                yield return IEFarToMiddle();
+            }
+            else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Close)
+            {
+                /// 中距离=>近距离
+                yield return IEMiddleToClose();
+            }
+            else if (lastPPS == PlayerPosState.Close && curPlayerPosState == PlayerPosState.Middle)
+            {
+                /// 近距离=>中距离
+                yield return IECloseToMiddle();
+            }
+            else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Far)
+            {
+                /// 中距离=>远距离
+                yield return IEMiddleToFar();
             }
 
             yield return 0;
         }
-    }
 
-    /// <summary>
-    /// 近距离=>中距离
-    /// </summary>
-    IEnumerator IENearToMidle()
-    {
-        MyImageTarget.Instance.TrackStop();
-        taidengObj.SetActive(false);
-        
-        while (true)
+        /// <summary>
+        /// 远距离=>中距离
+        /// </summary>
+        IEnumerator IEFarToMiddle()
         {
-            animIconFar.transform.localPosition = Vector3.MoveTowards(animIconFar.transform.localPosition, Vector3.zero, fIconMoveSpeed * Time.deltaTime);
-            animIconFar.transform.localScale = Vector3.MoveTowards(animIconFar.transform.localScale, Vector3.one, fIconMoveSpeed * Time.deltaTime);
-            float _fDis = Vector3.Distance(animIconFar.transform.localScale, Vector3.one);
-            if (_fDis < fThreshold)
-            {
-                animIconFar.transform.localPosition = Vector3.zero;
-                animIconFar.transform.localScale = Vector3.one;
+            //UI开始变化
+            bUIChanging = true;
 
-                for (int i = 0; i < animIconMiddle.Length; i++)
+            //远距离=>中距离
+            //Icon从静态变成动态
+            //Icon的自旋转动画开启
+            foreach (var v in animIconMiddle)
+                v.enabled = true;
+            //Icon自身上下浮动开启
+            animIconFar.enabled = true;
+            traIcon.gameObject.SetActive(true);
+
+            yield return 0;
+            //UI变化结束
+            bUIChanging = false;
+        }
+        /// <summary>
+        /// 中距离=>远距离
+        /// </summary>
+        IEnumerator IEMiddleToFar()
+        {
+            //UI开始变化
+            bUIChanging = true;
+
+            //中距离=>远距离
+            //Icon从动态变成静态
+            //Icon的自旋转动画关闭
+            foreach (var v in animIconMiddle)
+                v.enabled = false;
+            //Icon自身上下浮动关闭
+            animIconFar.enabled = false;
+            traIcon.gameObject.SetActive(true);
+
+            yield return 0;
+            //UI变化结束
+            bUIChanging = false;
+        }
+        /// <summary>
+        /// 中距离=>近距离
+        /// </summary>
+        IEnumerator IEMiddleToClose()
+        {
+            //UI开始变化
+            bUIChanging = true;
+
+            //中距离=>近距离
+
+            while (true)
+            {
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, 0.1f);
+                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
+                if (_fDis < fThreshold)
                 {
-                    animIconMiddle[i].enabled = true;
+                    traIcon.localScale = Vector3.zero;
+                    break;
                 }
-                break;
+                yield return 0;
             }
 
-            yield return 0;
-        }
-    }
+            //启动Mark
+            //markTrackMagazine.enabled = true;
+            //markTrackMagazine.StartTrack();
+            //初始化
+            taidengController.gameObject.SetActive(true);
+            taidengController.Init();
 
-    /// <summary>
-    /// 远距离=>中距离
-    /// </summary>
-    IEnumerator IEFarToMiddle()
-    {
-        animIconFar.enabled = false;
+            //UI变化结束
+            bUIChanging = false;
 
-        for (int i = 0; i < animIconMiddle.Length; i++)
-        {
-            animIconMiddle[i].enabled = true;
+            timelineShow.SetActive(true);
         }
-       
-        yield return 0;
-    }
-    /// <summary>
-    /// 中距离=>远距离
-    /// </summary>
-    IEnumerator IEMiddleToFar()
-    {
-        animIconFar.enabled = true;
-        for (int i = 0; i < animIconMiddle.Length; i++)
+
+        /// <summary>
+        /// 近距离=>中距离
+        /// </summary>
+        IEnumerator IECloseToMiddle()
         {
-            animIconMiddle[i].enabled = false;
+            //UI开始变化
+            bUIChanging = true;
+            //近距离=>中距离
+
+            while (true)
+            {
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, 0.1f);
+                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+                if (_fDis < fThreshold)
+                {
+                    traIcon.localScale = Vector3.one;
+                    break;
+                }
+                yield return 0;
+            }
+
+            OnQuit();
+
+            //UI变化结束
+            bUIChanging = false;
         }
-        yield return 0;
+
+#region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
+        [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
+        //Icon的对象的总根节点
+        public Transform traIconRoot;
+        //Icon的对象
+        public Transform traIcon;
+        //吸引态，上下移动动画
+        public Animator animIconFar;
+        //轻交互，半球动画+音符动画
+        public Animator[] animIconMiddle;
+        //Icon的移动速度
+        public float fIconSpeed = 1;
+        /// <summary>
+        /// 触点按钮
+        /// </summary>
+        public ButtonRayReceiver chudianBtn;
+        /// <summary>
+        /// 关闭按钮
+        /// </summary>
+        public ButtonRayReceiver closeBtn;
+        /// <summary>
+        /// 空间放置按钮
+        /// </summary>
+        public ButtonRayReceiver placeBtn;
+        /// <summary>
+        /// mark放置后控制脚本
+        /// </summary>
+        public TaidengController taidengController;
+
+        /// <summary>
+        /// 点击Icon
+        /// </summary>
+        void ClickIcon()
+        {
+            noOperationTime = 0;
+            if (curPlayerPosState == PlayerPosState.Close)
+                StartCoroutine(IEMiddleToClose());
+        }
+
+        void AddButtonRayEvent()
+        {
+            chudianBtn.onPinchDown.AddListener(ClickIcon);
+            closeBtn.onPinchDown.AddListener(OnClose);
+            placeBtn.onPinchDown.AddListener(OnCheckPlace);
+        }
+
+        void RemoveButtonRayEvent()
+        {
+            chudianBtn.onPinchDown.RemoveListener(ClickIcon);
+            closeBtn.onPinchDown.RemoveListener(OnClose);
+            placeBtn.onPinchDown.RemoveListener(OnCheckPlace);
+        }
+
+#endregion
+
+#region 重交互，大UI，近距离（小于1.5米）
+        [Header("===重交互，大UI，近距离（小于1.5米）")]
+        //UI的变化速度
+        public float fUISpeed = 5;
+        //Mark追踪对象
+        public Image2DTrackingTaideng markTrackMagazine;
+        public GameObject timelineShow;
+        
+        /// <summary>
+        /// 空间放置按钮响应
+        /// </summary>
+        void OnCheckPlace()
+        {
+            noOperationTime = 0;
+
+            timelineShow.SetActive(false);
+            
+            markTrackMagazine.StopTrack();
+            markTrackMagazine.enabled = false;
+
+            taidengController.PlaceTaideng();
+        }
+
+        void OnClose()
+        {
+            OnQuit();
+            StartCoroutine("IECloseToMiddle");
+        }
+
+        /// <summary>
+        /// 关闭界面响应
+        /// </summary>
+        void OnQuit()
+        {
+            noOperationTime = 0;
+
+            timelineShow.SetActive(false);
+            //markTrackMagazine.StopTrack();
+            //markTrackMagazine.enabled = false;
+
+            taidengController.gameObject.SetActive(false);
+        }
+#endregion
     }
 }

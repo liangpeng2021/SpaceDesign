@@ -28,7 +28,8 @@ public class ChangeSate : MonoBehaviour
 
     void Init()
     {
-        lightObj = transform.Find("BoundingBox/BoundsVisualization").gameObject;
+        if (transform.Find("BoundingBox/BoundsVisualization"))
+            lightObj = transform.Find("BoundingBox/BoundsVisualization").gameObject;
     }
 
     private void OnEnable()

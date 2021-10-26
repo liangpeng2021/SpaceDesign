@@ -194,6 +194,15 @@ namespace SpaceDesign.Music
             //{
             //    OnRight();
             //}
+            //if (Input.GetKeyDown(KeyCode.C))
+            //{
+            //    OnPlay();
+            //}
+            //if (Input.GetKeyDown(KeyCode.V))
+            //{
+            //    OnPause();
+            //}
+
             //if (Input.GetMouseButtonDown(0))
             //{
             //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -267,7 +276,8 @@ namespace SpaceDesign.Music
                             case MusicPlayState.OneLoop:
                                 audioSource.Stop();
                                 audioSource.time = 0;
-                                audioSource.Play();
+                                //audioSource.Play();
+                                SetAudioPlay(iCurMusicNum);
                                 break;
                             case MusicPlayState.Order:
                                 if (iCurMusicNum < iTotalMusicNum)
@@ -416,6 +426,27 @@ namespace SpaceDesign.Music
             //        break;
             //}
             //btnStateMax.GetComponentInChildren<Text>().text = _str;
+        }
+
+        public void SetAudioPlay(int index = -1)
+        {
+            if (index != -1)
+            {
+                //带序号播放
+            }
+            audioSource.Play();
+        }
+        public void SetAudioPause()
+        {
+            audioSource.Pause();
+        }
+        public void SetAudioStop()
+        {
+            audioSource.Stop();
+        }
+        public void SetVolume(int iValue)
+        {
+
         }
 
         /// <summary>

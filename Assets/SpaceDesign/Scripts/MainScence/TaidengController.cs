@@ -2,12 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SpaceDesign;
 
 /// <summary>
 /// 控制台灯UI显示，/*create by 梁鹏 2021-9-3 */
 /// </summary>
 public class TaidengController : MonoBehaviour
 {
+    /// <summary>
+    /// 台灯模型，展示的大模型
+    /// </summary>
+    public GameObject taidengModel;
     /// <summary>
     /// 开启购买流程
     /// </summary>
@@ -26,8 +31,11 @@ public class TaidengController : MonoBehaviour
     /// </summary>
     public GameObject payObj;
 
-    bool showFirst = false;
+    bool showBoundBox = false;
     BoundingBox boundingBox;
+    BoxCollider boxCollider;
+    GameObject boundingChild;
+
     /// <summary>
     /// 立即购买按钮
     /// </summary>
@@ -45,15 +53,13 @@ public class TaidengController : MonoBehaviour
 
     private void Update()
     {
-        boundingBox = GetComponent<BoundingBox>();
-        if (!hideBoxScale && boundingBox)
+        if (showBoundBox)
         {
-            for (int i = 0; i < boundingBox.cornerObjects.Length; i++)
-            {
-                boundingBox.cornerObjects[i].SetActive(false);
-            }
-            hideBoxScale = true;
+            Debug.Log("EnableBoundBox");
+            EnableBoundBox();
         }
+        else
+            DisableBoundBox();
     }
 
     private void OnDestroy()
@@ -66,7 +72,7 @@ public class TaidengController : MonoBehaviour
         justpayRayReceiver = null;
     }
 
-    void Init()
+    public void Init()
     {
         firstObj.SetActive(true);
         secondObj.SetActive(false);
@@ -76,7 +82,8 @@ public class TaidengController : MonoBehaviour
 
         startpayRayReceiver.gameObject.SetActive(false);
         paySuccessObj.SetActive(false);
-        showFirst = false;
+        taidengModel.SetActive(true);
+        //showFirst = false;
     }
 
     private void OnEnable()
@@ -88,12 +95,13 @@ public class TaidengController : MonoBehaviour
             boundingBox = GetComponent<BoundingBox>();
         if (boundingBox)
         {
-            boundingBox.onTranslateStart.AddListener(PointEnter);
-            boundingBox.onScaleStart.AddListener(PointEnter);
-            boundingBox.onRotateStart.AddListener(PointEnter);
-        } 
+            boundingBox.onTranslateStart.AddListener(PointDown);
+            boundingBox.onScaleStart.AddListener(PointDown);
+            boundingBox.onRotateStart.AddListener(PointDown);
+        }
         else
             Debug.Log("MyLog::找不到台灯BoundingBox");
+
         Init();
     }
 
@@ -104,48 +112,123 @@ public class TaidengController : MonoBehaviour
 
         if (boundingBox)
         {
-            boundingBox.onTranslateStart.RemoveListener(PointEnter);
-            boundingBox.onScaleStart.RemoveListener(PointEnter);
-            boundingBox.onRotateStart.RemoveListener(PointEnter);
+            boundingBox.onTranslateStart.RemoveListener(PointDown);
+            boundingBox.onScaleStart.RemoveListener(PointDown);
+            boundingBox.onRotateStart.RemoveListener(PointDown);
+        }
+    }
+    //有操作
+    void PointDown()
+    {
+         TaidengManager.Inst.noOperationTime = 0;
+    }
+    /// <summary>
+    /// 隐藏台灯移动旋转功能
+    /// </summary>
+    void DisableBoundBox()
+    {
+        if (boxCollider == null)
+            boxCollider = GetComponent<BoxCollider>();
+
+        if (boundingChild == null)
+        {
+            if (transform.Find("BoundingBox"))
+                boundingChild = transform.Find("BoundingBox").gameObject;
+        }
+        if (boundingBox == null)
+            boundingBox = GetComponent<BoundingBox>();
+
+        if (boundingBox)
+            boundingBox.enabled = false;
+        if (boundingChild)
+            boundingChild.SetActive(false);
+        if (boxCollider)
+            boxCollider.enabled = false;
+    }
+    /// <summary>
+    /// 打开台灯移动旋转功能
+    /// </summary>
+    void EnableBoundBox()
+    {
+        if (boxCollider == null)
+            boxCollider = GetComponent<BoxCollider>();
+
+        if (boundingChild == null)
+        {
+            if (transform.Find("BoundingBox"))
+                boundingChild = transform.Find("BoundingBox").gameObject;
+        }
+        if (boundingBox == null)
+            boundingBox = GetComponent<BoundingBox>();
+
+        if (boxCollider)
+            boxCollider.enabled = true;
+        if (boundingChild)
+            boundingChild.SetActive(true);
+        if (!hideBoxScale && boundingBox)
+        {
+            if (boundingBox.cornerObjects != null)
+            {
+                for (int i = 0; i < boundingBox.cornerObjects.Length; i++)
+                {
+                    boundingBox.cornerObjects[i].SetActive(false);
+                }
+                hideBoxScale = true;
+            }
         }
     }
 
-    void PointEnter()
+    /// <summary>
+    /// 放置台灯
+    /// </summary>
+    public void PlaceTaideng()
     {
-
-        if (!showFirst)
-        {
-            firstObj.SetActive(false);
-            startpayRayReceiver.gameObject.SetActive(true);
-            secondObj.SetActive(true);
-            showFirst = true;
-        }
+        //if (!showFirst)
+        //{
+        //    showFirst = true;
+        //}
+        firstObj.SetActive(false);
+        startpayRayReceiver.gameObject.SetActive(true);
+        secondObj.SetActive(true);
+        showBoundBox = true;
+        TaidengManager.Inst.noOperationTime = 0;
     }
     /// <summary>
     /// 开始购买
     /// </summary>
     void StartPay()
     {
+        taidengModel.SetActive(false);
         secondObj.SetActive(false);
         payObj.SetActive(true);
         startpayRayReceiver.gameObject.SetActive(false);
+        showBoundBox = false;
+        TaidengManager.Inst.noOperationTime = 0;
     }
 
     void PaySuccess()
     {
         payObj.SetActive(false);
-        Invoke("ShowPaySucess",2f);
+        ShowPaySucess();
+
+        TaidengManager.Inst.noOperationTime = 0;
     }
 
     void ShowPaySucess()
     {
         paySuccessObj.SetActive(true);
-        Invoke("ShowPeisong", 2f);
+        Invoke("ShowPeisong", 3f);
     }
 
     void ShowPeisong()
     {
         paySuccessObj.SetActive(false);
         peisongObj.SetActive(true);
+        Invoke("HidePeisong", 5f);
+    }
+
+    void HidePeisong()
+    {
+        peisongObj.SetActive(false);
     }
 }

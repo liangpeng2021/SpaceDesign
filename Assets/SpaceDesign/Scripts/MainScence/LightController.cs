@@ -8,7 +8,11 @@ using UnityEngine.UI;
 public class LightController : MonoBehaviour
 {
     public Sprite lightoff;
+    public GameObject lightoffFocusObj;
+
     public Sprite lightOn;
+    public GameObject lightOnFocusObj;
+
     bool islightOn;
     Image image;
     public GameObject lightObj;
@@ -18,7 +22,9 @@ public class LightController : MonoBehaviour
         image = GetComponent<Image>();
         image.sprite = lightOn;
     }
-
+    /// <summary>
+    /// 修改按钮精灵
+    /// </summary>
     public void SetLightOnOrOff()
     {
         islightOn = !islightOn;
@@ -27,5 +33,27 @@ public class LightController : MonoBehaviour
         else
             image.sprite = lightOn;
         lightObj.SetActive(islightOn);
+    }
+    /// <summary>
+    /// 修改悬停状态
+    /// </summary>
+    public void OnPointEnter()
+    {
+        if (islightOn)
+        {
+            lightOnFocusObj.SetActive(false);
+            lightoffFocusObj.SetActive(true);
+        }
+        else
+        {
+            lightOnFocusObj.SetActive(true);
+            lightoffFocusObj.SetActive(false);
+        }
+    }
+
+    public void OnPointExit()
+    {
+        lightOnFocusObj.SetActive(false);
+        lightoffFocusObj.SetActive(false);
     }
 }
