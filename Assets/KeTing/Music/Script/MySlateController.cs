@@ -28,29 +28,30 @@ namespace SpaceDesign.Music
 
             if (Mathf.Abs(x) < 0.05f)
             {
-                if (gameObject.name.Equals("3"))
-                {
+                //点击专辑图，播放或者暂停
+                //if (gameObject.name.Equals("3"))
+                //{
 
-                    if (MusicManage.Inst.bPlaying == false)
-                        MusicManage.Inst.OnPlay();
-                    else
-                        MusicManage.Inst.OnPause();
-                }
+                //    if (MusicManage.Inst.bPlaying == false)
+                //        MusicManage.Inst.OnPlay();
+                //    else
+                //        MusicManage.Inst.OnPause();
+                //}
             }
             else
             {
-                if (x > 0.05f)
+                if (x > 0.15f)
                 {
                     MusicManage.Inst.OnRight();
-                    if (x > 0.25f)
+                    if (x > 0.5f)
                     {
                         MusicManage.Inst.OnRight();
                     }
                 }
-                else if (x < -0.05f)
+                else if (x < -0.15f)
                 {
                     MusicManage.Inst.OnLeft();
-                    if (x < -0.25f)
+                    if (x < -0.5f)
                     {
                         MusicManage.Inst.OnLeft();
                     }

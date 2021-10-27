@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 管理台灯的部分效果，/*create by 梁鹏 2021-10-18 */
+/// 管理冰箱效果，/*create by 梁鹏 2021-10-27 */
 /// </summary>
 namespace SpaceDesign
 {
@@ -24,8 +24,7 @@ namespace SpaceDesign
         }
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
-        //播放模型
-        public Transform traModel;
+
         //Icon、UI等正在切换中
         bool bUIChanging = false;
         //运动阈值
@@ -38,20 +37,6 @@ namespace SpaceDesign
         [HideInInspector]
         public float noOperationTime=0;
         
-        private void Update()
-        {
-            //2分钟无操作，关闭
-            //if (curPlayerPosState == PlayerPosState.Close)
-            //{
-            //    noOperationTime += Time.deltaTime;
-            //    if (noOperationTime > 60)
-            //    {
-            //        noOperationTime = 0;
-            //        OnQuit();
-            //    }
-            //}
-        }
-
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
@@ -70,10 +55,7 @@ namespace SpaceDesign
             v3OriPos = this.transform.position;
             timelineShow.SetActive(false);
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-
-#if !UNITY_EDITOR
             Invoke("SetIconParent", 0.1f);
-#endif
         }
 
         void SetIconParent()
@@ -91,8 +73,8 @@ namespace SpaceDesign
         /// </summary>
         public void RefreshPos(Vector3 pos)
         {
-            if (bUIChanging)
-                return;
+            //if (bUIChanging)
+            //    return;
             Vector3 _v3 = v3OriPos;
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
@@ -219,8 +201,8 @@ namespace SpaceDesign
             }
 
             //启动Mark
-            //markTrackMagazine.enabled = true;
-            //markTrackMagazine.StartTrack();
+            image2DTrackingTaideng.enabled = true;
+            image2DTrackingTaideng.StartTrack();
             //初始化
             taidengController.gameObject.SetActive(true);
             taidengController.Init();
@@ -318,7 +300,7 @@ namespace SpaceDesign
         //UI的变化速度
         public float fUISpeed = 5;
         //Mark追踪对象
-        public Image2DTrackingTaideng markTrackMagazine;
+        public Image2DTrackingTaideng image2DTrackingTaideng;
         public GameObject timelineShow;
         
         /// <summary>
@@ -329,9 +311,9 @@ namespace SpaceDesign
             noOperationTime = 0;
 
             timelineShow.SetActive(false);
-            
-            markTrackMagazine.StopTrack();
-            markTrackMagazine.enabled = false;
+
+            image2DTrackingTaideng.StopTrack();
+            image2DTrackingTaideng.enabled = false;
 
             taidengController.PlaceTaideng();
         }
@@ -350,8 +332,8 @@ namespace SpaceDesign
             noOperationTime = 0;
 
             timelineShow.SetActive(false);
-            //markTrackMagazine.StopTrack();
-            //markTrackMagazine.enabled = false;
+            image2DTrackingTaideng.StopTrack();
+            image2DTrackingTaideng.enabled = false;
 
             taidengController.gameObject.SetActive(false);
         }

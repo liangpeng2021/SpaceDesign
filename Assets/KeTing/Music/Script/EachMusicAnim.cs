@@ -152,28 +152,28 @@ namespace SpaceDesign.Music
         }
         Vector3 v3Scale = new Vector3(320f, 320f, 1f);
 
-        //优化render
-        public MaterialPropertyBlock matPropBlock;
+        ////优化render
+        //public MaterialPropertyBlock matPropBlock;
 
-        /// <summary>
-        /// 设置材质属性，自定义颜色
-        /// </summary>
-        public void SetPropBlock(Color c)
-        {
-            if (renderChild == null)
-                return;
-            matPropBlock = new MaterialPropertyBlock();
-            renderChild.GetPropertyBlock(matPropBlock);
-            matPropBlock.SetColor("_MainColor", c);
-            renderChild.SetPropertyBlock(matPropBlock);
-        }
-        public Color GetPropBlockColor()
-        {
-            if (renderChild == null)
-                return Color.white;
-            matPropBlock = new MaterialPropertyBlock();
-            renderChild.GetPropertyBlock(matPropBlock);
-            return matPropBlock.GetColor("_MainColor");
-        }
+        ///// <summary>
+        ///// 设置材质属性，自定义颜色
+        ///// </summary>
+        //public void SetPropBlock(Color c)
+        //{
+        //    if (renderChild == null)
+        //        return;
+        //    matPropBlock = new MaterialPropertyBlock();
+        //    renderChild.GetPropertyBlock(matPropBlock);
+        //    matPropBlock.SetColor("_MainColor", c);
+        //    renderChild.SetPropertyBlock(matPropBlock);
+        //}
+        //public Color GetPropBlockColor()
+        //{
+        //    if (renderChild == null)
+        //        return Color.white;
+        //    matPropBlock = new MaterialPropertyBlock();
+        //    renderChild.GetPropertyBlock(matPropBlock);
+        //    return matPropBlock.GetColor("_MainColor");
+        //}
     }
 }

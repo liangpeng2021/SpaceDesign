@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using XR;
 namespace SpaceDesign.Magazine
 {
@@ -17,7 +16,7 @@ namespace SpaceDesign.Magazine
         private void Awake()
         {
             objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
-            //SetModelVisible(false);
+            SetModelVisible(false);
         }
 
         public void StartTrack()
@@ -96,17 +95,9 @@ namespace SpaceDesign.Magazine
             }
             else
             {
-                Invoke("SetIconParent", 0.1f);
+                MagazineManage.Inst.transform.SetParent(null);
             }
             objBtnShow.SetActive(isVisible);
-        }
-
-        void SetIconParent()
-        {
-            if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
-                MagazineManage.Inst.transform.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
-            else
-                MagazineManage.Inst.transform.SetParent(null);
         }
     }
 }

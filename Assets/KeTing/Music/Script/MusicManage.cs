@@ -52,8 +52,6 @@ namespace SpaceDesign.Music
         [Header("=====音乐通用变量")]
         //UI的变化速度
         public float fUISpeed = 5;
-        //播放模型
-        public Transform traMusicModel;
         //音乐播放源
         public AudioSource audioSource;
         //当前音乐播放状态
@@ -76,22 +74,90 @@ namespace SpaceDesign.Music
         public Image imgTempImage;
 
         //Icon、UI等正在切换中
-        bool bUIChanging = false;
+        private bool bUIChanging = false;
         //运动阈值
-        float fThreshold = 0.05f;
+        private float fThreshold = 0.1f;
+
+        //对象初始位置
+        private Vector3 v3OriPos;
+
+        //===========================================================================
+        //临时测距
+        public TextMesh tt;
+        //===========================================================================
 
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
+
+            btnEffect.onPinchUp.AddListener(ClickFarToMiddle);
+            btnIcon.onPinchUp.AddListener(ClickFarToMiddle);
+            btnMoreMusicMin.onPinchUp.AddListener(OnMoreMusicMin);
+            btnLeftMin.onPinchUp.AddListener(OnLeft);
+            btnLeftMax.onPinchUp.AddListener(OnLeft);
+            btnRightMin.onPinchUp.AddListener(OnRight);
+            btnRightMax.onPinchUp.AddListener(OnRight);
+            btnPlayMin.onPinchUp.AddListener(() => { OnPlay(); });
+            btnPlayMax.onPinchUp.AddListener(() => { OnPlay(); });
+            btnPauseMin.onPinchUp.AddListener(OnPause);
+            btnPauseMax.onPinchUp.AddListener(OnPause);
+
+            btnStateAllloop.onPinchUp.AddListener(OnState);
+            btnStateOneloop.onPinchUp.AddListener(OnState);
+            btnStateOrder.onPinchUp.AddListener(OnState);
+
+            btnVolumeMax.onPointerEnter.AddListener(EnterBtnVolum);
+            btnVolumeMax.onPointerExit.AddListener(ExitBtnVolum);
+            btnVolumeMax.onPinchUp.AddListener(OnBtnVolume);
+            btnExitSliderVolum.onPointerExit.AddListener(ExitObjVolum);
+            btnSliderVolumMax.onPointerEnter.AddListener(EnterObjVolum);
+            //因为要发送给CPE：不要实时变化，抬起才触发一次
+            //pinchSliderVolumMax.onValueChanged.AddListener(OnSliderVolume);
+            pinchSliderVolumMax.onInteractionEnd.AddListener(OnSliderVolume);
+
+            pinchSliderMusicMax.onInteractionStart.AddListener(SliderMusicMaxPointerDown);
+            pinchSliderMusicMax.onInteractionEnd.AddListener(SliderMusicMaxPointerUp);
+
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
+            btnEffect.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchUp.RemoveAllListeners();
+            btnMoreMusicMin.onPinchUp.RemoveAllListeners();
+            btnLeftMin.onPinchUp.RemoveAllListeners();
+            btnLeftMax.onPinchUp.RemoveAllListeners();
+            btnRightMin.onPinchUp.RemoveAllListeners();
+            btnRightMax.onPinchUp.RemoveAllListeners();
+            btnPlayMin.onPinchUp.RemoveAllListeners();
+            btnPlayMax.onPinchUp.RemoveAllListeners();
+            btnPauseMin.onPinchUp.RemoveAllListeners();
+            btnPauseMax.onPinchUp.RemoveAllListeners();
+
+            btnStateAllloop.onPinchUp.RemoveAllListeners();
+            btnStateOneloop.onPinchUp.RemoveAllListeners();
+            btnStateOrder.onPinchUp.RemoveAllListeners();
+
+            btnVolumeMax.onPointerEnter.RemoveAllListeners();
+            btnVolumeMax.onPointerExit.RemoveAllListeners();
+            btnVolumeMax.onPinchUp.RemoveAllListeners();
+            btnSliderVolumMax.onPointerEnter.RemoveAllListeners(); ;
+            btnExitSliderVolum.onPointerExit.RemoveAllListeners();
+            pinchSliderVolumMax.onValueChanged.RemoveAllListeners();
+            pinchSliderMusicMax.onInteractionStart.RemoveAllListeners();
+            pinchSliderMusicMax.onInteractionEnd.RemoveAllListeners();
+        }
+
+        void OnDestroy()
+        {
+            StopAllCoroutines();
         }
 
         void Start()
         {
+            v3OriPos = this.transform.position;
+
             Canvas[] _canvasAry = transform.GetComponentsInChildren<Canvas>();
             foreach (Canvas v in _canvasAry)
             {
@@ -100,82 +166,6 @@ namespace SpaceDesign.Music
 
             //播放的循环，不用该值控制
             audioSource.loop = false;
-
-            //btnLeftMin.onClick.AddListener(OnLeft);
-            //btnLeftMax.onClick.AddListener(OnLeft);
-            //btnRightMin.onClick.AddListener(OnRight);
-            //btnRightMax.onClick.AddListener(OnRight);
-            //btnPlayMin.onClick.AddListener(OnPlay);
-            //btnPlayMax.onClick.AddListener(OnPlay);
-            //btnPauseMin.onClick.AddListener(OnPause);
-            //btnPauseMax.onClick.AddListener(OnPause);
-
-            //btnStateMax.onClick.AddListener(OnState);
-            //btnStateAllloop.onClick.AddListener(OnState);
-            //btnStateOneloop.onClick.AddListener(OnState);
-            //btnStateOrder.onClick.AddListener(OnState);
-
-            //btnMoreMusicMin.onClick.AddListener(OnMoreMusicMin);
-
-            //btnVolumeMax.onClick.AddListener(OnBtnVolume);
-            //slidVolumeMax.onValueChanged.AddListener(OnSliderVolume);
-
-            ////=====================MaxUI里面拖拽进度条===================================
-            //EventTrigger _trigger = slidMusicMax.GetComponent<EventTrigger>();
-            //if (_trigger == null)
-            //    _trigger = slidMusicMax.gameObject.AddComponent<EventTrigger>();
-
-            //EventTrigger.Entry _entry = new EventTrigger.Entry
-            //{
-            //    eventID = EventTriggerType.PointerDown,
-            //    callback = new EventTrigger.TriggerEvent(),
-            //};
-            //_entry.callback.AddListener(x => { bSlideDragging = true; });
-            //_trigger.triggers.Add(_entry);
-
-            //_entry = new EventTrigger.Entry
-            //{
-            //    eventID = EventTriggerType.PointerUp,
-            //    callback = new EventTrigger.TriggerEvent(),
-            //};
-            //_entry.callback.AddListener(x => { bSlideDragging = false; audioSource.time = slidMusicMax.value * fTotalPlayTime; });
-            //_trigger.triggers.Add(_entry);
-            ////===========================================================================
-
-            ////===========================================================================
-            ////特效点击触发
-            //_trigger = objEffect.GetComponent<EventTrigger>();
-            //if (_trigger == null)
-            //    _trigger = objEffect.AddComponent<EventTrigger>();
-
-            //_entry = new EventTrigger.Entry
-            //{
-            //    eventID = EventTriggerType.PointerClick,
-            //    callback = new EventTrigger.TriggerEvent(),
-            //};
-            //_entry.callback.AddListener(x =>
-            //{
-            //    if (curPlayerPosState == PlayerPosState.Middle)
-            //        StartCoroutine(IEFarToMiddle());
-            //});
-            //_trigger.triggers.Add(_entry);
-            ////===========================================================================
-
-
-            ////===========================================================================
-            ////Icon点击触发
-            //_trigger = traIcon.GetComponent<EventTrigger>();
-            //if (_trigger == null)
-            //    _trigger = traIcon.gameObject.AddComponent<EventTrigger>();
-
-            //_entry = new EventTrigger.Entry
-            //{
-            //    eventID = EventTriggerType.PointerClick,
-            //    callback = new EventTrigger.TriggerEvent(),
-            //};
-            //_entry.callback.AddListener(x => { StartCoroutine(IEFarToMiddle()); });
-            //_trigger.triggers.Add(_entry);
-            ////===========================================================================
 
             //开始的时候刷新一下数据
             _SetCurMusicNum(1);
@@ -225,7 +215,8 @@ namespace SpaceDesign.Music
                     fMinToEffectTemp += Time.deltaTime;
                     if (fMinToEffectTemp > fAutoTurnUITime)
                     {
-                        StartCoroutine(IEMiddleToFar());
+                        StopAllCoroutines();
+                        StartCoroutine("IEMiddleToFar");
                         fMinToEffectTemp = 0;
                     }
                 }
@@ -237,7 +228,8 @@ namespace SpaceDesign.Music
                 fMaxToMinTemp += Time.deltaTime;
                 if (fMaxToMinTemp > fAutoTurnUITime)
                 {
-                    StartCoroutine(IEMaxToMin());
+                    StopAllCoroutines();
+                    StartCoroutine("IEMaxToMin");
                     fMaxToMinTemp = 0;
                 }
             }
@@ -274,17 +266,18 @@ namespace SpaceDesign.Music
                                 OnRight();
                                 break;
                             case MusicPlayState.OneLoop:
-                                audioSource.Stop();
-                                audioSource.time = 0;
+                                //audioSource.Stop();
+                                //audioSource.time = 0;
                                 //audioSource.Play();
-                                SetAudioPlay(iCurMusicNum);
+                                OnPlay(iCurMusicNum);
                                 break;
                             case MusicPlayState.Order:
                                 if (iCurMusicNum < iTotalMusicNum)
                                     OnRight();
                                 else
                                 {
-                                    audioSource.time = 0;
+                                    SetAudioTime(0);
+                                    //audioSource.time = 0;
                                     OnPause();
                                 }
                                 break;
@@ -307,7 +300,6 @@ namespace SpaceDesign.Music
                 }
                 else
                 {
-                    //bImgCenterEnter = false;
                     traImgCenter.localScale = v3ImgCenterEnter;
                 }
 
@@ -322,21 +314,9 @@ namespace SpaceDesign.Music
                 else
                 {
                     iImgCenterEnterOrExit = -1;
-                    //bImgCenterExit = false;
                     traImgCenter.localScale = Vector3.one;
                 }
             }
-            //if (iImgCenterEnterOrExit == 1 && iUpCenterPos != -1)
-            //{
-            //    switch (iUpCenterPos)
-            //    {
-            //        case 0: OnLeft(); break;
-            //        case 1: OnLeft(); OnLeft(); break;
-            //        case 2: OnRight(); break;
-            //        case 3: OnRight(); OnRight(); break;
-            //    }
-            //    iUpCenterPos = -1;
-            //}
         }
 
         /// <summary>
@@ -376,7 +356,8 @@ namespace SpaceDesign.Music
         public void SliderMusicMaxPointerUp()
         {
             bSlideDragging = false;
-            audioSource.time = (pinchSliderMusicMax.sliderValue * fTotalPlayTime);
+            SetAudioTime(pinchSliderMusicMax.sliderValue * fTotalPlayTime);
+            //audioSource.time = (pinchSliderMusicMax.sliderValue * fTotalPlayTime);
         }
 
         /// <summary>
@@ -385,16 +366,20 @@ namespace SpaceDesign.Music
         public void ClickFarToMiddle()
         {
             if (curPlayerPosState == PlayerPosState.Middle)
-                StartCoroutine(IEFarToMiddle());
+            {
+                print(11111);
+                StopAllCoroutines();
+                StartCoroutine("IEFarToMiddle");
+            }
         }
-
 
         /// <summary>
         /// 更多音乐响应
         /// </summary>
         public void OnMoreMusicMin()
         {
-            StartCoroutine(IEMinToMax());
+            StopAllCoroutines();
+            StartCoroutine("IEMinToMax");
         }
 
         /// <summary>
@@ -404,79 +389,58 @@ namespace SpaceDesign.Music
         {
             RestartTimeMaxToMin();
             curMusicPlayState = ((int)(curMusicPlayState)) == 2 ? 0 : curMusicPlayState + 1;
-            //string _str = null;
             btnStateAllloop.gameObject.SetActive(curMusicPlayState == MusicPlayState.AllLoop);
             btnStateOneloop.gameObject.SetActive(curMusicPlayState == MusicPlayState.OneLoop);
             btnStateOrder.gameObject.SetActive(curMusicPlayState == MusicPlayState.Order);
-            //switch (curMusicPlayState)
-            //{
-            //    case MusicPlayState.AllLoop:
-            //        //_str = "全部循环"; 
-            //        btnStateOneloop.gameObject.SetActive(true);
-            //        break;
-            //    case MusicPlayState.OneLoop:
-            //        //_str = "单首循环";
-            //        btnStateOneloop.gameObject.SetActive(false);
-            //        btnStateOrder.gameObject.SetActive(true);
-            //        break;
-            //    case MusicPlayState.Order:
-            //        //_str = "顺序播放";
-            //        btnStateOrder.gameObject.SetActive(false);
-            //        btnStateAllloop.gameObject.SetActive(true);
-            //        break;
-            //}
-            //btnStateMax.GetComponentInChildren<Text>().text = _str;
-        }
-
-        public void SetAudioPlay(int index = -1)
-        {
-            if (index != -1)
-            {
-                //带序号播放
-            }
-            audioSource.Play();
-        }
-        public void SetAudioPause()
-        {
-            audioSource.Pause();
-        }
-        public void SetAudioStop()
-        {
-            audioSource.Stop();
-        }
-        public void SetVolume(int iValue)
-        {
-
         }
 
         /// <summary>
         /// 播放
         /// </summary>
-        public void OnPlay()
+        public void OnPlay(int index = -1)
         {
-            RestartTimeMaxToMin();
+            //播放某首音乐、没有暂停过、播放到头了、播放时间为0
+            if ((index != -1))
+            {
+                iCurMusicNum = index;
+                SetAudioPlay(iCurMusicNum);
+            }
+            else if ((_bTempPause == false))
+            {
+                SetAudioPlay(iCurMusicNum);
+            }
+            else if ((audioSource.time >= fTotalPlayTime) || (audioSource.time <= 0))
+            {
+                SetAudioTime(0);
+                SetAudioPlay(iCurMusicNum);
+            }
+            else
+            {
+                SetAudioUnPause();
+            }
+
             bPlaying = true;
             btnPauseMax.gameObject.SetActive(bPlaying);
             btnPlayMax.gameObject.SetActive(!bPlaying);
             btnPauseMin.gameObject.SetActive(bPlaying);
             btnPlayMin.gameObject.SetActive(!bPlaying);
-            if (audioSource.time >= fTotalPlayTime)
-                audioSource.time = 0;
-            audioSource.Play();
         }
 
+        //临时计算是否暂停过用
+        bool _bTempPause = false;
         /// <summary>
         /// 暂停
         /// </summary>
         public void OnPause()
         {
-            RestartTimeMaxToMin();
+            _bTempPause = true;
             bPlaying = false;
             btnPauseMax.gameObject.SetActive(bPlaying);
             btnPlayMax.gameObject.SetActive(!bPlaying);
             btnPauseMin.gameObject.SetActive(bPlaying);
             btnPlayMin.gameObject.SetActive(!bPlaying);
-            audioSource.Pause();
+            //audioSource.Pause();
+            SetAudioPause();
         }
 
         /// <summary>
@@ -484,7 +448,6 @@ namespace SpaceDesign.Music
         /// </summary>
         public void OnLeft()
         {
-            RestartTimeMaxToMin();
             _SetCurMusicNum(iCurMusicNum - 1);
             bClockWise = true;
             _InitEachMusicAnim();
@@ -494,7 +457,6 @@ namespace SpaceDesign.Music
         /// </summary>
         public void OnRight()
         {
-            RestartTimeMaxToMin();
             _SetCurMusicNum(iCurMusicNum + 1);
             bClockWise = false;
             _InitEachMusicAnim();
@@ -507,9 +469,11 @@ namespace SpaceDesign.Music
         {
             if (audioSource.isPlaying)
             {
-                audioSource.time = 0;
+                //audioSource.time = 0;
+                SetAudioTime(0);
                 _SetCurPlayTime(true);
-                audioSource.Stop();
+                //audioSource.Stop();
+                SetAudioStop();
             }
 
             int _iLen = aryEachMusicAnim.Length;
@@ -549,10 +513,13 @@ namespace SpaceDesign.Music
                 //最中间的音乐播放
                 if (v.musicPicType == MusicAnimType.Center)
                 {
-                    //bool _bAutoPlay = audioSource.isPlaying;
-                    //if (_bAutoPlay)
-                    //    audioSource.Stop();
-                    audioSource.time = 0;
+                    ////bool _bAutoPlay = audioSource.isPlaying;
+                    ////if (_bAutoPlay)
+                    ////    audioSource.Stop();
+
+                    //audioSource.time = 0;
+                    SetAudioTime(0);
+
                     _SetCurPlayTime(true);
                     textCurMusicNameMax.text = $"{v.emaCurChild.strName} - {v.emaCurChild.strAuthor}";
                     textCurMusicNameMin.text = v.emaCurChild.strName;
@@ -563,7 +530,10 @@ namespace SpaceDesign.Music
                     fTotalPlayTime = audioSource.clip.length;
                     textTotalPlayTime.text = ((int)(fTotalPlayTime / 60)).ToString("D2") + ":" + ((int)(fTotalPlayTime % 60)).ToString("D2");
                     if (bPlaying)
-                        audioSource.Play();
+                    {
+                        //audioSource.Play();
+                        SetAudioPlay(iCurMusicNum);
+                    }
                 }
             }
 
@@ -589,6 +559,8 @@ namespace SpaceDesign.Music
         /// </summary>
         void _SetCurMusicNum(int iNum)
         {
+            RestartTimeMaxToMin();
+
             iCurMusicNum = iNum;
             if (iNum <= 0)
                 iCurMusicNum = iTotalMusicNum;
@@ -597,7 +569,6 @@ namespace SpaceDesign.Music
 
             textCurMusicNum.text = iCurMusicNum.ToString();
         }
-
         /// <summary>
         /// 刷新位置消息
         /// </summary>
@@ -606,32 +577,34 @@ namespace SpaceDesign.Music
             if (bUIChanging == true)
                 return;
 
-            Vector3 _v3 = traMusicModel.position;
+            Vector3 _v3 = v3OriPos;
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"音乐的距离:{_dis}");
+            tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 
             if (_dis >= 5f)
             {
+                curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
-                curPlayerPosState = PlayerPosState.Far;
             }
             else //if (_dis < 5f && _dis > 1.5f)
             {
+                curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
-                curPlayerPosState = PlayerPosState.Middle;
             }
             //else if (_dis <= 1.5f)
             //{
+            //    curPlayerPosState = PlayerPosState.Close;
             //    if (lastPPS == PlayerPosState.Close)
             //        return;
-            //    curPlayerPosState = PlayerPosState.Close;
             //}
 
+            StopAllCoroutines();
             StartCoroutine("IERefreshPos", lastPPS);
         }
 
@@ -645,8 +618,6 @@ namespace SpaceDesign.Music
 
             //UI开始变化
             bUIChanging = true;
-
-            //WaitForSeconds _wfs = new WaitForSeconds(0.1f);
 
             if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
             {
@@ -673,9 +644,9 @@ namespace SpaceDesign.Music
             //远距离=>中距离
             //Icon先左移动，然后UI从小变大出现
 
-            if (objEffect.activeSelf)
+            if (btnEffect.gameObject.activeSelf)
             {
-                objEffect.SetActive(false);
+                btnEffect.gameObject.SetActive(false);
             }
 
             //1、变Icon
@@ -689,7 +660,7 @@ namespace SpaceDesign.Music
             while (true)
             {
                 //Icon要复原到1
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * 5f * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * Time.deltaTime * 2);
 
                 traIcon.localPosition = Vector3.Lerp(traIcon.localPosition, Vector3.zero, fIconSpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localPosition, Vector3.zero);
@@ -704,20 +675,39 @@ namespace SpaceDesign.Music
             //2、变MinUI
             yield return new WaitForSeconds(0.1f);
             Transform _traBtnMoreMusic = btnMoreMusicMin.transform;
+            Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
+
             while (true)
             {
-                traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, Vector3.one, fUISpeed * 1.1f * Time.deltaTime);
-                float _fDis = Vector3.Distance(traMinUI.localScale, Vector3.one);
+                traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, _v3, fUISpeed * Time.deltaTime);
+                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, _v3, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traMinUI.localScale, _v3);
 
                 if (_fDis < fThreshold)
                 {
-                    traMinUI.localScale = Vector3.one;
-                    _traBtnMoreMusic.localScale = Vector3.one;
+                    traMinUI.localScale = _v3;
+                    _traBtnMoreMusic.localScale = _v3;
                     break;
                 }
                 yield return 0;
             }
+
+            _v3 = Vector3.one;
+            while (true)
+            {
+                traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, _v3, fUISpeed * Time.deltaTime);
+                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, _v3, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traMinUI.localScale, _v3);
+
+                if (_fDis < fThreshold)
+                {
+                    traMinUI.localScale = _v3;
+                    _traBtnMoreMusic.localScale = _v3;
+                    break;
+                }
+                yield return 0;
+            }
+
 
         }
         /// <summary>
@@ -725,17 +715,19 @@ namespace SpaceDesign.Music
         /// </summary>
         IEnumerator IEMiddleToFar()
         {
+            //中距离=>远距离
+            if (bMaxTiming)
+                yield return IEMaxToMin();
+
             bMaxTiming = false;
             bMinTiming = false;
-
-            //中距离=>远距离
 
             //1、变MinUI
             Transform _traBtnMoreMusic = btnMoreMusicMin.transform;
             while (true)
             {
                 traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
-                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, Vector3.zero, fUISpeed * 1.1f * Time.deltaTime);
+                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traMinUI.localScale, Vector3.zero);
 
                 if (_fDis < fThreshold)
@@ -756,7 +748,7 @@ namespace SpaceDesign.Music
             while (true)
             {
                 //播放中，显示音符特效，并Icon缩小为0
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, (bPlaying ? Vector3.zero : Vector3.one), fIconSpeed * 1.5f * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, (bPlaying ? Vector3.zero : Vector3.one), fIconSpeed * Time.deltaTime * 2);
 
                 traIcon.localPosition = Vector3.Lerp(traIcon.localPosition, Vector3.zero, fIconSpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localPosition, Vector3.zero);
@@ -775,7 +767,7 @@ namespace SpaceDesign.Music
             //如果在播放中，显示音符特效
             if (bPlaying)
             {
-                objEffect.SetActive(true);
+                btnEffect.gameObject.SetActive(true);
                 //print("音符特效");
             }
         }
@@ -804,67 +796,83 @@ namespace SpaceDesign.Music
             _traImgTempImage.GetComponent<Image>().enabled = false;
             _traImgTempImage.gameObject.SetActive(true);
             _traImgTempImage.SetParent(traTempImageMaxPos);
+            Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
             //更多音乐按钮对象
             Transform _traBtnMoreMusic = btnMoreMusicMin.transform;
             while (true)
             {
-                _traImgTempImage.localScale = Vector3.Lerp(_traImgTempImage.localScale, Vector3.one, fIconSpeed * 1.5f * Time.deltaTime);
-                _traImgTempImage.localPosition = Vector3.Lerp(_traImgTempImage.localPosition, Vector3.zero, fIconSpeed * 2.5f * Time.deltaTime);
-
-
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fIconSpeed * 1.5f * Time.deltaTime);
-
+                _traImgTempImage.localScale = Vector3.Lerp(_traImgTempImage.localScale, _v3, fUISpeed * Time.deltaTime);
+                _traImgTempImage.localPosition = Vector3.Lerp(_traImgTempImage.localPosition, Vector3.zero, fUISpeed * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fIconSpeed * Time.deltaTime);
                 traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
-                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, Vector3.zero, fUISpeed * 1.1f * Time.deltaTime);
+                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
 
 
                 float _fDis = Vector3.Distance(traMinUI.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
-                    _traImgTempImage.localScale = Vector3.one;
+                    _traImgTempImage.localScale = _v3;
                     _traImgTempImage.localPosition = Vector3.zero;
-
                     traIcon.localScale = Vector3.zero;
-
                     traMinUI.localScale = Vector3.zero;
                     _traBtnMoreMusic.localScale = Vector3.zero;
                     break;
                 }
                 yield return 0;
             }
-            //yield return new WaitForSeconds(0.1f);
 
             //2、MaxUI的控制按钮放大，图片旋转出现
 
             while (true)
             {
-
-                traMaxUICtr.localScale = Vector3.Lerp(traMaxUICtr.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traMaxUICtr.localScale, Vector3.one);
+                _traImgTempImage.localScale = Vector3.Lerp(_traImgTempImage.localScale, Vector3.one, fUISpeed * Time.deltaTime);
+                traMaxUICtr.localScale = Vector3.Lerp(traMaxUICtr.localScale, _v3, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traMaxUICtr.localScale, _v3);
 
                 if (_fDis < fThreshold)
                 {
-                    traMaxUICtr.localScale = Vector3.one;
+                    _traImgTempImage.localScale = Vector3.one;
+                    traMaxUICtr.localScale = _v3;
                     break;
                 }
                 yield return 0;
             }
-            //yield return new WaitForSeconds(0.1f);
-
+            traImgCenter.gameObject.SetActive(false);
+            Vector3 _v32 = new Vector3(1.7f, 1.7f, 1.7f);
             while (true)
             {
-                //traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, Vector3.one, fMinUISpeed * Time.deltaTime);
-                traMaxUIText.localScale = Vector3.Lerp(traMaxUIText.localScale, Vector3.one, fUISpeed * Time.deltaTime);
+                traMaxUICtr.localScale = Vector3.Lerp(traMaxUICtr.localScale, Vector3.one, fUISpeed * Time.deltaTime);
+                traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, _v32, fUISpeed * Time.deltaTime);
+                traMaxUIText.localScale = Vector3.Lerp(traMaxUIText.localScale, _v3, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traMaxUIText.localScale, _v3);
+
+                if (_fDis < fThreshold)
+                {
+                    traMaxUICtr.localScale = Vector3.one;
+                    traMaxUIImage.localScale = _v32;
+                    traMaxUIText.localScale = _v3;
+                    break;
+                }
+                yield return 0;
+            }
+
+            _v32 = new Vector3(1.5f, 1.5f, 1.5f);
+            while (true)
+            {
+                traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, _v32, fUISpeed * Time.deltaTime);
+                traMaxUIText.localScale = Vector3.Lerp(traMaxUICtr.localScale, Vector3.one, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traMaxUIText.localScale, Vector3.one);
 
                 if (_fDis < fThreshold)
                 {
-                    //traMaxUIImage.localScale = Vector3.one;
+                    traMaxUIImage.localScale = _v32;
                     traMaxUIText.localScale = Vector3.one;
                     break;
                 }
                 yield return 0;
             }
+
+            traImgCenter.gameObject.SetActive(true);
 
             objMinPic.SetActive(true);
             traMaxUIImage.gameObject.SetActive(true);
@@ -891,7 +899,7 @@ namespace SpaceDesign.Music
             bMaxTiming = false;
             bMinTiming = true;
 
-            traMaxUIImage.gameObject.SetActive(false);
+            //traMaxUIImage.gameObject.SetActive(false);
 
             //中距离和近距离的同一个音乐的图片，这里不要动画
             //Transform _traImgTempImage = imgTempImage.transform.parent.transform;
@@ -902,13 +910,13 @@ namespace SpaceDesign.Music
 
             while (true)
             {
-                //traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, Vector3.zero, fMinUISpeed * Time.deltaTime);
-                traMaxUIText.localScale = Vector3.Lerp(traMaxUIText.localScale, Vector3.zero, fUISpeed * 2 * Time.deltaTime);
+                traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+                traMaxUIText.localScale = Vector3.Lerp(traMaxUIText.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traMaxUIText.localScale, Vector3.zero);
 
                 if (_fDis < fThreshold)
                 {
-                    //traMaxUIImage.localScale = Vector3.zero;
+                    traMaxUIImage.localScale = Vector3.zero;
                     traMaxUIText.localScale = Vector3.zero;
                     break;
                 }
@@ -933,12 +941,13 @@ namespace SpaceDesign.Music
             RunIconMiddle();
             //更多音乐按钮对象
             Transform _traBtnMoreMusic = btnMoreMusicMin.transform;
+            Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * 1.5f * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * Time.deltaTime);
 
-                traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, Vector3.one, fUISpeed * 1.1f * Time.deltaTime);
+                traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, _v3, fUISpeed * Time.deltaTime);
+                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, _v3, fUISpeed * Time.deltaTime);
 
 
                 float _fDis = Vector3.Distance(traMinUI.localScale, Vector3.one);
@@ -947,15 +956,30 @@ namespace SpaceDesign.Music
 
                     traIcon.localScale = Vector3.one;
 
-                    traMinUI.localScale = Vector3.one;
-                    _traBtnMoreMusic.localScale = Vector3.one;
+                    traMinUI.localScale = _v3;
+                    _traBtnMoreMusic.localScale = _v3;
                     break;
                 }
                 yield return 0;
             }
-            //yield return new WaitForSeconds(0.1f);
 
-            //_traImgTempImage.gameObject.SetActive(false);
+            _v3 = Vector3.one;
+            while (true)
+            {
+                traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, _v3, fUISpeed * Time.deltaTime);
+                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, _v3, fUISpeed * Time.deltaTime * 1.1f);
+
+                float _fDis = Vector3.Distance(traMinUI.localScale, Vector3.one);
+                if (_fDis < fThreshold)
+                {
+
+                    traMinUI.localScale = _v3;
+                    _traBtnMoreMusic.localScale = _v3;
+                    break;
+                }
+                yield return 0;
+            }
+
             //UI变化结束
             bUIChanging = false;
         }
@@ -970,6 +994,8 @@ namespace SpaceDesign.Music
         public Transform traIconMiddlePos;
         //Icon的对象
         public Transform traIcon;
+        //Icon对象的AR手势Button按钮
+        public ButtonRayReceiver btnIcon;
         //吸引态，上下移动动画
         public Animator animIconFar;
         //轻交互，半球动画+音符动画
@@ -991,15 +1017,15 @@ namespace SpaceDesign.Music
         //小UI的图片总对象
         public GameObject objMinPic;
         //更多音乐按钮（不在traMinUI的子节点下，因为动画变化不同）
-        public Button btnMoreMusicMin;
+        public ButtonRayReceiver btnMoreMusicMin;
         //左切换按钮
-        public Button btnLeftMin;
+        public ButtonRayReceiver btnLeftMin;
         //右切换按钮
-        public Button btnRightMin;
+        public ButtonRayReceiver btnRightMin;
         //播放按钮
-        public Button btnPlayMin;
+        public ButtonRayReceiver btnPlayMin;
         //暂停按钮
-        public Button btnPauseMin;
+        public ButtonRayReceiver btnPauseMin;
         //[Header("音乐播放的进度条,这个地方用图片的FileAmount属性控制")]
         //音乐播放的进度条,这个地方用图片的FileAmount属性控制
         public Image imgSliderMin;
@@ -1045,21 +1071,25 @@ namespace SpaceDesign.Music
         public bool bClockWise = true;
 
         //播放状态按钮，全部循环
-        public Button btnStateAllloop;
+        public ButtonRayReceiver btnStateAllloop;
         //播放状态按钮，单曲循环
-        public Button btnStateOneloop;
+        public ButtonRayReceiver btnStateOneloop;
         //播放状态按钮，顺序
-        public Button btnStateOrder;
+        public ButtonRayReceiver btnStateOrder;
         //左切换按钮
-        public Button btnLeftMax;
+        public ButtonRayReceiver btnLeftMax;
         //右切换按钮
-        public Button btnRightMax;
+        public ButtonRayReceiver btnRightMax;
         //播放按钮
-        public Button btnPlayMax;
+        public ButtonRayReceiver btnPlayMax;
         //暂停按钮
-        public Button btnPauseMax;
+        public ButtonRayReceiver btnPauseMax;
         //音量按钮
-        public Button btnVolumeMax;
+        public ButtonRayReceiver btnVolumeMax;
+        //音量滑动条背景的按钮（碰触，显示音量设置条UI）
+        public ButtonRayReceiver btnSliderVolumMax;
+        //离开音量滑动调界面按钮
+        public ButtonRayReceiver btnExitSliderVolum;
         //音乐播放的进度条
         //public Slider slidMusicMax;
         //音乐播放的进度条
@@ -1091,46 +1121,34 @@ namespace SpaceDesign.Music
         public bool bTouchBtnVolum = false;
         //是否还碰触着音量控制对象
         public bool bTouchObjVolum = false;
-        //音量对象
-        public GameObject objVolum;
-
-        /// <summary>
-        /// 重置大UI的计时（大UI自动变小UI）
-        /// </summary>
-        void RestartTimeMaxToMin()
-        {
-            fMaxToMinTemp = 0;
-            fMinToEffectTemp = 0;
-        }
 
         public void OnBtnVolume()
         {
-            RestartTimeMaxToMin();
-
             if (audioSource.volume > 0.01f)
             {
-                audioSource.volume = 0;
+                //audioSource.volume = 0;
+                SetAudioVolume(0);
                 pinchSliderVolumMax.sliderValue = 0;
                 //slidVolumeMax.SetValueWithoutNotify(0);
             }
             else
             {
-                audioSource.volume = 1;
+                //audioSource.volume = 1;
+                SetAudioVolume(1);
                 pinchSliderVolumMax.sliderValue = 1;
                 //slidVolumeMax.SetValueWithoutNotify(1);
             }
         }
-        public void OnSliderVolume(float f)
+        public void OnSliderVolume()
         {
-            RestartTimeMaxToMin();
-            audioSource.volume = f;
+            SetAudioVolume(pinchSliderVolumMax.sliderValue);
+            //audioSource.volume = f;
         }
 
         public void EnterBtnVolum()
         {
-            RestartTimeMaxToMin();
             bTouchBtnVolum = true;
-            objVolum.SetActive(true);
+            btnSliderVolumMax.gameObject.SetActive(true);
         }
         public void ExitBtnVolum()
         {
@@ -1139,9 +1157,8 @@ namespace SpaceDesign.Music
         }
         public void EnterObjVolum()
         {
-            RestartTimeMaxToMin();
             bTouchObjVolum = true;
-            objVolum.SetActive(true);
+            btnSliderVolumMax.gameObject.SetActive(true);
         }
         public void ExitObjVolum()
         {
@@ -1157,17 +1174,81 @@ namespace SpaceDesign.Music
         {
             if (bTouchBtnVolum == true || bTouchObjVolum == true)
                 return;
-            objVolum.SetActive(false);
+            btnSliderVolumMax.gameObject.SetActive(false);
         }
         #endregion
 
         #region 音符特效
         //播放过程中的特效（音响周围的特效）
-        public GameObject objEffect;
-        //public void EffectToMinUI()
-        //{
-        //    StartCoroutine(IEFarToMiddle());
-        //}
+        public ButtonRayReceiver btnEffect;
+        #endregion
+
+        /// <summary>
+        /// 重置大UI的计时（大UI自动变小UI）
+        /// </summary>
+        void RestartTimeMaxToMin()
+        {
+            fMaxToMinTemp = 0;
+            fMinToEffectTemp = 0;
+        }
+
+        #region 调用CPE接口
+        public void SetAudioPlay(int index = -1)
+        {
+            RestartTimeMaxToMin();
+            if (index != -1)
+            {
+                audioSource.Play();
+                //===========================================================================
+                //CPE发送：带序号播放
+                //===========================================================================
+            }
+        }
+        public void SetAudioUnPause()
+        {
+            RestartTimeMaxToMin();
+            audioSource.UnPause();
+            //===========================================================================
+            //CPE发送：恢复暂停
+            //===========================================================================
+        }
+        public void SetAudioPause()
+        {
+            RestartTimeMaxToMin();
+            audioSource.Pause();
+            //===========================================================================
+            //CPE发送：暂停
+            //===========================================================================
+        }
+        public void SetAudioStop()
+        {
+            RestartTimeMaxToMin();
+            audioSource.Stop();
+            //===========================================================================
+            //CPE发送：停止
+            //===========================================================================
+        }
+        public void SetAudioVolume(float fValue)
+        {
+            RestartTimeMaxToMin();
+            audioSource.volume = fValue;
+
+            //音量CPE赋值：数值乘以100
+            fValue *= 100;
+            //===========================================================================
+            //CPE发送：音量
+            //===========================================================================
+        }
+        public void SetAudioTime(float fTime)
+        {
+            RestartTimeMaxToMin();
+            audioSource.time = fTime;
+
+            //进度CPE赋值：数值即为当前秒数
+            //===========================================================================
+            //CPE发送：进度
+            //===========================================================================
+        }
 
         #endregion
     }

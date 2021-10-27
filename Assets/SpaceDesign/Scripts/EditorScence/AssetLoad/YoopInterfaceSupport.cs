@@ -170,21 +170,25 @@ namespace SpaceDesign
             }
         }
 
-        public static IEnumerator SendDataToCPE(string url, Action<string> callback)
+        public static IEnumerator SendDataToCPE<T>(string url, Action<T> callback)
         {
-            UnityWebRequest request = UnityWebRequest.Get(url);
-            yield return request.SendWebRequest();
-
-            if (request.isHttpError || request.isNetworkError)
+            using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
-                Debug.Log("MyLog::request.error:" + request.error);
-            }
-            else
-            {
-                callback?.Invoke(request.downloadHandler.text);
-            }
+                yield return request.SendWebRequest();
+                T yyd;
+                if (request.isHttpError || request.isNetworkError)
+                {
+                    Debug.Log("MyLog::request.error:" + request.error);
+                }
+                else
+                {
+                    yyd = JsonMapper.ToObject<T>(request.downloadHandler.text);
+                    if (yyd != null)
+                        callback?.Invoke(yyd);
+                }
 
-            yield return null;
+                yield return null;
+            }
         }
     }
 }

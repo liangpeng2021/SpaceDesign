@@ -23,7 +23,6 @@ public struct TimelineData
 }
 public class TimelineControl : MonoBehaviour
 {
-    public static TimelineControl Instance;
     public PlayableDirector playableDirector;
     
     public TimelineData[] timelineDatas;
@@ -33,12 +32,7 @@ public class TimelineControl : MonoBehaviour
     bool startPlay;
     [HideInInspector]
     public TimelineData curTimeData;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
+    
     /// <summary>
     /// 是否自动继续
     /// </summary>

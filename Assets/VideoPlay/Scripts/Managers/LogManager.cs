@@ -52,7 +52,7 @@ public class LogManager : Singleton<LogManager>
 
             lastBtn.onClick.AddListener(() => { SetLogTextStr(true); });
             nextBtn.onClick.AddListener(() => { SetLogTextStr(false); });
-            
+            qingkongBtn.onClick.AddListener(Clear);
             //#if !UNITY_EDITOR
             Application.logMessageReceivedThreaded += AddLogThread;
 //#endif
@@ -69,7 +69,7 @@ public class LogManager : Singleton<LogManager>
                 if (strList[i].str.Equals(temp))
                 {
                     strList[i].num++;
-
+                    startCount = i;
                     return;
                 }
             }
@@ -105,7 +105,18 @@ public class LogManager : Singleton<LogManager>
         }
         
     }
-
+    void Clear()
+    {
+        startCount = 0;
+        isShow = false;
+        for (int i = 0; i < strList.Count; i++)
+        {
+            strList[i].str = null;
+            strList[i] = null;
+        }
+        strList.Clear();
+        logText.text = "";
+    }
     /// <summary>
     /// 显示日志信息
     /// </summary>
@@ -121,6 +132,7 @@ public class LogManager : Singleton<LogManager>
     public Button lastBtn;
     public Button nextBtn;
 
+    public Button qingkongBtn;
     //内容切换
     void SetLogTextStr(bool islast)
     {

@@ -22,10 +22,10 @@ namespace SpaceDesign
 
         public void StartTrack()
         {
-#if UNITY_EDITOR 
+#if UNITY_EDITOR
             return;
 #endif
-
+            Debug.Log("MyLog::StartTrack");
             StopTrack();
 
             bCallback = true;
@@ -41,6 +41,7 @@ namespace SpaceDesign
 #if UNITY_EDITOR
             return;
 #endif
+            Debug.Log("MyLog::StopTrack");
             Image2DTrackingManager.Instance.TrackStop();
         }
 
@@ -97,8 +98,9 @@ namespace SpaceDesign
             //objTargetModel.SetActive(isVisible);
             if (isVisible)
             {
+                //Debug.Log("MyLog::objTargetModel:" + objTargetModel);
                 TaidengManager.Inst.transform.SetParent(objTargetModel.transform);
-                //TaidengManager.Inst.transform.localPosition = new Vector3(0, -0.05f, -0.3f);
+                TaidengManager.Inst.transform.localPosition = new Vector3(0, -0.3f, 0);
                 //TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
             }
             else
@@ -110,6 +112,11 @@ namespace SpaceDesign
        
         void SetIconParent()
         {
+            //Debug.Log("MyLog::GetActiveScene:"+ SceneManager.GetActiveScene().name.Equals("EditorScence"));
+            //Debug.Log("MyLog::TaidengManager:" + TaidengManager.Inst);
+            //Debug.Log("MyLog::EditorControl:" + EditorControl.Instance);
+            //Debug.Log("MyLog::loadPreviewScence:" + EditorControl.Instance.loadPreviewScence);
+            //Debug.Log("MyLog::ObjParent:" + EditorControl.Instance.loadPreviewScence.ObjParent);
             if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
                 TaidengManager.Inst.transform.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
             else

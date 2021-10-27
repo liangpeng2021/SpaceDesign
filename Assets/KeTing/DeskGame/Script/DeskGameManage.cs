@@ -8,6 +8,7 @@
 
  */
 
+using OXRTK.ARHandTracking;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,47 +32,47 @@ namespace SpaceDesign.DeskGame
         }
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
-        //播放模型
-        public Transform traModel;
+        ////播放模型
+        //public Transform traModel;
         //Icon、UI等正在切换中
-        bool bUIChanging = false;
+        private bool bUIChanging = false;
         //运动阈值
-        float fThreshold = 0.1f;
+        private float fThreshold = 0.1f;
+        //对象初始位置
+        private Vector3 v3OriPos;
+
+        //===========================================================================
+        //临时测距
+        public TextMesh tt;
+        //===========================================================================
 
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
+            btnIcon.onPinchUp.AddListener(ClickIcon);
+            btnGame01.onPinchUp.AddListener(() => { CallApp("com.gabor.artowermotion"); });
+            btnGame02.onPinchUp.AddListener(() => { CallApp("com.baymax.omoba"); });
+            btnGame03.onPinchUp.AddListener(() => { CallApp("com.xyani.findanimals"); });
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
+            btnIcon.onPinchUp.RemoveAllListeners();
+            btnGame01.onPinchUp.RemoveAllListeners();
+            btnGame02.onPinchUp.RemoveAllListeners();
+            btnGame03.onPinchUp.RemoveAllListeners();
         }
 
-        //void Start()
-        //{
-        //    //btnCheckTranslate.onClick.AddListener(OnCheckTranslate);
-        //    //btnQuit.onClick.AddListener(OnQuit);
+        void OnDestroy()
+        {
+            StopAllCoroutines();
+        }
 
-        //    ////===========================================================================
-        //    ////Icon点击触发
-        //    //EventTrigger _trigger = traIcon.GetComponent<EventTrigger>();
-        //    //if (_trigger == null)
-        //    //    _trigger = traIcon.gameObject.AddComponent<EventTrigger>();
-
-        //    //EventTrigger.Entry _entry = new EventTrigger.Entry
-        //    //{
-        //    //    eventID = EventTriggerType.PointerClick,
-        //    //    callback = new EventTrigger.TriggerEvent(),
-        //    //};
-        //    //_entry.callback.AddListener(x =>
-        //    //{
-        //    //    if (curPlayerPosState == PlayerPosState.Middle)
-        //    //        StartCoroutine(IEFarToMiddle());
-        //    //});
-        //    //_trigger.triggers.Add(_entry);
-        //    ////===========================================================================
-        //}
+        void Start()
+        {
+            v3OriPos = this.transform.position;
+        }
 
         /// <summary>
         /// 点击Icon
@@ -87,9 +88,6 @@ namespace SpaceDesign.DeskGame
             //print($"拉起应用:{strPackName}");
             XR.AppManager.StartApp(strPackName);
         }
-
-        public TextMesh tt;
-
         /// <summary>
         /// 刷新位置消息
         /// </summary>
@@ -98,7 +96,7 @@ namespace SpaceDesign.DeskGame
             if (bUIChanging == true)
                 return;
 
-            Vector3 _v3 = traIcon.position;
+            Vector3 _v3 = v3OriPos;
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
@@ -108,15 +106,15 @@ namespace SpaceDesign.DeskGame
 
             if (_dis > 5f)
             {
+                curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
-                curPlayerPosState = PlayerPosState.Far;
             }
-            else if (_dis <= 5f)// && _dis > 1.5f)
+            else //if (_dis <= 5f) && _dis > 1.5f)
             {
+                curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
-                curPlayerPosState = PlayerPosState.Middle;
             }
             //else if (_dis <= 1.5f)
             //{
@@ -179,9 +177,8 @@ namespace SpaceDesign.DeskGame
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
 
-            timelineShow.time = 0;
-            timelineHide.Stop();
-            timelineShow.Play();
+            timelineShow.gameObject.SetActive(true);
+            timelineHide.gameObject.SetActive(false);
 
             while (true)
             {
@@ -195,6 +192,7 @@ namespace SpaceDesign.DeskGame
                 yield return 0;
             }
 
+            bUIShow = true;
 
             yield return 0;
             //UI变化结束
@@ -211,9 +209,12 @@ namespace SpaceDesign.DeskGame
             //中距离=>远距离
             traIcon.gameObject.SetActive(true);
 
-                timelineHide.time = 0;
-                timelineShow.Stop();
-                timelineHide.Play();
+            if (bUIShow == true)
+            {
+                timelineShow.gameObject.SetActive(false);
+                timelineHide.gameObject.SetActive(true);
+
+            }
 
             while (true)
             {
@@ -232,6 +233,7 @@ namespace SpaceDesign.DeskGame
             //Icon自身上下浮动关闭
             animIconFar.enabled = true;
 
+            bUIShow = false;
 
             yield return 0;
             //UI变化结束
@@ -242,6 +244,8 @@ namespace SpaceDesign.DeskGame
         [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
         //Icon的对象
         public Transform traIcon;
+        //Icon对象的AR手势Button按钮
+        public ButtonRayReceiver btnIcon;
         //吸引态，上下移动动画
         public Animator animIconFar;
         //轻交互，半球动画+音符动画
@@ -258,6 +262,14 @@ namespace SpaceDesign.DeskGame
         public PlayableDirector timelineShow;
         //Timeline：隐藏
         public PlayableDirector timelineHide;
+        //游戏1按钮
+        public ButtonRayReceiver btnGame01;
+        //游戏2按钮
+        public ButtonRayReceiver btnGame02;
+        //游戏3按钮
+        public ButtonRayReceiver btnGame03;
+        private bool bUIShow = false;
+
         public void Hide()
         {
             StartCoroutine(IEMiddleToFar());

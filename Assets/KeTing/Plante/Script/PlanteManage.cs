@@ -4,6 +4,7 @@
 
  */
 
+using OXRTK.ARHandTracking;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,49 +28,40 @@ namespace SpaceDesign.Plante
         }
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
-        //播放模型
-        public Transform traModel;
         //Icon、UI等正在切换中
         bool bUIChanging = false;
         //运动阈值
         float fThreshold = 0.1f;
         //对象初始位置
-        public Vector3 v3OriPos;
+        [SerializeField]
+        private Vector3 v3OriPos;
+
+        //===========================================================================
+        //临时测距
+        public TextMesh tt;
+        //===========================================================================
+
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
+            btnIcon.onPinchUp.AddListener(ClickIcon);
+            btnQuit.onPinchUp.AddListener(Hide);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
+            btnIcon.onPinchUp.RemoveAllListeners();
+            btnQuit.onPinchUp.RemoveAllListeners();
         }
 
         void Start()
         {
-            //btnCheckTranslate.onClick.AddListener(OnCheckTranslate);
-            //btnQuit.onClick.AddListener(OnQuit);
-
-            ////===========================================================================
-            ////Icon点击触发
-            //EventTrigger _trigger = traIcon.GetComponent<EventTrigger>();
-            //if (_trigger == null)
-            //    _trigger = traIcon.gameObject.AddComponent<EventTrigger>();
-
-            //EventTrigger.Entry _entry = new EventTrigger.Entry
-            //{
-            //    eventID = EventTriggerType.PointerClick,
-            //    callback = new EventTrigger.TriggerEvent(),
-            //};
-            //_entry.callback.AddListener(x =>
-            //{
-            //    if (curPlayerPosState == PlayerPosState.Middle)
-            //        StartCoroutine(IEFarToMiddle());
-            //});
-            //_trigger.triggers.Add(_entry);
-            ////===========================================================================
-
             v3OriPos = this.transform.position;
+        }
+        void OnDestroy()
+        {
+            StopAllCoroutines();
         }
 
         //void Update()
@@ -79,9 +71,6 @@ namespace SpaceDesign.Plante
         //        Hide();
         //    }
         //}
-
-        public TextMesh tt;
-
 
         /// <summary>
         /// 刷新位置消息
@@ -101,15 +90,15 @@ namespace SpaceDesign.Plante
 
             if (_dis > 5f)
             {
+                curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
-                curPlayerPosState = PlayerPosState.Far;
             }
-            else if (_dis <= 5f && _dis > 1.5f)
+            else //if (_dis <= 5f && _dis > 1.5f)
             {
+                curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
-                curPlayerPosState = PlayerPosState.Middle;
             }
             //else if (_dis <= 1.5f)
             //{
@@ -242,6 +231,8 @@ namespace SpaceDesign.Plante
         public Transform traIcon;
         //吸引态，上下移动动画
         public Animator animIconFar;
+        //Icon对象的AR手势Button按钮
+        public ButtonRayReceiver btnIcon;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
         //Icon的移动速度
@@ -266,6 +257,7 @@ namespace SpaceDesign.Plante
         public PlayableDirector timelineShow;
         //Timeline：隐藏
         public PlayableDirector timelineHide;
+        public ButtonRayReceiver btnQuit;
         private bool bUIShow = false;
 
         public void Hide()
