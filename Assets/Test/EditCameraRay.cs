@@ -98,6 +98,7 @@ public class EditCameraRay : MonoBehaviour
             hitpointhandler = null;
         }
 #else
+
         gameObject.SetActive(false);
 #endif
     }

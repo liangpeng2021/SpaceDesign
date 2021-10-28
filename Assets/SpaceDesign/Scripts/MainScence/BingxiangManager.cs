@@ -151,6 +151,7 @@ namespace SpaceDesign
             }
             else if (_dis <= 1.5f)
             {
+                Debug.Log(lastPPS);
                 if (lastPPS == PlayerPosState.Close)
                     return;
                 curPlayerPosState = PlayerPosState.Close;
@@ -165,7 +166,7 @@ namespace SpaceDesign
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
             //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
-            
+
             if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
             {
                 /// 远距离=>中距离
@@ -186,7 +187,11 @@ namespace SpaceDesign
                 /// 中距离=>远距离
                 yield return IEMiddleToFar();
             }
-
+            else if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Close)
+            {
+                /// 一来就是近距离
+                yield return IEMiddleToClose();
+            }
             yield return 0;
         }
 
@@ -241,7 +246,6 @@ namespace SpaceDesign
             bUIChanging = true;
 
             //中距离=>近距离
-
             while (true)
             {
                 traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, 0.1f);

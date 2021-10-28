@@ -1193,6 +1193,51 @@ namespace SpaceDesign.Music
         }
 
         #region 调用CPE接口
+        /// <summary>
+        /// 音乐数据
+        /// </summary>
+        public struct MusicData
+        {
+            public int ErrorCode;
+            public int MusicId;
+        }
+        /// <summary>
+        /// 音量数据
+        /// </summary>
+        public struct VomlumeData
+        {
+            public int ErrorCode;
+            public int Volume;
+        }
+
+        void ClickMusic(string str)
+        {
+            //开启新协程
+            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<MusicData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/music/" + str,
+                //回调
+                (sd) =>
+                {
+                    Debug.Log("MyLog::音乐"+str+":"+sd.MusicId);
+                }
+                );
+
+            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+        }
+
+        void ClickMusicVolume(string str)
+        {
+            //开启新协程
+            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<VomlumeData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/music/setting?action=setVolume&value=" + str,
+                //回调
+                (sd) =>
+                {
+                    Debug.Log("MyLog::音响" + str + ":" + sd.Volume);
+                }
+                );
+
+            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+        }
+
         public void SetAudioPlay(int index = -1)
         {
             RestartTimeMaxToMin();
@@ -1201,6 +1246,7 @@ namespace SpaceDesign.Music
                 audioSource.Play();
                 //===========================================================================
                 //CPE发送：带序号播放
+                ClickMusic("play?id="+index.ToString());
                 //===========================================================================
             }
         }
@@ -1210,6 +1256,7 @@ namespace SpaceDesign.Music
             audioSource.UnPause();
             //===========================================================================
             //CPE发送：恢复暂停
+            ClickMusic("resume");
             //===========================================================================
         }
         public void SetAudioPause()
@@ -1218,6 +1265,7 @@ namespace SpaceDesign.Music
             audioSource.Pause();
             //===========================================================================
             //CPE发送：暂停
+            ClickMusic("pause");
             //===========================================================================
         }
         public void SetAudioStop()
@@ -1226,6 +1274,7 @@ namespace SpaceDesign.Music
             audioSource.Stop();
             //===========================================================================
             //CPE发送：停止
+            ClickMusic("stop");
             //===========================================================================
         }
         public void SetAudioVolume(float fValue)
@@ -1237,6 +1286,7 @@ namespace SpaceDesign.Music
             fValue *= 100;
             //===========================================================================
             //CPE发送：音量
+            ClickMusicVolume(fValue.ToString("f0"));
             //===========================================================================
         }
         public void SetAudioTime(float fTime)
@@ -1247,6 +1297,7 @@ namespace SpaceDesign.Music
             //进度CPE赋值：数值即为当前秒数
             //===========================================================================
             //CPE发送：进度
+            ClickMusic("setting?action=setPace&value="+ fTime.ToString());
             //===========================================================================
         }
 

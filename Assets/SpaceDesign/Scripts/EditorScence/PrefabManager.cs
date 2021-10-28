@@ -89,7 +89,10 @@ public class PrefabManager : MonoBehaviour
     }
     #endregion
 
-    public ButtonRayReceiver deleteObjBtn;
+    public GameObject deletePrefab;
+
+    ButtonRayReceiver deleteObjBtn;
+
     public ButtonRayReceiver backtoRoomBtn;
     #region 预设管理
     
@@ -100,7 +103,7 @@ public class PrefabManager : MonoBehaviour
     public Dictionary<string, GameObject> icon2DDic = new Dictionary<string, GameObject>();
     private void OnDestroy()
     {
-        deleteObjBtn = null;
+        deletePrefab = null;
         backtoRoomBtn = null;
         
         for (int i = 0; i < prefabDatas.Length; i++)
@@ -196,34 +199,34 @@ public class PrefabManager : MonoBehaviour
         }
 
         InitPage();
-        deleteObjBtn.gameObject.SetActive(false);
     }
 
     private void OnEnable()
     {
         backtoRoomBtn.onPinchDown.AddListener(BackToRoom);
-        deleteObjBtn.onPinchDown.AddListener(DeleteObj);
+
         Add2DObjEvent();
     }
 
     private void OnDisable()
     {
         backtoRoomBtn.onPinchDown.RemoveListener(BackToRoom);
-        deleteObjBtn.onPinchDown.RemoveListener(DeleteObj);
+        
         Remove2DObjEvent();
     }
 
     void BackToRoom()
     {
         EditorControl.Instance.ToEditRoom();
-        deleteObjBtn.gameObject.SetActive(false);
     }
     //删除当前编辑的物体
     public void DeleteObj()
     {
+        if (deleteObjBtn!=null)
+            deleteObjBtn.onPinchDown.RemoveAllListeners();
         string id= EditorControl.Instance.roomManager.RemoveCurRoomObj();
         ResetObjUI(id);
-        deleteObjBtn.gameObject.SetActive(false);
+        //deleteObjBtn.gameObject.SetActive(false);
     }
 
     public void ResetObjUI(string id)
@@ -235,10 +238,22 @@ public class PrefabManager : MonoBehaviour
         }
     }
 
-    public void SetDeleteObjPos(Vector3 pos)
+    public void SetDeleteObjPos(Transform parent)
     {
-        deleteObjBtn.gameObject.SetActive(true);
-        deleteObjBtn.transform.position = pos + new Vector3(0,-0.2f,0);
-        deleteObjBtn.transform.forward = XR.XRCameraManager.Instance.stereoCamera.transform.forward;
+        if (deleteObjBtn == null)
+        {
+            deleteObjBtn = Instantiate(deletePrefab).GetComponent<ButtonRayReceiver>();
+        }
+        if (deleteObjBtn != null)
+        {
+            deleteObjBtn.transform.SetParent(parent);
+            deleteObjBtn.transform.localEulerAngles = Vector3.zero;
+            deleteObjBtn.transform.localPosition = new Vector3(0, -0.1f, -0.1f);
+            deleteObjBtn.transform.localScale = Vector3.one;
+        }
+
+        //deleteObjBtn.gameObject.SetActive(true);
+        //deleteObjBtn.transform.position = pos + new Vector3(0,-0.2f,0);
+        //deleteObjBtn.transform.forward = XR.XRCameraManager.Instance.stereoCamera.transform.forward;
     }
 }

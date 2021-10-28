@@ -240,7 +240,10 @@ namespace SpaceDesign
 
         [HideInInspector]
         public List<ScenceData> scenceDataList = new List<ScenceData>();
-
+        /// <summary>
+        /// 跳转到主场景
+        /// </summary>
+        public ButtonRayReceiver mainloadBtn;
         /// <summary>
         /// 公共的场景文件URL地址
         /// </summary>
@@ -312,6 +315,13 @@ namespace SpaceDesign
 
             turnPageLastBtn.onPinchDown.AddListener(TurnLastPage);
             turnPageNextBtn.onPinchDown.AddListener(TurnNextPage);
+
+            mainloadBtn.onPinchDown.AddListener(LoadMainScence);
+        }
+
+        void LoadMainScence()
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(0);
         }
 
         void RemoveScenceEvent()
@@ -329,6 +339,7 @@ namespace SpaceDesign
 
             turnPageLastBtn.onPinchDown.RemoveAllListeners();
             turnPageNextBtn.onPinchDown.RemoveAllListeners();
+            mainloadBtn.onPinchDown.RemoveAllListeners();
         }
 
         public void LoadUserScenceList(UserData ud)

@@ -71,6 +71,12 @@ public class ChangeSate : MonoBehaviour
     public void HightLightOn()
     {
         isLightOn = true;
+
+        if (lightObj == null)
+            Init();
+        if (lightObj == null)
+            return;
+        EditorControl.Instance.prefabManager.SetDeleteObjPos(transform);
     }
 
     private void Update()
@@ -80,7 +86,5 @@ public class ChangeSate : MonoBehaviour
         if (lightObj == null)
             return;
         lightObj.SetActive(isLightOn);
-        if (isLightOn)
-            EditorControl.Instance.prefabManager.SetDeleteObjPos(transform.position);
     }
 }

@@ -49,6 +49,7 @@ namespace SpaceDesign.CPEShow
             btnLightOff.onPinchUp.AddListener(LightOn);
             btnQuit.onPinchUp.AddListener(Hide);
             sliderLamp.onValueChanged.AddListener(LightSlider);
+            sliderLamp.onInteractionEnd.AddListener(LightSliderCPE);
         }
 
         void OnDisable()
@@ -59,6 +60,7 @@ namespace SpaceDesign.CPEShow
             btnLightOff.onPinchUp.RemoveAllListeners();
             btnQuit.onPinchUp.RemoveAllListeners();
             sliderLamp.onValueChanged.RemoveAllListeners();
+            sliderLamp.onInteractionEnd.RemoveAllListeners();
         }
 
         void OnDestroy()
@@ -308,7 +310,30 @@ namespace SpaceDesign.CPEShow
 
             //===========================================================================
             //CPE发送：开灯
+            ClickLight("id=1&action=on");
             //===========================================================================
+        }
+
+        public struct LightData
+        {
+            public int ErrorCode;
+            public int LampId;
+            public int Brightness;
+            public string Status;
+        }
+
+        void ClickLight(string str)
+        {
+            //开启新协程
+            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<LightData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/lamp/setting?"+str,
+                //回调
+                (sd) =>
+                {
+                    Debug.Log("MyLog::灯"+ str+":" + sd.Status);
+                }
+                );
+
+            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
         }
 
         public void LightOff()
@@ -316,9 +341,10 @@ namespace SpaceDesign.CPEShow
             sliderLamp.sliderValue = 0;
             //===========================================================================
             //CPE发送：关灯
+            ClickLight("id=1&action=off");
             //===========================================================================
         }
-
+        
         public void LightSlider(float f)
         {
             f = 0.4f + f * 0.6f;
@@ -337,12 +363,16 @@ namespace SpaceDesign.CPEShow
                 if (btnLightOff.gameObject.activeSelf == true)
                     btnLightOff.gameObject.SetActive(false);
             }
-
+        }
+        public void LightSliderCPE()
+        {
             //===========================================================================
             //CPE发送：灯光亮度
+            string valuetest = (sliderLamp.sliderValue * 100).ToString("f0");
+            valuetest = "id=1&action=setBrightness&value=" + valuetest;
+            ClickLight(valuetest);
             //===========================================================================
         }
-
         /// <summary>
         /// 设置材质属性，自定义颜色
         /// </summary>
