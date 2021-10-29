@@ -127,7 +127,7 @@ namespace SpaceDesign.Phone
             tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
-            print($"目标的距离:{_dis}--lastPPS:{lastPPS}--curPPS:{curPlayerPosState}");
+            //print($"目标的距离:{_dis}--lastPPS:{lastPPS}--curPPS:{curPlayerPosState}");
 
             if (_dis > 5f)
             {

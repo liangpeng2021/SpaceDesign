@@ -136,8 +136,8 @@ namespace OXRTK.ARHandTracking
         }
 
         bool m_IsHandMenuOpened = false;
-        bool m_PalmBackStatus = false;
-
+        bool m_PalmForwardStatus = true;
+        bool m_PinchEventStatus = false;
         int m_RaycastLayer = ~Physics.IgnoreRaycastLayer;
         Coroutine m_InitRoutine;
         #endregion
@@ -219,6 +219,7 @@ namespace OXRTK.ARHandTracking
             {
                 PointerManager.instance.onHandMenuChanged += UpdateHandMenuStatus;
             }
+            onActionEvent.AddListener(UpdatePinchEventStatus);
         }
 
         void LateUpdate()
@@ -415,8 +416,17 @@ namespace OXRTK.ARHandTracking
 
             UpdatePalmDirection();
 
-            if (m_PalmBackStatus)
+            if (!m_PalmForwardStatus)
+            {
+                if (m_PinchEventStatus)
+                {
+                    onActionEvent?.Invoke(PointerEventType.OnPinchUp, m_CurrentTarget == null ? null : m_CurrentTarget.gameObject);
+                    ResetTarget();
+                    m_AlgorithmCounterOut = 0;
+                    
+                }
                 return;
+            }
 
             m_HandInfo = info;
             
@@ -446,7 +456,8 @@ namespace OXRTK.ARHandTracking
                             if (m_CurrentTarget.isInInteraction)
                                 return;
 
-                            m_CurrentTarget.OnPinchDown(m_KStartPosition, m_Direction, m_CurrentTargetPoint);
+                            //m_CurrentTarget.OnPinchDown(m_KStartPosition, m_Direction, m_CurrentTargetPoint);
+                            m_CurrentTarget.OnPinchDown(m_IShoulder.position, m_KStartPosition, m_Direction, m_CurrentTargetPoint);
                             if (HandTrackingPlugin.debugLevel > 0) Debug.Log("CurrentTarget: " + m_CurrentTarget.gameObject.name + " ---> OnPinchDown");
 
                             if (m_CurrentTarget != null)
@@ -469,7 +480,8 @@ namespace OXRTK.ARHandTracking
                         return;
 
                     if (m_TargetInInteraction != null)
-                        m_TargetInInteraction.OnDragging(m_KStartPosition, m_Direction);
+                        //m_TargetInInteraction.OnDragging(m_KStartPosition, m_Direction);
+                        m_TargetInInteraction.OnDragging(m_IShoulder.position, m_KStartPosition, m_Direction);
                 }
             }
             if (m_HandInfo.staticGesture != HandTrackingPlugin.StaticGesture.OK)
@@ -525,7 +537,7 @@ namespace OXRTK.ARHandTracking
                                 return;
                             }
                         }
-                        m_PointerLine.enabled = true;
+                        //m_PointerLine.enabled = true;
                     }
                 }
             }
@@ -545,39 +557,25 @@ namespace OXRTK.ARHandTracking
                         }
                         ResetTarget();
                     }
-                    m_PointerLine.enabled = false;
-                    m_PalmBackStatus = true;
+                    if (m_PointerLine != null)
+                        m_PointerLine.enabled = false;
+                    m_PalmForwardStatus = false;
                 }
             }
         }
 
         void UpdatePalmDirection()
         {
-            bool palmBackStatus = false;
+            bool palmForwardCheck = true;
 
             if(CustomizedGestureController.instance != null)
             {
-                palmBackStatus = CustomizedGestureController.instance.GetHandStatus(m_HandType, CustomizedGesture.PalmBack);
+                palmForwardCheck = CustomizedGestureController.instance.GetHandStatus(m_HandType, CustomizedGesture.PalmForward);
             }
 
-            if(m_PalmBackStatus != palmBackStatus)
+            if(m_PalmForwardStatus != palmForwardCheck)
             {
-                if(m_PalmBackStatus && !palmBackStatus)
-                {
-                    if (m_IsEnabled || m_IsHandMenuOpened)
-                    {
-                        if (PointerManager.instance != null)
-                        {
-                            int res = PointerManager.instance.UpdatePriorityInteraction(m_HandType, m_Type, m_Priority, false);
-                            if (res < 0)
-                            {
-                                return;
-                            }
-                        }
-                        m_PointerLine.enabled = true;
-                    }
-                }
-                else
+                if(m_PalmForwardStatus && !palmForwardCheck)
                 {
                     if (m_IsEnabled || m_IsHandMenuOpened)
                     {
@@ -589,10 +587,30 @@ namespace OXRTK.ARHandTracking
                         }
                         ResetTarget();
                     }
-                    m_PointerLine.enabled = false;
+                    if (m_PointerLine != null)
+                        m_PointerLine.enabled = false;
                 }
-
-                m_PalmBackStatus = palmBackStatus;
+                else
+                {
+                    if (m_IsEnabled || m_IsHandMenuOpened)
+                    {
+                        if (PointerManager.instance != null)
+                        {
+                            int res = PointerManager.instance.UpdatePriorityInteraction(m_HandType, m_Type, m_Priority, false);
+                            if (res < 0)
+                            {
+                                return;
+                            }
+                        }
+                        if(m_PointerLine != null)
+                            m_PointerLine.enabled = true;
+                        if (cursor != null && !cursor.activeSelf)
+                        {
+                            cursor.SetActive(true);
+                        }
+                    }
+                }
+                m_PalmForwardStatus = palmForwardCheck;
             }
         }
 
@@ -608,7 +626,7 @@ namespace OXRTK.ARHandTracking
                 return;
             }
 
-            if (m_PalmBackStatus)
+            if (!m_PalmForwardStatus)
             {
                 return;
             }
@@ -662,13 +680,13 @@ namespace OXRTK.ARHandTracking
 
             if (m_HandController.hidHandMode)
             {
-                if (m_PointerLine.enabled == false)
-                {
-                    m_PointerLine.enabled = true;
-                }
-
                 if (m_PointerLine != null)
                 {
+                    if(m_PointerLine.enabled == false)
+                    {
+                        m_PointerLine.enabled = true;
+                    }
+
                     UpdatePointerCurve(m_StartPosition, dir, m_CurrentTargetPoint);
 
                     if (!m_IsHandMenuOpened)
@@ -697,17 +715,14 @@ namespace OXRTK.ARHandTracking
             }
             else
             {
-                if (m_IsPinched)
+                if (m_PointerLine != null)
                 {
-                    if (m_PointerLine != null)
+                    if (m_IsPinched)
                     {
                         UpdatePointerCurve(m_StartPosition, dir, m_CurrentTargetPoint);
                         m_PointerLine.enabled = true;
                     }
-                }
-                else
-                {
-                    if (m_PointerLine != null)
+                    else
                     {
                         m_PointerLine.enabled = false;
                     }
@@ -782,7 +797,7 @@ namespace OXRTK.ARHandTracking
         {
             if (m_BezierCurve == null)
             {
-                Debug.LogError("Unble to calculate curver laser");
+                if (HandTrackingPlugin.debugLevel > 1) Debug.Log("Unble to calculate curver laser");
                 return;
             }
             float length = Vector3.Distance(start, end);
@@ -796,11 +811,21 @@ namespace OXRTK.ARHandTracking
         {
             if (cursor != null)
             {
-                cursor.SetActive(res);
+                if (!m_PalmForwardStatus)
+                    cursor.SetActive(false);
+                else
+                    cursor.SetActive(res);
             }
             if (m_PointerLine != null)
             {
-                m_PointerLine.enabled = res;
+                if (!m_PalmForwardStatus)
+                {
+                    m_PointerLine.enabled = false;
+                }
+                else
+                {
+                    m_PointerLine.enabled = res;
+                }
             }
             if (!res && m_CursorInfo != null)
             {
@@ -864,6 +889,18 @@ namespace OXRTK.ARHandTracking
             }
             SetVisualizationItems(isHigher);
             m_PriorityEnabled = isHigher;
+        }
+
+        void UpdatePinchEventStatus(PointerEventType pinchevent, GameObject obj)
+        {
+            if (pinchevent == PointerEventType.OnPinchDown)
+            {
+                m_PinchEventStatus = true;
+            }
+            else if (pinchevent == PointerEventType.OnPinchUp)
+            {
+                m_PinchEventStatus = false;
+            }
         }
     }
 }

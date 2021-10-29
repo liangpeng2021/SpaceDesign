@@ -26,8 +26,8 @@ namespace OXRTK
             }
             else if (Application.platform == RuntimePlatform.Android)
             {
-                yield return new WaitUntil(() => CenterCamera.centerCamera != null);
-                m_MainCamera = CenterCamera.centerCamera;
+                yield return new WaitUntil(() => CenterCamera.instance.centerCamera != null);
+                m_MainCamera = CenterCamera.instance.centerCamera;
             }
         }
 

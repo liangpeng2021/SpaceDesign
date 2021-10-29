@@ -21,8 +21,9 @@ public class WaveInteractionExampleDisplay : MonoBehaviour
     bool m_ManualMoveEnable = false;
     float m_CDTimer = 0f;
 
-
-
+    public bool needPress;
+    private bool isPressed;
+    
     #region Manual Move
 
     /// <summary>
@@ -53,9 +54,12 @@ public class WaveInteractionExampleDisplay : MonoBehaviour
     /// <param name="delta">Move delta.<br>移动距离.</param>
     public void ManualMove(Vector2 delta)
     {
-        if (m_ManualMoveEnable && !m_QuadScrollRect.g_IsMoving)
+        if (!needPress || (needPress && isPressed))
         {
-            m_QuadScrollRect.ManualMove(delta);
+            if (m_ManualMoveEnable && !m_QuadScrollRect.g_IsMoving)
+            {
+                m_QuadScrollRect.ManualMove(delta);
+            }
         }
     }
 
@@ -76,7 +80,10 @@ public class WaveInteractionExampleDisplay : MonoBehaviour
     /// <param name="dir">Hand wave direction, 1 wave right, -1 wave left.<br>手挥动方向, 1右挥，-1左挥.</param>
     public void WaveHandle(Vector2Int dir)
     {
-        m_QuadScrollRect.MovePage(dir);
+        if (!needPress || (needPress && isPressed))
+        {
+            m_QuadScrollRect.MovePage(dir);
+        }
     }
 
     public void UpdateWaveCDDisplay(float time)
@@ -103,6 +110,10 @@ public class WaveInteractionExampleDisplay : MonoBehaviour
 
     #endregion Wave
 
+    public void ChangePressStatus(bool pressStatus)
+    {
+        isPressed = pressStatus;
+    }
 
     void DebugUpdate()
     {

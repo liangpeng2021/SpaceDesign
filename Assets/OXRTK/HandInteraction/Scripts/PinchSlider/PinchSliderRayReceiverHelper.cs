@@ -63,6 +63,22 @@ namespace OXRTK.ARHandTracking
             m_PinchSliderRoot.UpdateHandlerPosition(targetPoint);
             m_Distance = Vector3.Distance(startPoint, targetPoint);
         }
+        
+        /// <summary>
+        /// Called when the user pinches down on the object. <br>
+        /// 当射线打中物体并按下时调用。
+        /// </summary>
+        /// <param name="shoulderPoint">Start point of ray in far interaction. <br>远端射线肩膀位置.</param>
+        /// <param name="handPoint">Start point of ray in far interaction. <br>远端射线手关键点位置.</param>
+        /// <param name="direction">Direction of the ray in far interaction. <br>远端射线方向.</param>
+        /// <param name="targetPoint">End position of the ray in far interaction. <br>远端射线终点打到的位置.</param>
+        public override void OnPinchDown(Vector3 shoulderPoint, Vector3 handPoint, Vector3 direction, Vector3 targetPoint)
+        {
+            base.OnPinchDown(shoulderPoint, handPoint, direction, targetPoint);
+            m_PinchSliderRoot.onInteractionStart?.Invoke();
+            m_PinchSliderRoot.UpdateHandlerPosition(targetPoint);
+            m_Distance = Vector3.Distance(handPoint, targetPoint);
+        }
 
         /// <summary>
         /// Called when the user pinches up on the object. <br>
@@ -84,6 +100,20 @@ namespace OXRTK.ARHandTracking
         {
             base.OnDragging(startPosition, direction);
             Vector3 endPosition = startPosition + direction * m_Distance;
+            m_PinchSliderRoot.UpdateHandlerPosition(endPosition);
+        }
+
+        /// <summary>
+        /// Called when the user drags the object. <br>
+        /// 当用户拖拽物体时调用。
+        /// </summary>
+        /// <param name="shoulderPosition">The shoulder position of ray. <br>射线肩膀位置.</param>
+        /// <param name="handPosition">The hand position of ray. <br>射线手关键点位置.</param>
+        /// <param name="direction">The direction of laser. <br>射线方向.</param>
+        public override void OnDragging(Vector3 shoulderPosition, Vector3 handPosition, Vector3 direction)
+        {
+            base.OnDragging(shoulderPosition, handPosition, direction);
+            Vector3 endPosition = handPosition + direction * m_Distance;
             m_PinchSliderRoot.UpdateHandlerPosition(endPosition);
         }
     }

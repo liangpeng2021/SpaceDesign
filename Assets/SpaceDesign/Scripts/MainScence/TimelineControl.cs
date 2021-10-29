@@ -24,24 +24,39 @@ public struct TimelineData
 public class TimelineControl : MonoBehaviour
 {
     public PlayableDirector playableDirector;
-    
+    [Header("此处的fragmentName必须为唯一名称")]
     public TimelineData[] timelineDatas;
     /// <summary>
     /// 开始播放
     /// </summary>
     bool startPlay;
+    /// <summary>
+    /// 当前播放的时段
+    /// </summary>
     [HideInInspector]
     public TimelineData curTimeData;
-    
+
+    Dictionary<string, TimelineData> timeDataDic = new Dictionary<string, TimelineData>();
+
     /// <summary>
     /// 是否自动继续
     /// </summary>
     public bool isAutoContinue;
     
+    /// <summary>
+    /// 结束时候的回调
+    /// </summary>
+    System.Action endAction;
+    
     public void StartPause()
     {
 		playableDirector.time = 0;
         playableDirector.Pause();
+
+        for (int i = 0; i < timelineDatas.Length; i++)
+        {
+            timeDataDic.Add(timelineDatas[i].fragmentName, timelineDatas[i]);
+        }
     }
 
     // Update is called once per frame
@@ -53,6 +68,8 @@ public class TimelineControl : MonoBehaviour
             {
                 playableDirector.Pause();
                 startPlay = false;
+
+                endAction?.Invoke();
             }
         }
     }
@@ -73,21 +90,35 @@ public class TimelineControl : MonoBehaviour
     /// <param name="name"></param>
     public void SetCurTimelineData(string name)
     {
-        for (int i = 0; i < timelineDatas.Length; i++)
+        if (timeDataDic.ContainsKey(name))
         {
-            if (name.Equals(timelineDatas[i].fragmentName))
-            {
-                startPlay = true;
-                curTimeData = timelineDatas[i];
+            startPlay = true;
+            curTimeData = timeDataDic[name];
 
-                playableDirector.time = curTimeData.startTime;
+            playableDirector.time = curTimeData.startTime;
 
-				playableDirector.Play();
-
-                break;
-            }
+            playableDirector.Play();
         }
     }
+
+    /// <summary>
+    /// 根据时段名称播放,加结束回调
+    /// </summary>
+    /// <param name="name"></param>
+    public void SetCurTimelineData(string name,System.Action action)
+    {
+        if (timeDataDic.ContainsKey(name))
+        {
+            startPlay = true;
+            curTimeData = timeDataDic[name];
+
+            playableDirector.time = curTimeData.startTime;
+
+            playableDirector.Play();
+            endAction = action;
+        }
+    }
+
     /// <summary>
     /// 自动播放
     /// </summary>

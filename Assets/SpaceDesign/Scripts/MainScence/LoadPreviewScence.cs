@@ -62,7 +62,7 @@ public class LoadPreviewScence : MonoBehaviour
             GameObject obj = Instantiate(roomPrefab);
             RoomControl roomControl = obj.GetComponent<RoomControl>();
             obj.transform.parent = ObjParent;
-            roomControl.SetRoomData(objectDatas.roomDatasList[i],LoadPrefab.Instance.prefabDic);
+            roomControl.SetRoomData(objectDatas.roomDatasList[i],LoadPrefab.prefabDic);
         }
     }
 

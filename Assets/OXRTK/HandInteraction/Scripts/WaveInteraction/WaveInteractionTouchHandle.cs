@@ -110,7 +110,7 @@ namespace OXRTK.ARHandTracking
             m_Hands.Remove(hand);
             if (m_ActiveHand == hand)
             {
-                m_ActiveHand = null;
+                ChangeHand(null);
                 g_OnHandExit?.Invoke();
                 ResetWave();
                 if (HandTrackingPlugin.debugLevel > 0) Debug.LogWarning("[WIT-RemoveHand] - Remove current hand, TryGetNextActiveHand");
@@ -136,7 +136,7 @@ namespace OXRTK.ARHandTracking
             {
                 foreach (BaseHand k in m_Hands.Keys)
                 {
-                    m_ActiveHand = k;
+                    ChangeHand(k);
                     InitHandPos();
                     g_OnHandEnter?.Invoke((int)m_ActiveHand.handType);
                     if (HandTrackingPlugin.debugLevel > 0) Debug.LogWarning("[WIT-TryGetNextActiveHand] - Got:" + m_ActiveHand.GetInstanceID());

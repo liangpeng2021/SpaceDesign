@@ -90,8 +90,8 @@ namespace OXRTK.ARHandTracking
 
             if (m_MainCameraTransform == null)
             {
-                if (CenterCamera.centerCamera != null)
-                    m_MainCameraTransform = CenterCamera.centerCamera.transform;
+                if (CenterCamera.instance.centerCamera != null)
+                    m_MainCameraTransform = CenterCamera.instance.centerCamera.transform;
                 else
                     return;
             }
@@ -257,8 +257,8 @@ namespace OXRTK.ARHandTracking
             m_IsRecentering = true;
             if (m_MainCameraTransform == null)
             {
-                if (CenterCamera.centerCamera != null)
-                    m_MainCameraTransform = CenterCamera.centerCamera.transform;
+                if (CenterCamera.instance.centerCamera != null)
+                    m_MainCameraTransform = CenterCamera.instance.centerCamera.transform;
                 else
                     return;
             }
@@ -302,8 +302,8 @@ namespace OXRTK.ARHandTracking
         {
             if (m_MainCameraTransform == null)
             {
-                if (CenterCamera.centerCamera != null)
-                    m_MainCameraTransform = CenterCamera.centerCamera.transform;
+                if (CenterCamera.instance.centerCamera != null)
+                    m_MainCameraTransform = CenterCamera.instance.centerCamera.transform;
                 else
                     return;
             }

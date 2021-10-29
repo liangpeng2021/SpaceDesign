@@ -321,16 +321,6 @@ public class RoomControl : MonoBehaviour
         {
             if (index==curObjIndex)
                 return;
-
-            if (curObjIndex != -1)
-            {
-                if (curObjIndex >= 0 && curObjIndex < objList.Count)
-                {
-                    objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOff();
-                }
-                else
-                    Debug.Log("MyLog::lastindex:" + curObjIndex);
-            } 
             curObjIndex = index;
             
             if (curObjIndex >= 0 && curObjIndex < objList.Count)

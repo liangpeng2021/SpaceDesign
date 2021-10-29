@@ -59,12 +59,27 @@ namespace OXRTK.ARHandTracking
         /// Called when the user pinches down on the object. <br>
         /// 当射线打中物体并按下时调用。
         /// </summary>
-        /// <param name="startPoint">Start point of ray in far interaction. <br>远端射线起点位置.</param>
-        /// <param name="direction">Direction of the ray in far interaction. <br>远端射线方向.</param>
+        /// <param name="start">Start point of ray in far interaction. <br>远端射线起点位置.</param>
+        /// <param name="dir">Direction of the ray in far interaction. <br>远端射线方向.</param>
         /// <param name="targetPoint">End position of the ray in far interaction. <br>远端射线终点打到的位置.</param>
         public override void OnPinchDown(Vector3 start, Vector3 dir, Vector3 targetPoint)
         {
             base.OnPinchDown(start, dir, targetPoint);
+
+            onPinchDown?.Invoke();
+        }
+
+        /// <summary>
+        /// Called when the user pinches down on the object. <br>
+        /// 当射线打中物体并按下时调用。
+        /// </summary>
+        /// <param name="shoulderPosition">Start point of ray in far interaction. <br>远端射线肩膀位置.</param>
+        /// <param name="handPosition">Start point of ray in far interaction. <br>远端射线手关键点位置.</param>
+        /// <param name="dir">Direction of the ray in far interaction. <br>远端射线方向.</param>
+        /// <param name="targetPoint">End position of the ray in far interaction. <br>远端射线终点打到的位置.</param>
+        public override void OnPinchDown(Vector3 shoulderPosition, Vector3 handPosition, Vector3 dir, Vector3 targetPoint)
+        {
+            base.OnPinchDown(shoulderPosition, handPosition, dir, targetPoint);
 
             onPinchDown?.Invoke();
         }

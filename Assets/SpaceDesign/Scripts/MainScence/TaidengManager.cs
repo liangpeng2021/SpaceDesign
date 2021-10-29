@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 管理冰箱效果，/*create by 梁鹏 2021-10-27 */
+/// 管理台灯效果，/*create by 梁鹏 2021-10-27 */
 /// </summary>
 namespace SpaceDesign
 {

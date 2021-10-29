@@ -24,9 +24,12 @@ namespace OXRTK.ARHandTracking
             get { return m_TargetAction; }
         }
 
-        bool m_IsDragging = false;
+        bool m_IsLaserDragging = false;
+        bool m_IsRayDragging = false;
         Vector3 m_DragStartPos;
         Vector3 m_DragDir;
+        Vector3 m_ShoulderPosition;
+        Vector3 m_HandPosition;
 
         Transform m_BoundingboxRoot;
         BoundingBox m_TargetObject;
@@ -80,7 +83,7 @@ namespace OXRTK.ARHandTracking
 
         void Update()
         {
-            if (m_IsDragging)
+            if (m_IsLaserDragging || m_IsRayDragging)
             {
                 DragAction();
             }
@@ -124,6 +127,22 @@ namespace OXRTK.ARHandTracking
         }
 
         /// <summary>
+        /// Called when the user pinches down on the object. <br>
+        /// 当射线打中物体并按下时调用。
+        /// </summary>
+        /// <param name="shoulderPosition">Start point of ray in far interaction. <br>远端射线肩膀位置.</param>
+        /// <param name="handPosition">Start point of ray in far interaction. <br>远端射线手关键点位置.</param>
+        /// <param name="direction">Direction of the ray in far interaction. <br>远端射线方向.</param>
+        /// <param name="targetPoint">End position of the ray in far interaction. <br>远端射线终点打到的位置.</param>
+        public override void OnPinchDown(Vector3 shoulderPosition, Vector3 handPosition, Vector3 direction, Vector3 targetPoint)
+        {
+            base.OnPinchDown(shoulderPosition, handPosition, direction, targetPoint);
+            onPinchDown?.Invoke();
+            m_TargetObject.SetAllChildrenStatus(true);
+            m_TargetObject.StartRayAction(m_TargetAction, m_TargetLocalAxis, shoulderPosition, handPosition, direction, targetPoint);
+        }
+
+        /// <summary>
         /// Called when the user pinches up on the object. <br>
         /// 当射线松开时调用。
         /// </summary>
@@ -133,7 +152,8 @@ namespace OXRTK.ARHandTracking
             onPinchUp?.Invoke();
             m_TargetObject.SetAllChildrenStatus(false);
             m_TargetObject.EndAction(m_TargetAction);
-            m_IsDragging = false;
+            m_IsLaserDragging = false;
+            m_IsRayDragging = false;
         }
 
         /// <summary>
@@ -144,15 +164,40 @@ namespace OXRTK.ARHandTracking
         /// <param name="direction">The direction of laser. <br>射线方向.</param>
         public override void OnDragging(Vector3 startPosition, Vector3 direction)
         {
-            m_IsDragging = true;
+            base.OnDragging(startPosition, direction);
+            m_IsLaserDragging = true;
             m_DragStartPos = startPosition;
+            m_DragDir = direction;
+        }
+
+        /// <summary>
+        /// Called when the user drags the object. <br>
+        /// 当用户拖拽物体时调用。
+        /// </summary>
+        /// <param name="shoulderPosition">The shoulder position of ray. <br>射线肩膀位置.</param>
+        /// <param name="handPosition">The hand position of ray. <br>射线手关键点位置.</param>
+        /// <param name="direction">The direction of laser. <br>射线方向.</param>
+        public override void OnDragging(Vector3 shoulderPosition, Vector3 handPosition, Vector3 direction)
+        {
+            base.OnDragging(shoulderPosition, handPosition, direction);
+            m_IsRayDragging = true;
+            m_ShoulderPosition = shoulderPosition;
+            m_HandPosition = handPosition;
             m_DragDir = direction;
         }
 
         void DragAction()
         {
-            base.OnDragging(m_DragStartPos, m_DragDir);
-            m_TargetObject.UpdateRayAction(m_DragStartPos, m_DragDir);
+            if (m_IsLaserDragging)
+            {
+                OnDragging(m_DragStartPos, m_DragDir);
+                m_TargetObject.UpdateRayAction(m_DragStartPos, m_DragDir);
+            }
+            else
+            {
+                OnDragging(m_ShoulderPosition, m_HandPosition, m_DragDir);
+                m_TargetObject.UpdateRayAction(m_ShoulderPosition, m_HandPosition, m_DragDir);
+            }
         }
 
         void SetInteractionStatus(bool status)

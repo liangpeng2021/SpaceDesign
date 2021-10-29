@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SlateButtonBoard
+  m_Shader: {fileID: 4800000, guid: dbff9f42696c4434c94853023df90d60, type: 3}
+  m_ShaderKeywords: ETC1_EXTERNAL_ALPHA _VH_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 2999
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 532d150d87e304674af8324dc4cf117d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTexture:
+        m_Texture: {fileID: 2800000, guid: d9675384e6610476086f6c7862eb5003, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Ramp:
+        m_Texture: {fileID: 2800000, guid: 1b375de048554973a446ff3eba42fbf5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_1712:
+        m_Texture: {fileID: 2800000, guid: b2d8c85e9c6a342de906e94c8443277a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_2652:
+        m_Texture: {fileID: 2800000, guid: 61c1da716f35a425b914776d414c1170, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_4997:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_6026:
+        m_Texture: {fileID: 2800000, guid: 1b375de048554973a446ff3eba42fbf5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - PixelSnap: 0
+    - _BumpScale: 1
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _EdgeOffset: 0.5
+    - _EmissionPower: 1
+    - _Focus: 4.6
+    - _GlossMapScale: 1
+    - _Glossiness: 0.5
+    - _GlossyReflections: 1
+    - _Metallic: 0
+    - _Mode: 0
+    - _OcclusionStrength: 1
+    - _Opacity: 0
+    - _Parallax: 0.02
+    - _SOLID: 1
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _Stencil: 11
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilOpFail: 0
+    - _StencilOpZFail: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _Thickness: 0.074
+    - _UVSec: 0
+    - _VH: 1
+    - _ZTestMode: 4
+    - _ZWrite: 1
+    - _filletScale: 0.13825
+    - _focus: 2.31
+    - _node_1069: 0.2966502
+    - _node_2035: 0
+    - _node_3130: 0
+    - _node_375: 0
+    - _node_4152: 1
+    - _node_7203: 0.368
+    - _node_8171: 8.5
+    - _opacity: 1
+    - _radius: 0.774
+    - _solid: 0
+    - _testScaler: 0
+    - _threshold: 0.448
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Tint: {r: 3.6451643, g: 3.6451643, b: 3.6451643, a: 1}
+    - _node_1301: {r: 1, g: 1, b: 1, a: 1}
+    - _node_1301_copy: {r: 1, g: 0.5217904, b: 0, a: 1}
+    - _node_5317: {r: 0.7169812, g: 0.7169812, b: 0.7169812, a: 1}

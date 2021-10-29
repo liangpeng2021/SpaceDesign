@@ -248,8 +248,8 @@ public class PrefabManager : MonoBehaviour
         {
             deleteObjBtn.transform.SetParent(parent);
             deleteObjBtn.transform.localEulerAngles = Vector3.zero;
-            deleteObjBtn.transform.localPosition = new Vector3(0, -0.1f, -0.1f);
-            deleteObjBtn.transform.localScale = Vector3.one;
+            deleteObjBtn.transform.localPosition = new Vector3(0, -0.228f, -0.152f);
+            deleteObjBtn.transform.localScale = Vector3.one*0.001f;
         }
 
         //deleteObjBtn.gameObject.SetActive(true);

@@ -74,6 +74,20 @@ namespace OXRTK.ARHandTracking
         }
 
         /// <summary>
+        /// Called when the user pinches down on the object. <br>
+        /// 当射线打中物体并按下时调用。
+        /// </summary>
+        /// <param name="shoulderPosition">Shoulder point of ray in far interaction. <br>远端射线肩膀位置.</param>
+        /// <param name="handPoint">Start point of ray in far interaction. <br>远端射线手关键点位置.</param>
+        /// <param name="direction">Direction of the ray in far interaction. <br>远端射线方向.</param>
+        /// <param name="targetPoint">End position of the ray in far interaction. <br>远端射线终点打到的位置.</param>
+        public virtual void OnPinchDown(Vector3 shoulderPosition, Vector3 handPoint, Vector3 direction, Vector3 targetPoint)
+        {
+            m_IsInInteraction = true;
+            if (HandTrackingPlugin.debugLevel > 0) Debug.Log("OnPinchDown: " + gameObject.name);
+        }
+
+        /// <summary>
         /// Called when the user pinches up on the object. <br>
         /// 当射线松开时调用。
         /// </summary>
@@ -89,6 +103,17 @@ namespace OXRTK.ARHandTracking
         /// <param name="startPosition">The start position of laser. <br>射线起点.</param>
         /// <param name="direction">The direction of laser. <br>射线方向.</param>
         public virtual void OnDragging(Vector3 startPosition, Vector3 direction)
+        {
+        }
+        
+        /// <summary>
+        /// Called when the user drags the object. <br>
+        /// 当用户拖拽物体时调用。
+        /// </summary>
+        /// <param name="shoulderPosition">The shoulder position of ray. <br>射线肩膀位置.</param>
+        /// <param name="handPosition">The hand position of ray. <br>射线手关键点起点.</param>
+        /// <param name="direction">The direction of laser. <br>射线方向.</param>
+        public virtual void OnDragging(Vector3 shoulderPosition, Vector3 handPosition, Vector3 direction)
         {
         }
 

@@ -14,6 +14,7 @@ namespace OXRTK.ARHandTracking
     {
         None = 0,
         InPreparing = 1,
+        Prepared = 2
         //Prepared = 2
     }
 
@@ -29,17 +30,6 @@ namespace OXRTK.ARHandTracking
         Off = 3
     }
 
-    /// <summary>
-    /// Hand menu status infomation. <br>
-    /// 随手菜单状态信息。
-    /// </summary>
-   /* public class HandMenuStatus
-    {
-        public HandTrackingPlugin.HandType handType;
-        public HandMenuStep currentStep;
-        //public float prepareCounter;
-    }
-   */
     /// <summary>
     /// The class for hand menu interaction. <br>
     /// 控制随手菜单交互的类。
@@ -73,21 +63,22 @@ namespace OXRTK.ARHandTracking
         bool m_IsHandDetected;
         bool m_IsLocked = false;
         bool m_IsActive = false;
+        float m_HandMenuReadyTimeEnd = 0;
 
         void OnValidate()
         {
             if (handToFollow == HandTrackingPlugin.HandType.LeftHand)
             {
                 HandMenuController[] allHandMenu = FindObjectsOfType<HandMenuController>();
-                if(allHandMenu.Length > 2)
+                if (allHandMenu.Length > 2)
                 {
                     if (HandTrackingPlugin.debugLevel > 0) Debug.Log("The number of Hand Menu exceeds the hand number!");
                 }
-                for(int i = 0; i < allHandMenu.Length; i++)
+                for (int i = 0; i < allHandMenu.Length; i++)
                 {
-                    if(allHandMenu[i] == this)
+                    if (allHandMenu[i] == this)
                         continue;
-                    if(allHandMenu[i].handToFollow == handToFollow)
+                    if (allHandMenu[i].handToFollow == handToFollow)
                     {
                         if (HandTrackingPlugin.debugLevel > 0) Debug.Log("Hand menu for left hand already existed!");
                         break;
@@ -112,7 +103,7 @@ namespace OXRTK.ARHandTracking
                     }
                 }
             }
-            
+
             if (handMenu != null || m_HandMenuLocator != null)
             {
                 if (handMenu != null && m_HandMenuLocator != null)
@@ -227,9 +218,9 @@ namespace OXRTK.ARHandTracking
 
             if (HandTrackingPlugin.instance != null)
             {
-                if(handToFollow == HandTrackingPlugin.HandType.LeftHand && HandTrackingPlugin.instance.leftHandController != null)
+                if (handToFollow == HandTrackingPlugin.HandType.LeftHand && HandTrackingPlugin.instance.leftHandController != null)
                     m_HandController = HandTrackingPlugin.instance.leftHandController;
-                if(handToFollow == HandTrackingPlugin.HandType.RightHand && HandTrackingPlugin.instance.rightHandController != null)
+                if (handToFollow == HandTrackingPlugin.HandType.RightHand && HandTrackingPlugin.instance.rightHandController != null)
                     m_HandController = HandTrackingPlugin.instance.rightHandController;
             }
 
@@ -240,20 +231,20 @@ namespace OXRTK.ARHandTracking
                 //yield return 0;
             }
             InitHandMenu();
-            
+
             if (HandTrackingPlugin.instance != null)
             {
                 HandTrackingPlugin.instance.onHandDataUpdated += UpdateHandInfo;
             }
 
-           // yield return new WaitUntil(() => HandDisplayModeSwtich.rightHandControllerLocated && HandDisplayModeSwtich.leftHandControllerLocated);
+            // yield return new WaitUntil(() => HandDisplayModeSwtich.rightHandControllerLocated && HandDisplayModeSwtich.leftHandControllerLocated);
             if (handMenu != null)
                 handMenu.SetActive(false);
         }
 
         private void OnDestroy()
         {
-            if(m_HandMenuLocator != null)
+            if (m_HandMenuLocator != null)
             {
                 m_HandMenuLocator.DisconnectController(this);
             }
@@ -269,7 +260,8 @@ namespace OXRTK.ARHandTracking
             {
                 Debug.LogError("NO SDK INIT YET");
                 return;
-            } else
+            }
+            else
             {
                 m_CurrentStep = HandMenuStep.None;
                 m_IsActive = true;
@@ -290,7 +282,7 @@ namespace OXRTK.ARHandTracking
             {
                 handDetected = HandTrackingPlugin.instance.rightHandInfo.handDetected;
             }
-            
+
             UpdateHandVisible(handToFollow, handDetected);
 
             if (handDetected)
@@ -303,7 +295,7 @@ namespace OXRTK.ARHandTracking
         {
             // Update the prep indicator's pose
             UpdateHandPrepPos(m_HandController, prepIndicator);
-            
+
             if (m_IsLocked)
             {
                 if (m_CompleteCounter < m_LockTimerThreshold)
@@ -318,7 +310,7 @@ namespace OXRTK.ARHandTracking
                 }
             }
 
-            if(CustomizedGestureController.instance == null) 
+            if (CustomizedGestureController.instance == null)
             {
                 if (HandTrackingPlugin.instance != null)
                     HandTrackingPlugin.instance.gameObject.AddComponent<CustomizedGestureController>();
@@ -327,11 +319,12 @@ namespace OXRTK.ARHandTracking
             }
 
             bool fistCheck = CustomizedGestureController.instance.GetHandStatus(handToFollow, CustomizedGesture.Fist);
-            bool palmBackwardCheck = CustomizedGestureController.instance.GetHandStatus(handToFollow, CustomizedGesture.PalmBack);
+            //bool palmBackwardCheck = CustomizedGestureController.instance.GetHandStatus(handToFollow, CustomizedGesture.PalmBackForBlossom);
+            float palmReadyOffsetAngle = CustomizedGestureController.instance.IsBloomPossible(handToFollow);
 
-            if(handToFollow == HandTrackingPlugin.HandType.LeftHand)
+            if (handToFollow == HandTrackingPlugin.HandType.LeftHand)
             {
-                if(HandTrackingPlugin.debugLevel > 1) Debug.Log("Left hand " + HandTrackingPlugin.instance.leftHandInfo.dynamicGesture + ", currentStep = " + m_CurrentStep);
+                if (HandTrackingPlugin.debugLevel > 1) Debug.Log("Left hand " + HandTrackingPlugin.instance.leftHandInfo.dynamicGesture + ", currentStep = " + m_CurrentStep);
             }
 
             if (handToFollow == HandTrackingPlugin.HandType.RightHand)
@@ -339,14 +332,14 @@ namespace OXRTK.ARHandTracking
                 if (HandTrackingPlugin.debugLevel > 1) Debug.Log("Right hand " + HandTrackingPlugin.instance.rightHandInfo.dynamicGesture + ", currentStep = " + m_CurrentStep);
             }
 
-            if (m_CurrentStep == HandMenuStep.InPreparing)
+            if (m_CurrentStep != HandMenuStep.None)
             {
                 if ((handToFollow == HandTrackingPlugin.HandType.LeftHand &&
                     HandTrackingPlugin.instance.leftHandInfo.dynamicGesture == HandTrackingPlugin.DynamicGesture.Blossom) ||
                     (handToFollow == HandTrackingPlugin.HandType.RightHand &&
                     HandTrackingPlugin.instance.rightHandInfo.dynamicGesture == HandTrackingPlugin.DynamicGesture.Blossom))
                 {
-                    if(HandTrackingPlugin.debugLevel > 1) Debug.Log("In preparing && " + handToFollow + " is blossom, show handMenu");
+                    if (HandTrackingPlugin.debugLevel > 1) Debug.Log("In preparing && " + handToFollow + " is blossom, show handMenu");
                     m_CompleteCounter = 0;
                     m_IsLocked = true;
                     ShowMenu();
@@ -355,24 +348,43 @@ namespace OXRTK.ARHandTracking
                     return;
                 }
             }
-            
-            if(fistCheck && palmBackwardCheck)
+
+            if (fistCheck && palmReadyOffsetAngle == 0)
             {
-                if(m_CurrentStep == HandMenuStep.None)
+                if (m_CurrentStep != HandMenuStep.InPreparing)
                 {
-                    if(HandTrackingPlugin.debugLevel > 1) Debug.Log("Start in preparing");
+                    if (HandTrackingPlugin.debugLevel > 1) Debug.Log("Start in preparing");
                     m_CurrentStep = HandMenuStep.InPreparing;
                     VisualizationOnPrepare(handToFollow, ShowingStatus.Showing);
                     return;
-                } 
-            } 
-            else if(!palmBackwardCheck)
+                }
+            }
+            else if (palmReadyOffsetAngle != 0)
             {
                 if (m_CurrentStep != HandMenuStep.None)
                 {
                     if (HandTrackingPlugin.debugLevel > 1) Debug.Log("PalmBackwardCheck is false , step = " + m_CurrentStep);
-                    VisualizationOnPrepare(handToFollow, ShowingStatus.Fail);
-                    m_CurrentStep = HandMenuStep.None;
+                    if (m_CurrentStep == HandMenuStep.InPreparing )
+                    {
+                        if (palmReadyOffsetAngle > 5)
+                        {
+                            VisualizationOnPrepare(handToFollow, ShowingStatus.Fail);
+                            m_CurrentStep = HandMenuStep.None;
+                        }
+                        else
+                        {
+                            m_CurrentStep = HandMenuStep.Prepared;
+                            m_HandMenuReadyTimeEnd = Time.time + 0.2f;
+                        }
+                    }
+                    else if (m_CurrentStep == HandMenuStep.Prepared)
+                    {
+                        if (Time.time > m_HandMenuReadyTimeEnd || palmReadyOffsetAngle > 15)
+                        {
+                            VisualizationOnPrepare(handToFollow, ShowingStatus.Fail);
+                            m_CurrentStep = HandMenuStep.None;
+                        }
+                    }
                 }
             }
         }
@@ -385,21 +397,21 @@ namespace OXRTK.ARHandTracking
                     if (prepIndicator != null && prepIndicator.isShow != ShowingStatus.Showing)
                     {
                         prepIndicator.Show();
-                        if(HandTrackingPlugin.debugLevel > 0) Debug.Log(type + " Hand SHOW Completed");
+                        if (HandTrackingPlugin.debugLevel > 0) Debug.Log(type + " Hand SHOW Completed");
                     }
                     break;
                 case ShowingStatus.Fail:
                     if (prepIndicator != null && prepIndicator.isShow == ShowingStatus.Showing)
                     {
                         prepIndicator.Fail();
-                        if(HandTrackingPlugin.debugLevel > 0) Debug.Log(type + " Hand FAIL Completed");
+                        if (HandTrackingPlugin.debugLevel > 0) Debug.Log(type + " Hand FAIL Completed");
                     }
                     break;
                 case ShowingStatus.Success:
                     if (prepIndicator != null && prepIndicator.isShow == ShowingStatus.Showing)
                     {
                         prepIndicator.Success();
-                        if(HandTrackingPlugin.debugLevel > 0) Debug.Log(type + " Hand SUCCESS Completed");
+                        if (HandTrackingPlugin.debugLevel > 0) Debug.Log(type + " Hand SUCCESS Completed");
                     }
                     break;
                 case ShowingStatus.Off:
@@ -414,13 +426,13 @@ namespace OXRTK.ARHandTracking
 
         void UpdateHandPrepPos(HandController handController, HandPrepIndicator indicator)
         {
-            Vector3 palmPos = (handController.activeHand.joints[0].transform.position + 
+            Vector3 palmPos = (handController.activeHand.joints[0].transform.position +
                                handController.activeHand.joints[9].transform.position) / 2;
-                
+
             indicator.transform.rotation = Quaternion.LookRotation(
-                handController.activeHand.joints[0].transform.up, 
+                handController.activeHand.joints[0].transform.up,
                 handController.activeHand.joints[0].transform.right);
-            indicator.transform.position = palmPos - handController.activeHand.joints[0].transform.up * 0.035f; 
+            indicator.transform.position = palmPos - handController.activeHand.joints[0].transform.up * 0.035f;
         }
 
         //更新手的显示隐藏
@@ -442,7 +454,7 @@ namespace OXRTK.ARHandTracking
 
                     m_IsLocked = false;
                     m_CompleteCounter = 0;
-                    
+
                     VisualizationOnPrepare(type, ShowingStatus.Off);
                 }
             }

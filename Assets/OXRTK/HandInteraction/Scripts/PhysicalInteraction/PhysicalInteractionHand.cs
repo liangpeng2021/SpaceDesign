@@ -40,7 +40,7 @@ namespace OXRTK.ARHandTracking
             m_InitRoutine = StartCoroutine(Init());
             HandController.onActiveHandChanged += OnHandStyleChange;
 
-            if(PointerManager.instance != null)
+            if (PointerManager.instance != null)
             {
                 PointerManager.instance.onHandMenuChanged += UpdateHandMenuStatus;
             }
@@ -228,6 +228,32 @@ namespace OXRTK.ARHandTracking
             {
                 isPause = status;
             }
+        }
+
+        public bool IsFist()
+        {   //0-13 vs 15-16  0-9 vs 11-12  0-5 vs 7-8
+            //m_HandController.activeHand.joints.Length
+            int fistFingerCount = 0;
+            if (IsThisFingerFist(0,13,15,16))
+                fistFingerCount++;
+
+            if (IsThisFingerFist(0, 9, 11, 12))
+                fistFingerCount++;
+
+            if (IsThisFingerFist(0, 5, 7, 8))
+                fistFingerCount++;
+
+            return fistFingerCount >= 2;
+        }
+
+        bool IsThisFingerFist(int rootStart, int rootTip, int topStart, int topTip)
+        {
+            return 
+                Vector3.Angle(
+                    (m_HandController.activeHand.joints[rootTip].position - m_HandController.activeHand.joints[rootStart].position).normalized,
+                    (m_HandController.activeHand.joints[topTip].position - m_HandController.activeHand.joints[topStart].position).normalized
+                    )
+                > 120f;
         }
 
         void OnValidate()

@@ -5,6 +5,7 @@ using OXRTK.ARHandTracking;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using XR;
+using ArmIK;
 
 namespace OXRTK
 {
@@ -35,8 +36,10 @@ namespace OXRTK
 
         [SerializeField] private FluidOSI m_LeftOsi;
         [SerializeField] private FluidOSI m_RightOsi;
-
+        
         public GameObject overlayMask;
+
+        [SerializeField] private GameObject m_WavePlane;
 
         public static HudManager instance { get; set; }
 
@@ -78,8 +81,8 @@ namespace OXRTK
             }
             else if (Application.platform == RuntimePlatform.Android)
             {
-                yield return new WaitUntil(() => CenterCamera.centerCamera != null);
-                m_MainCamera = CenterCamera.centerCamera;
+                yield return new WaitUntil(() => CenterCamera.instance.centerCamera != null);
+                m_MainCamera = CenterCamera.instance.centerCamera;
             }
 
             yield return new WaitUntil(() => HandTrackingPlugin.instance != null);
@@ -119,27 +122,8 @@ namespace OXRTK
                 result.x = v.x > 0 ? (m_ScreenWidth / 2) : (-m_ScreenWidth / 2);
             }
 
-            /*result = new Vector3(
-                                Mathf.Clamp(v.x, -m_ScreenWidth/2 + bld, m_ScreenWidth/2 - bld),
-                                Mathf.Clamp(v.y, -m_ScreenHeight/2 + bld, m_ScreenHeight/2 - bld), 
-                                v.z);*/
-
-            /*if (Mathf.Abs(v.x) > Mathf.Abs(v.y))
-            {
-                result.x = v.x > 0 ? m_ScreenWidth / 2 : -m_ScreenWidth / 2;
-                
-                result.y = (v.y / v.x) * (v.x > 0 ? m_ScreenHeight / 2 : m_ScreenHeight / -2);
-            }
-            else
-            {
-                result.y = v.y > 0 ? m_ScreenHeight / 2 : -m_ScreenHeight / 2;
-                
-                result.x = (v.x / v.y) * (v.y > 0 ? m_ScreenWidth / 2 : m_ScreenWidth / -2);
-            }*/
-
             return result;
         }
-
         
         // Update is called once per frame
         void Update()
@@ -152,65 +136,18 @@ namespace OXRTK
             infoL = HandTrackingPlugin.instance.leftHandInfo;
             infoR = HandTrackingPlugin.instance.rightHandInfo;
             
-            // UpdateOsiIndicator(m_RightHand, m_RightHandIndicator, m_RightPing, m_RightOsi, infoR);
-            // UpdateOsiIndicator(m_LeftHand, m_LeftHandIndicator, m_LeftPing, m_LeftOsi, infoL);
-            
             UpdateOsiIndicator(m_RightHand, m_RightOsi, infoR);
             UpdateOsiIndicator(m_LeftHand, m_LeftOsi, infoL);
             
+            // Control the indirect wave plane torch light
+
+            TorchLight.probe1Ind = m_WavePlane.transform.InverseTransformPoint(m_LeftHand.activeHand.joints[16].position);
+            TorchLight.probe2Ind = m_WavePlane.transform.InverseTransformPoint(m_RightHand.activeHand.joints[16].position);
+
+            TorchLight.inputDir1Ind = m_WavePlane.transform.InverseTransformDirection(TorchLight.leftHandDir);
+            TorchLight.inputDir2Ind = m_WavePlane.transform.InverseTransformDirection(TorchLight.righttHandDir);
         }
-
-        /*void UpdateOsiIndicator(HandController hc, RectTransform handIndicator, RectTransform ping, FluidOSI osi, HandTrackingPlugin.HandInfo hInfo)
-        {
-            if (hc.activeHand)
-            {
-                Vector3 screenPoint;
-                
-                if (m_UsePalm)
-                {
-                    Vector3 palmPos = (hc.activeHand.joints[0].position +
-                                        hc.activeHand.joints[5].position +
-                                        hc.activeHand.joints[13].position) / 3f;
-                    
-                    screenPoint = m_MainCamera.WorldToViewportPoint(palmPos);
-                }
-                else
-                {
-                    screenPoint = m_MainCamera.WorldToViewportPoint(hc.activeHand.joints[16].position);
-                }
-                
-                Vector3 hudIndicatorPos = V3Clamp(screenPoint, 100f);
-                // Vector3 hudIndicatorPos = screenPoint;
-
-                // osi.SetAttractor(hudIndicatorPos);
-
-                if (screenPoint.x > 1-m_Offset || screenPoint.y > 1-m_Offset || screenPoint.x < m_Offset || screenPoint.y < m_Offset)
-                {                    
-                    handIndicator.localPosition = hudIndicatorPos;
-                    
-                    ping.localScale = Vector3.one * Mathf.Clamp(Vector3.Distance(screenPoint, Vector3.zero), .4f, 1.4f);                    
-                    ping.localPosition = hudIndicatorPos;
-
-                    handIndicator.gameObject.SetActive(true);
-                    // ping.gameObject.SetActive(true);
-                    // osi.gameObject.SetActive(true);
-                }
-                else
-                {
-                    handIndicator.gameObject.SetActive(false);
-                    // ping.gameObject.SetActive(false);
-                    // osi.gameObject.SetActive(false);
-                }
-            }
-            
-            if (!hInfo.handDetected)
-            {
-                handIndicator.gameObject.SetActive(false);
-                // ping.gameObject.SetActive(false);
-                // osi.gameObject.SetActive(false);
-            }
-        }
-        */
+        
         
         void UpdateOsiIndicator(HandController hc, FluidOSI osi, HandTrackingPlugin.HandInfo hInfo)
         {
@@ -231,7 +168,6 @@ namespace OXRTK
                     screenPoint = m_MainCamera.WorldToViewportPoint(hc.activeHand.joints[16].position);
                 }
                 
-                // Vector3 hudIndicatorPos = V3Clamp(screenPoint);
                 Vector3 hudIndicatorPos = screenPoint;
                 
                 osi.SetAttractor(hudIndicatorPos);

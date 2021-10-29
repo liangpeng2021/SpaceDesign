@@ -43,6 +43,10 @@ namespace OXRTK.ARHandTracking
         /// </summary>
         public InteractionSetting[] handSetting;
 
+        /// <summary>
+        /// OK visual and audio feedback for hand. <br>
+        /// 当前手上OK的视觉和声音反馈。
+        /// </summary>
         [Header("Gesture Feedback")]
         public bool okFeedback = true;
 
@@ -96,6 +100,8 @@ namespace OXRTK.ARHandTracking
 
         void InteractionSetup()
         {
+            bool physicalNeeded = false;
+            
             if (PointerManager.instance == null)
                 return;
 
@@ -111,7 +117,11 @@ namespace OXRTK.ARHandTracking
                 PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.PhysicalInteraction, handSetting[i].usePhysicalInteraction && !m_IsHandMenuOpen);
 
                 PointerManager.instance.SetHandInteraction(handSetting[i].handType, HandInteractionType.UiIneraction, handSetting[i].useUIInteraction && !m_IsHandMenuOpen);
+
+                if (handSetting[i].usePhysicalInteraction) { physicalNeeded = true; }
             }
+            
+            if (physicalNeeded) {TorchLight.isPhysical = true;}
 
             m_PreviousHandSetting = new InteractionSetting[handSetting.Length];
             for(int i = 0; i < handSetting.Length; i++)

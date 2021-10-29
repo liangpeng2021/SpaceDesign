@@ -42,6 +42,8 @@ public class WaveInteractionExampleManager : MonoBehaviour
     bool m_IsGaze = true;
     bool m_IsWave = true;
     bool m_IsLeftRight = true;
+    
+    private bool m_NeedResetPos = false;   
 
     void Start()
     {

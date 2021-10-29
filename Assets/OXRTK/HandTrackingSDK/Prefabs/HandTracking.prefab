@@ -1150,6 +1150,7 @@ GameObject:
   - component: {fileID: 5691732395442919872}
   - component: {fileID: 5691732395442919873}
   - component: {fileID: 51316200555316910}
+  - component: {fileID: 4041918672013299662}
   m_Layer: 0
   m_Name: RightHand
   m_TagString: Untagged
@@ -1448,6 +1449,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_IsEnabled: 0
   m_DisableWhenSwitchScene: 1
+--- !u!114 &4041918672013299662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5691732395442919874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aca547150ba2d945a3cc9d973e043e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5691732395503690588
 GameObject:
   m_ObjectHideFlags: 0
@@ -1630,6 +1643,7 @@ GameObject:
   - component: {fileID: 5691732396136958970}
   - component: {fileID: 5691732396136958971}
   - component: {fileID: 1381754533851527130}
+  - component: {fileID: 6530763244501765963}
   m_Layer: 0
   m_Name: LeftHand
   m_TagString: Untagged
@@ -1928,6 +1942,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_IsEnabled: 0
   m_DisableWhenSwitchScene: 1
+--- !u!114 &6530763244501765963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5691732396136958966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aca547150ba2d945a3cc9d973e043e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5691732396286232124
 GameObject:
   m_ObjectHideFlags: 0
@@ -2276,6 +2302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2df821d2af748be47bcb13dd3b7ea0c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  centerCamera: {fileID: 0}
 --- !u!1 &5691732396735883525
 GameObject:
   m_ObjectHideFlags: 0

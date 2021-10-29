@@ -23,7 +23,7 @@ namespace OXRTK.ARHandTracking
 
         }
 
-        readonly string m_OxrtkHandVersion = "0.2.4.2";
+        readonly string m_OxrtkHandVersion = "0.2.6";
 
         /// <summary>
         /// The controller for right hand.<br>
@@ -339,7 +339,7 @@ namespace OXRTK.ARHandTracking
         /// 添加到手部数据的平滑滤波。数值越大，滤波越强。默认数值是0.65。范围是0 ~ 0.9。
         /// </summary>
         [Range(0.0f, 0.9f)]
-        private float m_SmoothFilter = 0.75f;
+        private float m_SmoothFilter = 0.3f;
         bool m_LastFrameRightHandDetected = false;
         bool m_LastFrameLeftHandDetected = false;
         JointData[] m_LastFrameJointData = new JointData[2];
@@ -570,6 +570,8 @@ namespace OXRTK.ARHandTracking
 
                 if (m_HandThreadLock == 1)
                 {
+                    CenterCamera.instance.UpdateCenterCameraTransform();
+
                     m_HandInfo[0].handDetected = m_HandTrackingInfo.right.handDetected;
                     if (m_IsHandTrackingCorrect && m_HandInfo[0].handDetected)
                     {

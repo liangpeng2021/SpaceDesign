@@ -22,6 +22,7 @@ public class LoadMainScence : MonoBehaviour
 
     public Canvas[] canvas;
 
+    public GameObject kaichangObj;
     #region 拉起其他应用
     /// <summary>
     /// 奇幻森林按钮
@@ -112,9 +113,8 @@ public class LoadMainScence : MonoBehaviour
     private void OnDestroy()
     {
         roomPrefab = null;
-        
+
         objectDatas.Clear();
-        objectDatas = null;
         
         backto = null;
 
@@ -136,7 +136,15 @@ public class LoadMainScence : MonoBehaviour
         {
             canvas[i].worldCamera = eventCamera;
         }
-        
+        //播放开场动效
+        kaichangObj.SetActive(true);
+        Invoke("HideKaichang",7.1f);
+    }
+
+    void HideKaichang()
+    {
+        kaichangObj.SetActive(false);
+        //加载物体
         LoadGameObjectData();
     }
     
@@ -158,7 +166,7 @@ public class LoadMainScence : MonoBehaviour
             GameObject obj = Instantiate(roomPrefab);
             RoomControl roomControl = obj.GetComponent<RoomControl>();
             if (objectDatas.roomDatasList[i] != null)
-                roomControl.SetRoomData(objectDatas.roomDatasList[i],LoadPrefab.Instance.prefabDic);
+                roomControl.SetRoomData(objectDatas.roomDatasList[i],LoadPrefab.prefabDic);
             else
             {
                 Debug.Log("MyLog::第" + i.ToString()+"房间为空");

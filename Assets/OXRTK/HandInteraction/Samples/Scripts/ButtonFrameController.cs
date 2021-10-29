@@ -98,9 +98,9 @@ public class ButtonFrameController : MonoBehaviour
     {
         if (backBoard != null && backBoard.GetComponent<MeshRenderer>() != null)
         {
-            if (backBoard.GetComponent<MeshRenderer>().material.HasProperty("_BaseColor"))
+            if (backBoard.GetComponent<MeshRenderer>().material.HasProperty("_Color"))
             {
-                backBoard.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", col);
+                backBoard.GetComponent<MeshRenderer>().material.SetColor("_Color", col);
             }
         }
     }

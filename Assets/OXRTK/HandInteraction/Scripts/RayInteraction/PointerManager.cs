@@ -26,6 +26,10 @@ namespace OXRTK.ARHandTracking
 
         public static PointerManager instance = null;
 
+        /// <summary>
+        /// Action to call when handmenu display status changed.<br>
+        /// 当随手菜单开始显示或结束显示时调用。
+        /// </summary>
         public Action<bool> onHandMenuChanged;
         GameObject m_LeftHand, m_RightHand;
         

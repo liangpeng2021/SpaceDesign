@@ -11,26 +11,26 @@ public class ChangeSate : MonoBehaviour
     
     [HideInInspector]
     public int index;
-    bool isLightOn;
-    GameObject lightObj;
+    //bool isLightOn;
+    //GameObject lightObj;
     
     private void OnDestroy()
     {
-        lightObj = null;
+        //lightObj = null;
 
         boundingBox = null;
     }
 
-    public void HightLightOff()
-    {
-        isLightOn = false;
-    }
+    //public void HightLightOff()
+    //{
+    //    //isLightOn = false;
+    //}
 
-    void Init()
-    {
-        if (transform.Find("BoundingBox/BoundsVisualization"))
-            lightObj = transform.Find("BoundingBox/BoundsVisualization").gameObject;
-    }
+    //void Init()
+    //{
+    //    if (transform.Find("BoundingBox/BoundsVisualization"))
+    //        lightObj = transform.Find("BoundingBox/BoundsVisualization").gameObject;
+    //}
 
     private void OnEnable()
     {
@@ -70,21 +70,37 @@ public class ChangeSate : MonoBehaviour
 
     public void HightLightOn()
     {
-        isLightOn = true;
+        //isLightOn = true;
 
-        if (lightObj == null)
-            Init();
-        if (lightObj == null)
-            return;
+        //if (lightObj == null)
+        //    Init();
+        //if (lightObj == null)
+        //    return;
         EditorControl.Instance.prefabManager.SetDeleteObjPos(transform);
     }
 
     private void Update()
     {
-        if (lightObj == null)
-            Init();
-        if (lightObj == null)
+        //if (lightObj == null)
+        //    Init();
+        //if (lightObj == null)
+        //    return;
+        //lightObj.SetActive(isLightOn);
+        if (boundingBox == null)
+        {
+            boundingBox = GetComponent<BoundingBox>();
+        }
+        if (boundingBox == null)
             return;
-        lightObj.SetActive(isLightOn);
+        if (boundingBox.edgeObjects == null)
+            return;
+        for (int i = 0; i < boundingBox.edgeObjects.Length; i++)
+        {
+            //x、z不旋转
+            if (i < 4 || (i >= 8 && i < 12))
+            {
+                boundingBox.edgeObjects[i].SetActive(false);
+            }
+        }
     }
 }

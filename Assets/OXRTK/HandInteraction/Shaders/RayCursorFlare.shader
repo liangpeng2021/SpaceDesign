@@ -5,6 +5,7 @@ Shader "OXRTK/RayCursorFlare" {
         [HideInInspector]_Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
         _Stencil ("Stencil ID", Float) = 0
         [Toggle] _IsSwap("Swap Color", Float) = 0
+        _ZTest("ZTest", Float) = 0
     }
     SubShader {
         Tags {
@@ -20,7 +21,7 @@ Shader "OXRTK/RayCursorFlare" {
             Blend One One
             // Blend SrcAlpha OneMinusSrcAlpha
             ZWrite Off
-            ZTest Off
+            ZTest [_ZTest]
             
             Stencil {
                 Ref [_Stencil]
@@ -50,7 +51,7 @@ Shader "OXRTK/RayCursorFlare" {
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 float2 uv0 : TEXCOORD0;
                 float4 posWorld : TEXCOORD1;
-                UNITY_FOG_COORDS(2)
+    
             };
             VertexOutput vert (VertexInput v) {
                 VertexOutput o = (VertexOutput)0;
@@ -69,7 +70,6 @@ Shader "OXRTK/RayCursorFlare" {
                 bbmv._m12 = 0.0f;
                 bbmv._m22 = -1.0/length(unity_WorldToObject[2].xyz);
                 o.pos = mul( UNITY_MATRIX_P, mul( bbmv, v.vertex ));
-                UNITY_TRANSFER_FOG(o,o.pos);
                 return o;
             }
             float4 frag(VertexOutput i) : COLOR {
@@ -81,7 +81,6 @@ Shader "OXRTK/RayCursorFlare" {
                 float3 emissive = _IsSwap? (_MainTex_var.rgb * pow(float3(abs(viewDir.r) * 0.4, abs(viewDir.g) * 0.4, abs(viewDir.b) * 0.7), _EmissionPow_var)) : _MainTex_var.rgb;
                 float3 finalColor = emissive;
                 fixed4 finalRGBA = fixed4(finalColor,_MainTex_var.a);
-                UNITY_APPLY_FOG_COLOR(i.fogCoord, finalRGBA, fixed4(0.5,0.5,0.5,1));
                 return finalRGBA;
             }
             ENDCG

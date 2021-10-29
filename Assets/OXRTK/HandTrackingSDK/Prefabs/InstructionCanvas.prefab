@@ -167,8 +167,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 3036676095
+  m_fontColor: {r: 1, g: 1, b: 1, a: 0.7058824}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -626,8 +626,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -302.5, y: 0}
-  m_SizeDelta: {x: -655, y: -70}
+  m_AnchoredPosition: {x: -302.5, y: -14.5}
+  m_SizeDelta: {x: -655, y: -41}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8202057784693812357
 CanvasRenderer:
@@ -743,7 +743,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 81.59, y: 352.93, z: 15}
+  m_Size: {x: 81.59, y: 376.6, z: 15}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!95 &1202568270355394173
 Animator:
@@ -813,6 +813,7 @@ GameObject:
   - component: {fileID: 8202057784897580508}
   - component: {fileID: 8202057784897580509}
   - component: {fileID: 8202057784897580510}
+  - component: {fileID: 7606275912435885310}
   m_Layer: 5
   m_Name: InstructionCanvas
   m_TagString: Untagged
@@ -904,6 +905,20 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &7606275912435885310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8202057784897580504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7bd5c37cd9ef084eb5137bc8f1b1a9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_InstructionBody: {fileID: 8962271407245901977}
+  isLaunhcer: 0
 --- !u!1 &8398310407572544549
 GameObject:
   m_ObjectHideFlags: 0
@@ -968,10 +983,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u573A\u666F\u540D"
+  m_text: "\u573A\u666F"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: a48f7c17cebaabf45ad1d55be96bd4fb, type: 2}
-  m_sharedMaterial: {fileID: 21488856140539268, guid: a48f7c17cebaabf45ad1d55be96bd4fb,
+  m_fontAsset: {fileID: 11400000, guid: 5af972cd402f24743b8d8f0be85d9341, type: 2}
+  m_sharedMaterial: {fileID: -7480945792303159387, guid: 5af972cd402f24743b8d8f0be85d9341,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}

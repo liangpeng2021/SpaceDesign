@@ -107,8 +107,9 @@ namespace OXRTK.ARHandTracking
             {
                 if (handData.Value.thumb == null && handData.Value.fingers.Count == 0)
                 {
+                    if(m_fingerTipHands[handData.Key].removeFrameCount < m_FilterFrameDelay)
                     m_fingerTipHands[handData.Key].removeFrameCount++;
-                    if (m_fingerTipHands[handData.Key].removeFrameCount >= m_FilterFrameDelay)
+                    if (m_fingerTipHands[handData.Key].removeFrameCount == m_FilterFrameDelay)
                     {
                         toDelete.Add(handData.Key);
                         continue;
@@ -120,9 +121,12 @@ namespace OXRTK.ARHandTracking
                 }
                 if (ShouldGrab(handData.Key, handData.Value))
                 {
-                    m_fingerTipHands[handData.Key].grabFrameCount++;
-                    m_fingerTipHands[handData.Key].releaseFrameCount = 0;
-                    if (m_fingerTipHands[handData.Key].grabFrameCount >= m_FilterFrameDelay)
+                    if (m_fingerTipHands[handData.Key].grabFrameCount < m_FilterFrameDelay)
+                    {
+                        m_fingerTipHands[handData.Key].grabFrameCount++;
+                        m_fingerTipHands[handData.Key].releaseFrameCount = 0;
+                    }
+                    if (m_fingerTipHands[handData.Key].grabFrameCount == m_FilterFrameDelay)
                         toGrab.Add(handData.Key);
                 }
                 else
@@ -150,14 +154,21 @@ namespace OXRTK.ARHandTracking
                 for (int i = 0; i < toGrab.Count; i++)
                 {
                     if (m_fingerTipHands.ContainsKey(toGrab[i]))
+                    {
                         Grab(toGrab[i]);
-                    break;
+                        break;
+                    }
                 }
             }
         }
 
         bool ShouldGrab(PhysicalInteractionHand hand, FingerTipsStruct handData)
         {
+            if(m_GrabbedHand == hand)
+            {
+                if (hand.IsFist())
+                    return true;
+            }
             if (handData.thumb == null || handData.fingers.Count == 0)
                 return false;
             for (int i = 0; i < handData.fingers.Count; i++)
@@ -207,7 +218,9 @@ namespace OXRTK.ARHandTracking
         void RemoveHand(PhysicalInteractionHand hand)
         {
             if (m_GrabbedHand == hand)
+            {
                 UnGrab();
+            }
             m_fingerTipHands.Remove(hand);
         }
 

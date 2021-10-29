@@ -8,14 +8,8 @@ public class LoadPrefab : MonoBehaviour
 {
     public Prefab3D[] prefab3Ds;
 
-    public Dictionary<string, GameObject> prefabDic = new Dictionary<string, GameObject>();
-
-    public static LoadPrefab Instance;
-    private void Awake()
-    {
-        Instance = this;
-    }
-
+    public static Dictionary<string, GameObject> prefabDic = new Dictionary<string, GameObject>();
+    
     // Start is called before the first frame update
     void Start()
     {

@@ -2,6 +2,8 @@ Shader "OXRTK/BorderStandard" {
     Properties {
         _Color ("Color", Color) = (1,1,1,1)
         _Power ("Power", Range(0, 2)) = 1
+        _StencilID ("Stencil ID", Float) = 11
+        _PassOperation ("Pass Operation", Float) = 2
     }
     SubShader {
         Tags {
@@ -14,8 +16,10 @@ Shader "OXRTK/BorderStandard" {
             }
 
             Stencil {
-                Ref 11
-                Pass Replace
+                /*Ref 11
+                Pass Replace*/
+                Ref [_StencilID]
+                Pass [_PassOperation]
             }
 
             CGPROGRAM

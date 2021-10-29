@@ -11,10 +11,25 @@ namespace OXRTK.ARHandTracking
     /// </summary>
     public class CenterCamera : MonoBehaviour
     {
-        public static Camera centerCamera;
+        public static CenterCamera instance = null;
+        public CenterCamera()
+        {            
+            
+        }
 
-        void Start()
+        /// <summary>
+        /// The camera used to mirror OppoXR SDK Stereo Camera.<br>
+        /// 用于镜像OppoXR SDK Stereo Camera的相机。
+        /// </summary>
+        public Camera centerCamera;
+
+        void Awake()
         {
+            if (instance == null)
+            {
+                instance = this;
+            }
+
             if (XRCameraManager.Instance != null)
             {
                 centerCamera = XRCameraManager.Instance.stereoCamera.GetComponent<Camera>();
@@ -23,14 +38,23 @@ namespace OXRTK.ARHandTracking
 
         void Update()
         {
+            
+        }
+
+        /// <summary>
+        /// Updates the position and rotation of hands' parent node.<br>
+        /// 更新手的母节点位置和旋转信息。
+        /// </summary>
+        public void UpdateCenterCameraTransform()
+        {
             // Center camera is actually OppoXR SDK's Stereo Camera.
             // The name is to distinguish it from OppoXR's camera.
             // Sync center camera's transform to hands' parent node each frame.
             if (centerCamera != null)
             {
                 transform.position = centerCamera.transform.position;
-                transform.rotation = centerCamera.transform.rotation;
-            }
+                transform.rotation = centerCamera.transform.rotation;                
+            }            
         }
     }
 }

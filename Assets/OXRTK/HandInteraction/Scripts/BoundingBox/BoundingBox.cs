@@ -171,9 +171,12 @@ namespace OXRTK.ARHandTracking
         Vector3 m_OriginalLocalScale, m_LocalScaleAtInit, m_CenterToHandlerAtBeginning, m_GlobalScaleAtInit;
         Vector2 m_CornerRescaleDirection;
 
+        Vector3 m_HandStartPositionRelativeToCamera;
+        Vector3 m_ObjectPositionRelativeToCamera;
+        float m_RatioForHandAndObject;
+
         float m_TimerForFocus;
         bool m_IsFocusOn;
-
         #endregion
 
         void Start()
@@ -204,7 +207,6 @@ namespace OXRTK.ARHandTracking
                         boundsOverride.size = new Vector3(newEdgeLengthX, newEdgeLengthY, newEdgeLengthZ);
                     }
                 }
-
             }
 
             if (isFlat)
@@ -540,7 +542,7 @@ namespace OXRTK.ARHandTracking
                 case BoundsAction.Translate:
                     m_OriginalPosition = m_TargetOverride.position;
                     m_CursorToCenter = m_OriginalPosition - endPosition;
-                    m_OriginalTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
+                    m_OriginalTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.instance.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
                     onTranslateStart?.Invoke();
                     break;
 
@@ -565,15 +567,86 @@ namespace OXRTK.ARHandTracking
                     m_OriginalRotation = m_TargetOverride.rotation;
                     onRotateStart?.Invoke();
                     break;
+
                 case BoundsAction.Scale:
                     m_OriginalLocalScale = m_TargetOverride.localScale;
-                    Vector3 pointOnCamera = CenterCamera.centerCamera.WorldToScreenPoint(endPosition);
-                    Vector3 objectOnCamera = CenterCamera.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
+                    Vector3 pointOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(endPosition);
+                    Vector3 objectOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
                     m_CornerRescaleDirection = new Vector2(Mathf.Sign((pointOnCamera - objectOnCamera).x), Mathf.Sign((pointOnCamera - objectOnCamera).y));
                     m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
-
                     onScaleStart?.Invoke();
                     break;
+                    
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Starts bounding box ray interaction. <br>
+        /// 开始bounding box远端交互。
+        /// </summary>
+        /// <param name="action">The action to start. <br>开始交互的类型.</param>
+        /// <param name="axis">Current interaction axis. <br>当前交互轴.</param>
+        /// <param name="shoulderPoint">Start point of ray in far interaction. <br>远端射线肩膀位置.</param>
+        /// <param name="handPosition">Start point of ray in far interaction. <br>远端射线手关键点位置.</param>
+        /// <param name="direction">Direction of the ray in far interaction. <br>远端射线方向.</param>
+        /// <param name="endPosition">End position of the ray in far interaction. <br>远端射线终点打到的位置.</param>
+        public void StartRayAction(BoundsAction action, BoundsActionAxis axis = BoundsActionAxis.None,
+            Vector3 shoulderPoint = default(Vector3), Vector3 handPosition = default(Vector3), Vector3 direction = default(Vector3), Vector3 endPosition = default(Vector3))
+        {
+            m_CurrentAction = action;
+            m_CurrentActionAxis = axis;
+            m_RatioForHandAndObject = (Vector3.Distance(shoulderPoint, handPosition) / Vector3.Distance(shoulderPoint, endPosition));
+            m_HandStartPositionRelativeToCamera = CenterCamera.instance.centerCamera.transform.InverseTransformPoint(handPosition);
+            m_ObjectPositionRelativeToCamera = CenterCamera.instance.centerCamera.transform.InverseTransformPoint(endPosition);
+            m_DistanceToObject = Vector3.Distance(handPosition, endPosition);
+            switch (m_CurrentAction)
+            {
+                case BoundsAction.Translate:
+                    m_OriginalPosition = m_TargetOverride.position;
+                    m_CursorToCenter = m_OriginalPosition - endPosition;
+                    m_OriginalTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.instance.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
+                    onTranslateStart?.Invoke();
+                    break;
+
+                case BoundsAction.Rotate:
+                    m_OriginalPosition = m_TargetOverride.position;
+                    switch (m_CurrentActionAxis)
+                    {
+                        case BoundsActionAxis.X:
+                            m_CurrentAxis = m_TargetOverride.right;
+                            break;
+                        case BoundsActionAxis.Y:
+                            m_CurrentAxis = m_TargetOverride.up;
+                            break;
+                        case BoundsActionAxis.Z:
+                            m_CurrentAxis = m_TargetOverride.forward;
+                            break;
+                        default:
+                            break;
+                    }
+                    m_OriginalCenterToHandlerOnTargetAxis = Vector3.ProjectOnPlane(endPosition - m_TargetOverride.position, m_CurrentAxis).normalized;
+                    m_OriginalRotation = m_TargetOverride.rotation;
+                    onRotateStart?.Invoke();
+                    break;
+
+                case BoundsAction.Scale:
+                    m_OriginalLocalScale = m_TargetOverride.localScale;
+                    Vector3 pointOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(endPosition);
+                    Vector3 objectOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
+                    m_CornerRescaleDirection = new Vector2(Mathf.Sign((pointOnCamera - objectOnCamera).x), Mathf.Sign((pointOnCamera - objectOnCamera).y));
+                    m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
+                    onScaleStart?.Invoke();
+                    
+                    //3d
+                    /*m_OriginalLocalScale = m_TargetOverride.localScale;
+                    Vector3 pointOnCamera = endPosition;
+                    Vector3 objectOnCamera = m_TargetOverride.position;
+                    m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
+                    onScaleStart?.Invoke();*/
+                    break;
+                    
                 default:
                     break;
             }
@@ -595,7 +668,7 @@ namespace OXRTK.ARHandTracking
                 case BoundsAction.Translate:
                     m_OriginalPosition = m_TargetOverride.position;
                     m_CursorToCenter = m_OriginalPosition - pinchPosition;
-                    m_OriginalTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
+                    m_OriginalTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.instance.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
                     onTranslateStart?.Invoke();
                     break;
 
@@ -621,8 +694,8 @@ namespace OXRTK.ARHandTracking
                 case BoundsAction.Scale:
                     m_OriginalLocalScale = m_TargetOverride.localScale;
                     m_CenterToHandlerAtBeginning = pinchPosition - m_TargetOverride.position;
-                   /* Vector3 pointOnCamera = CenterCamera.centerCamera.WorldToScreenPoint(pinchPosition);
-                    Vector3 objectOnCamera = CenterCamera.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
+                   /* Vector3 pointOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(pinchPosition);
+                    Vector3 objectOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
                     m_CornerRescaleDirection = new Vector2(Mathf.Sign((pointOnCamera - objectOnCamera).x), Mathf.Sign((pointOnCamera - objectOnCamera).y));
                     m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
                    */
@@ -641,6 +714,9 @@ namespace OXRTK.ARHandTracking
         public void EndAction(BoundsAction action)
         {
             m_DistanceToObject = 0;
+            m_RatioForHandAndObject = 0;
+            m_HandStartPositionRelativeToCamera = default(Vector3);
+            m_ObjectPositionRelativeToCamera = default(Vector3);
             if (m_CurrentAction == action)
             {
                 switch (m_CurrentAction)
@@ -677,6 +753,168 @@ namespace OXRTK.ARHandTracking
         /// Updates far interaction information. <br>
         /// 交互过程中，更新bounding box远端交互。
         /// </summary>
+        /// <param name="shoulderPosition">The shoulder position of laser. <br>射线肩膀位置.</param>
+        /// <param name="handPosition">The hand position of laser. <br>射线手关键点位置.</param>
+        /// <param name="direction">The direction of laser. <br>射线方向.</param>
+        public void UpdateRayAction(Vector3 shoulderPosition, Vector3 handPosition, Vector3 direction)
+        {
+            Vector3 handPositionRelativeToCamera = CenterCamera.instance.centerCamera.transform.InverseTransformPoint(handPosition);
+            Vector3 handDifference = handPositionRelativeToCamera - m_HandStartPositionRelativeToCamera;
+            Vector3 objectRelPosition;
+            Vector3 objectPosition;
+            Vector3 endPosition;
+            Vector3 centerToHandler;
+
+            switch (m_CurrentAction)
+            {
+                case BoundsAction.Translate:
+                    objectRelPosition = m_ObjectPositionRelativeToCamera + handDifference * (1 / m_RatioForHandAndObject);
+                    objectPosition = CenterCamera.instance.centerCamera.transform.TransformPoint(objectRelPosition) + m_CursorToCenter;
+                    m_RatioForHandAndObject = (Vector3.Distance(shoulderPosition, handPosition) / Vector3.Distance(shoulderPosition, objectPosition));
+                    endPosition = objectPosition;
+
+                    m_TargetOverride.position = Vector3.Lerp(m_TargetOverride.position, endPosition, 0.3f);
+                    if (isFlat)
+                    {
+                        Vector3 objectTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.instance.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
+                        Quaternion newRot = Quaternion.FromToRotation(m_OriginalTowardCamera, objectTowardCamera);
+                        m_TargetOverride.rotation = newRot * m_TargetOverride.rotation;
+                        m_OriginalTowardCamera = objectTowardCamera;
+                    }
+                    onTranslateUpdate?.Invoke();
+                    break;
+                case BoundsAction.Rotate:
+
+                    objectRelPosition = m_ObjectPositionRelativeToCamera + handDifference * (1 / m_RatioForHandAndObject);
+                    objectPosition = CenterCamera.instance.centerCamera.transform.TransformPoint(objectRelPosition) + m_CursorToCenter;
+                    m_RatioForHandAndObject = (Vector3.Distance(shoulderPosition, handPosition) / Vector3.Distance(shoulderPosition, objectPosition));
+                    endPosition = objectPosition;
+
+                    centerToHandler = Vector3.ProjectOnPlane(endPosition - m_TargetOverride.position, m_CurrentAxis).normalized;
+                    Quaternion rot = Quaternion.FromToRotation(m_OriginalCenterToHandlerOnTargetAxis, centerToHandler);
+                    m_TargetOverride.rotation = rot * m_OriginalRotation;
+
+                    m_BoundingBoxRoot.GetComponent<BoundsScaleController>().SetIsRotation(true);
+                    onRotateUpdate?.Invoke();
+                    break;
+                case BoundsAction.Scale:
+                    endPosition = handPosition + direction * m_DistanceToObject;
+                    Vector3 pointOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(endPosition);
+                    Vector3 objectOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
+                    centerToHandler = pointOnCamera - objectOnCamera;
+
+                    float xWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.x) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y));
+                    float yWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.y) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y));
+
+                    Vector2 newPositionDiff = new Vector2((centerToHandler - m_CenterToHandlerAtBeginning).x, (centerToHandler - m_CenterToHandlerAtBeginning).y);
+
+                    float xMul = xWeight * newPositionDiff.x * m_CornerRescaleDirection.x / 1500;
+                    float yMul = yWeight * newPositionDiff.y * m_CornerRescaleDirection.y / 1500;
+                    float finalMulResult = (xMul + yMul) / (xWeight + yWeight);
+
+                    float scaleSize = (finalMulResult * m_GlobalScaleAtInit.magnitude + m_OriginalLocalScale.x) / m_LocalScaleAtInit.x;
+
+                    if (scaleSize > scaleMin && scaleSize < scaleMax)
+                    {
+                        Vector3 tempScale = m_LocalScaleAtInit * scaleSize;
+                        if (isFlat)
+                        {
+                            m_TargetOverride.localScale = Vector3.Lerp(m_TargetOverride.localScale,
+                                new Vector3(tempScale.x, tempScale.y, m_TargetOverride.localScale.z), 0.4f);
+                            m_BoundingBoxRoot.GetComponent<BoundsScaleController>().UpdateFlatZScale(scaleSize);
+                        }
+
+                        else
+                        {
+                            m_TargetOverride.localScale = Vector3.Lerp(m_TargetOverride.localScale, tempScale, 0.4f);
+                        }
+                    }
+                    else if (scaleSize <= scaleMin)
+                    {
+                        Vector3 tempScale = scaleMin * m_LocalScaleAtInit;
+                        if (isFlat)
+                        {
+                            m_TargetOverride.localScale = new Vector3(tempScale.x, tempScale.y, m_TargetOverride.localScale.z);
+                            m_BoundingBoxRoot.GetComponent<BoundsScaleController>().UpdateFlatZScale(scaleMin);
+                        }
+                        else
+                            m_TargetOverride.localScale = tempScale;
+                    }
+                    else
+                    {
+                        Vector3 tempScale = scaleMax * m_LocalScaleAtInit;
+                        if (isFlat)
+                        {
+                            m_TargetOverride.localScale = new Vector3(tempScale.x, tempScale.y, m_TargetOverride.localScale.z);
+                            m_BoundingBoxRoot.GetComponent<BoundsScaleController>().UpdateFlatZScale(scaleMax);
+                        }
+                        else
+                            m_TargetOverride.localScale = tempScale;
+                    }
+                    onScaleUpdate?.Invoke();
+
+                    //3D
+                    /*objectRelPosition = m_ObjectPositionRelativeToCamera + handDifference;
+                    objectPosition = CenterCamera.centerCamera.transform.TransformPoint(objectRelPosition);
+                    endPosition = objectPosition;
+                    Vector3 pointOnCamera = endPosition;
+                    Vector3 objectOnCamera = m_TargetOverride.position;
+                    centerToHandler = pointOnCamera - objectOnCamera;
+                    float rescaleRatio = Vector3.Magnitude(centerToHandler) / Vector3.Magnitude(m_CenterToHandlerAtBeginning);
+                    float angle = Vector3.Angle(m_CenterToHandlerAtBeginning, centerToHandler);
+                    if (angle < 120)
+                    {
+                        float scaleSize = (rescaleRatio * m_OriginalLocalScale.x) / m_LocalScaleAtInit.x;
+                        if (scaleSize > scaleMin && scaleSize < scaleMax)
+                        {
+                            Vector3 tempScale = m_LocalScaleAtInit * scaleSize;
+                            if (isFlat)
+                            {
+                                m_TargetOverride.localScale = Vector3.Lerp(m_TargetOverride.localScale,
+                                    new Vector3(tempScale.x, tempScale.y, m_TargetOverride.localScale.z), 0.4f);
+                                m_BoundingBoxRoot.GetComponent<BoundsScaleController>().UpdateFlatZScale(scaleSize);
+                            }
+
+                            else
+                            {
+                                m_TargetOverride.localScale = Vector3.Lerp(m_TargetOverride.localScale, tempScale, 0.4f);
+                            }
+                        }
+                        else if (scaleSize <= scaleMin)
+                        {
+                            Vector3 tempScale = scaleMin * m_LocalScaleAtInit;
+                            if (isFlat)
+                            {
+                                m_TargetOverride.localScale = new Vector3(tempScale.x, tempScale.y, m_TargetOverride.localScale.z);
+                                m_BoundingBoxRoot.GetComponent<BoundsScaleController>().UpdateFlatZScale(scaleMin);
+                            }
+                            else
+                                m_TargetOverride.localScale = tempScale;
+                        }
+                        else
+                        {
+                            Vector3 tempScale = scaleMax * m_LocalScaleAtInit;
+                            if (isFlat)
+                            {
+                                m_TargetOverride.localScale = new Vector3(tempScale.x, tempScale.y, m_TargetOverride.localScale.z);
+                                m_BoundingBoxRoot.GetComponent<BoundsScaleController>().UpdateFlatZScale(scaleMax);
+                            }
+                            else
+                                m_TargetOverride.localScale = tempScale;
+                        }
+                    }
+
+                    onScaleUpdate?.Invoke();*/
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// Updates far interaction information. <br>
+        /// 交互过程中，更新bounding box远端交互。
+        /// </summary>
         /// <param name="startPosition">The start position of laser. <br>射线起点.</param>
         /// <param name="direction">The direction of laser. <br>射线方向.</param>
         public void UpdateRayAction(Vector3 startPosition, Vector3 direction)
@@ -689,7 +927,7 @@ namespace OXRTK.ARHandTracking
                     m_TargetOverride.position = Vector3.Lerp(m_TargetOverride.position, endPosition, 0.3f);
                     if (isFlat)
                     {
-                        Vector3 objectTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
+                        Vector3 objectTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.instance.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
                         Quaternion newRot = Quaternion.FromToRotation(m_OriginalTowardCamera, objectTowardCamera);
                         m_TargetOverride.rotation = newRot * m_TargetOverride.rotation;
                         m_OriginalTowardCamera = objectTowardCamera;
@@ -700,20 +938,20 @@ namespace OXRTK.ARHandTracking
                     endPosition = startPosition + direction * m_DistanceToObject + m_CursorToCenter;
                     Vector3 endPositionShift = endPosition - m_PreviousEndPosition;
                     endPositionShift = new Vector3(endPositionShift.x, endPositionShift.y, endPositionShift.z);
-                    Vector3 temp = CenterCamera.centerCamera.transform.InverseTransformDirection(endPositionShift);
+                    Vector3 temp = CenterCamera.instance.centerCamera.transform.InverseTransformDirection(endPositionShift);
                     temp = new Vector3(temp.x, temp.y * 1.5f, temp.z);
-                    endPositionShift = CenterCamera.centerCamera.transform.TransformDirection(temp);
-                    Vector3 forwardVector = CenterCamera.centerCamera.transform.forward;
+                    endPositionShift = CenterCamera.instance.centerCamera.transform.TransformDirection(temp);
+                    Vector3 forwardVector = CenterCamera.instance.centerCamera.transform.forward;
                     switch (m_CurrentActionAxis)
                     {
                         case BoundsActionAxis.Y:
                             if (forwardVector == m_TargetOverride.transform.up)
                             {
-                                m_CurrentRotationDirection = -CenterCamera.centerCamera.transform.up;
+                                m_CurrentRotationDirection = -CenterCamera.instance.centerCamera.transform.up;
                             }
                             else if (forwardVector == -m_TargetOverride.transform.up)
                             {
-                                m_CurrentRotationDirection = CenterCamera.centerCamera.transform.up;
+                                m_CurrentRotationDirection = CenterCamera.instance.centerCamera.transform.up;
                             }
                             else
                             {
@@ -725,11 +963,11 @@ namespace OXRTK.ARHandTracking
                         case BoundsActionAxis.X:
                             if (forwardVector == m_TargetOverride.transform.right)
                             {
-                                m_CurrentRotationDirection = -CenterCamera.centerCamera.transform.up;
+                                m_CurrentRotationDirection = -CenterCamera.instance.centerCamera.transform.up;
                             }
                             else if (forwardVector == -m_TargetOverride.transform.right)
                             {
-                                m_CurrentRotationDirection = CenterCamera.centerCamera.transform.up;
+                                m_CurrentRotationDirection = CenterCamera.instance.centerCamera.transform.up;
                             }
                             else
                             {
@@ -741,11 +979,11 @@ namespace OXRTK.ARHandTracking
                         case BoundsActionAxis.Z:
                             if (forwardVector == m_TargetOverride.transform.forward)
                             {
-                                m_CurrentRotationDirection = -CenterCamera.centerCamera.transform.up;
+                                m_CurrentRotationDirection = -CenterCamera.instance.centerCamera.transform.up;
                             }
                             else if (forwardVector == -m_TargetOverride.transform.forward)
                             {
-                                m_CurrentRotationDirection = CenterCamera.centerCamera.transform.up;
+                                m_CurrentRotationDirection = CenterCamera.instance.centerCamera.transform.up;
                             }
                             else
                             {
@@ -761,8 +999,8 @@ namespace OXRTK.ARHandTracking
                     break;
                 case BoundsAction.Scale:
                     endPosition = startPosition + direction * m_DistanceToObject;
-                    Vector3 pointOnCamera = CenterCamera.centerCamera.WorldToScreenPoint(endPosition);
-                    Vector3 objectOnCamera = CenterCamera.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
+                    Vector3 pointOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(endPosition);
+                    Vector3 objectOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
                     Vector3 centerToHandler = pointOnCamera - objectOnCamera;
 
                     float xWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.x) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y));
@@ -834,7 +1072,7 @@ namespace OXRTK.ARHandTracking
                     m_TargetOverride.position = endPosition;
                     if (isFlat)
                     {
-                        Vector3 objectTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
+                        Vector3 objectTowardCamera = Vector3.ProjectOnPlane(Vector3.Normalize(CenterCamera.instance.centerCamera.transform.position - m_TargetOverride.position), Vector3.up);
                         Quaternion newRot = Quaternion.FromToRotation(m_OriginalTowardCamera, objectTowardCamera);
                         m_TargetOverride.rotation = newRot * m_TargetOverride.rotation;
                         m_OriginalTowardCamera = objectTowardCamera;
@@ -848,20 +1086,6 @@ namespace OXRTK.ARHandTracking
                     onRotateUpdate?.Invoke();
                     break;
                 case BoundsAction.Scale:
-                    /*Vector3 pointOnCamera = CenterCamera.centerCamera.WorldToScreenPoint(fingerPosition);
-                    Vector3 objectOnCamera = CenterCamera.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
-                    Vector3 centerToHandler = pointOnCamera - objectOnCamera;
-
-                    float xWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.x) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y));
-                    float yWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.y) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y));
-                    
-                    Vector2 newPositionDiff = new Vector2((centerToHandler - m_CenterToHandlerAtBeginning).x, (centerToHandler - m_CenterToHandlerAtBeginning).y);
-
-                    float xMul = xWeight * newPositionDiff.x * m_CornerRescaleDirection.x / 1500;
-                    float yMul = yWeight * newPositionDiff.y * m_CornerRescaleDirection.y / 1500;
-                    float finalMulResult = (xMul + yMul) / (xWeight + yWeight);
-
-                    float scaleSize = (finalMulResult * m_GlobalScaleAtInit.magnitude + m_OriginalLocalScale.x) / m_LocalScaleAtInit.x;*/
                     Vector3 centerToHandler = fingerPosition - m_TargetOverride.position;
                     
                     float xWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.x) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y) + Mathf.Abs(m_CenterToHandlerAtBeginning.z));
@@ -879,7 +1103,6 @@ namespace OXRTK.ARHandTracking
 
                     if (scaleSize > scaleMin && scaleSize < scaleMax)
                     {
-                        //Vector3 tempScale = m_LocalScaleAtInit * scaleSize;
                         Vector3 tempScale = m_OriginalLocalScale * finalMulResult;
                         if (isFlat)
                         {

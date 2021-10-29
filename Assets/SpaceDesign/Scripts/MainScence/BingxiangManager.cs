@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 管理台灯的部分效果，/*create by 梁鹏 2021-10-18 */
+/// 管理冰箱的部分效果，/*create by 梁鹏 2021-10-18 */
 /// </summary>
 namespace SpaceDesign
 {
@@ -18,17 +18,7 @@ namespace SpaceDesign
             public int DoorId;
             public string Status;
         }
-
-        static BingxiangManager inst;
-        public static BingxiangManager Inst
-        {
-            get
-            {
-                if (inst == null)
-                    inst = FindObjectOfType<BingxiangManager>();
-                return inst;
-            }
-        }
+        
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
         //Icon、UI等正在切换中
@@ -151,7 +141,7 @@ namespace SpaceDesign
             }
             else if (_dis <= 1.5f)
             {
-                Debug.Log(lastPPS);
+                //Debug.Log(lastPPS);
                 if (lastPPS == PlayerPosState.Close)
                     return;
                 curPlayerPosState = PlayerPosState.Close;

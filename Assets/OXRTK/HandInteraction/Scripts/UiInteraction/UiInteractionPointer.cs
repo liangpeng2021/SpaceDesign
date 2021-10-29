@@ -54,6 +54,15 @@ namespace OXRTK.ARHandTracking
         Transform m_ThumbSecond;
         //检测范围内的colliders
         Collider[] m_TouchableObjects;
+        
+        // Getter for the all detected touchable objects
+        public Collider[] touchableObjects
+        {
+            get { return m_TouchableObjects; }
+            private set {}
+        }
+        
+
         //交互检测范围内最近的UiInteractionPointerHandler
         UiInteractionPointerHandler m_ClosestObject;
         UiInteractionPointerHandler m_TargetInInteraction;
@@ -70,7 +79,7 @@ namespace OXRTK.ARHandTracking
         //bool m_PriorityEnabled = true;
         bool m_PriorityEnabled = false;
         bool m_IsPinched = false;
-        bool m_PalmBackStatus = false;
+        bool m_PalmForwardStatus = true;
 
         bool m_IsHandMenuOpened = false;
 
@@ -185,8 +194,14 @@ namespace OXRTK.ARHandTracking
                 return;
             if (!m_IsHandDetected)
                 return;
-            if (m_PalmBackStatus)
+            if (!m_PalmForwardStatus)
+            {
+                if (m_TargetInInteraction != null)
+                {
+                    ResetHandEvent();
+                }
                 return;
+            }
             if (m_IsPinched && m_TargetInInteraction != null)
                 return;
 
@@ -326,7 +341,7 @@ namespace OXRTK.ARHandTracking
 
             UpdatePalmDirection();
 
-            if (m_PalmBackStatus)
+            if (!m_PalmForwardStatus)
                 return;
 
             CheckHandPinch(info);
@@ -430,7 +445,7 @@ namespace OXRTK.ARHandTracking
                             PointerManager.instance.UpdatePriorityInteraction(m_HandType, m_Type, m_Priority, true);
                         }
                         ResetHandEvent();
-                        m_PalmBackStatus = true;
+                        m_PalmForwardStatus = false;
                     }
                 }
             }
@@ -438,20 +453,27 @@ namespace OXRTK.ARHandTracking
 
         void UpdatePalmDirection()
         {
-            bool palmBackStatus = false;
+            bool palmForwardStatus = true;
 
             if (CustomizedGestureController.instance != null)
             {
-                palmBackStatus = CustomizedGestureController.instance.GetHandStatus(m_HandType, CustomizedGesture.PalmBack);
+                palmForwardStatus = CustomizedGestureController.instance.GetHandStatus(m_HandType, CustomizedGesture.PalmForward);
             }
 
-            if (m_PalmBackStatus != palmBackStatus)
+            if (m_PalmForwardStatus != palmForwardStatus)
             {
-                if (palmBackStatus)
+                if (palmForwardStatus)
                 {
-                    if (!m_PalmBackStatus)
+                    if (!m_PalmForwardStatus)
                     {
-                        m_PalmBackStatus = true;
+                        m_PalmForwardStatus = true;
+                    }
+                }
+                else
+                {
+                    if (!m_PalmForwardStatus)
+                    {
+                        m_PalmForwardStatus = false;
 
                         if (m_IsEnabled && !m_IsHandMenuOpened)
                         {
@@ -463,14 +485,7 @@ namespace OXRTK.ARHandTracking
                         }
                     }
                 }
-                else
-                {
-                    if (m_PalmBackStatus)
-                    {
-                        m_PalmBackStatus = false;
-                    }
-                }
-                m_PalmBackStatus = palmBackStatus;
+                m_PalmForwardStatus = palmForwardStatus;
             }
         }
 

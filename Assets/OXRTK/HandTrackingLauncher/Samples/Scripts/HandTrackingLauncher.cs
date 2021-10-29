@@ -16,10 +16,12 @@ public class HandTrackingLauncher : MonoBehaviour
 
     int m_SceneNum;
 
-    Button[] m_Buttons;
+    LauncherButtonController[] m_Buttons;
 
-    int m_BoarderHeight = 125;    
+    int m_BoarderHeight = 125;
 
+    public string[] sceneNamesChn; 
+    
     void Start()
     {        
         m_SceneNum = SceneManager.sceneCountInBuildSettings;
@@ -30,7 +32,7 @@ public class HandTrackingLauncher : MonoBehaviour
             return;
         }        
 
-        m_Buttons = new Button[m_SceneNum];
+        m_Buttons = new LauncherButtonController[m_SceneNum];
 
         RectTransform rt = uiCanvas.GetComponent<RectTransform>();        
         int unitHeight = (int)(rt.sizeDelta.y - m_BoarderHeight * 2) / (m_SceneNum + 1);
@@ -40,7 +42,7 @@ public class HandTrackingLauncher : MonoBehaviour
             string pathToScene = SceneUtility.GetScenePathByBuildIndex(i);
             string sceneName = System.IO.Path.GetFileNameWithoutExtension(pathToScene);            
 
-            m_Buttons[i] = Instantiate(buttonPrefab).GetComponent<Button>();
+            m_Buttons[i] = Instantiate(buttonPrefab).GetComponent<LauncherButtonController>();
             m_Buttons[i].name = "button_" + sceneName;
             
             string[] nSceneName = Regex.Split(sceneName, @"(?<!^)(?=[A-Z])");
@@ -50,11 +52,21 @@ public class HandTrackingLauncher : MonoBehaviour
                 naturalName += s + ' ';
             }
 
-            m_Buttons[i].GetComponentInChildren<TextMeshProUGUI>().text = naturalName;
+            // m_Buttons[i].GetComponentInChildren<TextMeshProUGUI>().text = naturalName;
+            foreach (TextMeshPro tmp in m_Buttons[i].chnName)
+            {
+                tmp.text = sceneNamesChn[i-1];
+            }
+
+            foreach (TextMeshPro tmp in m_Buttons[i].engName)
+            {
+                tmp.text = naturalName;
+            }
+
             m_Buttons[i].gameObject.transform.SetParent(uiCanvas.gameObject.transform, false);
             m_Buttons[i].gameObject.transform.localPosition = new Vector3(0, rt.sizeDelta.y / 2 - m_BoarderHeight - unitHeight * (i + 1), 0);
             int num = i;
-            //m_Buttons[i].onClick.AddListener(delegate { LoadScene(num); });
+          //  m_Buttons[i].onClick.AddListener(delegate { LoadScene(num); });
             
             m_Buttons[i].GetComponent<ButtonRayReceiver>().onPinchDown.AddListener(delegate { LoadScene(num); });
         }

@@ -157,12 +157,12 @@ namespace OXRTK.ARHandTracking
 
         void HandEnterView(BaseHand hand)
         {
-            m_ActiveHand = hand;
+            ChangeHand(hand);
         }
 
         void HandExitView(bool getNewHand = true)
         {
-            m_ActiveHand = null;
+            ChangeHand(null);
             HandExitInteractionArea();
 
             if (getNewHand)
@@ -224,7 +224,7 @@ namespace OXRTK.ARHandTracking
 
         Vector3 m_BondTopRight = new Vector3(0.5f, 0.5f, 0);
         Vector3 m_BondBotLeft = new Vector3(-0.5f, -0.5f, 0);
-        Camera m_MainCamera;
+       
         void TrySetCameraReference()
         {
             if (m_MainCamera == null) m_MainCamera = XR.XRCameraManager.Instance.stereoCamera.Cam;
@@ -295,7 +295,7 @@ namespace OXRTK.ARHandTracking
 
         #region Wave Logic
 
-        protected override Vector2 GetHandPos()
+        protected override Vector3 GetHandPos()
         {
             Vector3 pos = m_MainCamera.WorldToViewportPoint(m_ActiveHand.joints[12].transform.position);
 

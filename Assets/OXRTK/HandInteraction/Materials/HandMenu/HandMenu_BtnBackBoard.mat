@@ -8,8 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: HandMenu_BtnBackBoard
-  m_Shader: {fileID: 4800000, guid: 2854192280c4a37438c117bce2aa64b5, type: 3}
-  m_ShaderKeywords: _ALPHAPREMULTIPLY_ON
+  m_Shader: {fileID: 4800000, guid: dbff9f42696c4434c94853023df90d60, type: 3}
+  m_ShaderKeywords: _ALPHAPREMULTIPLY_ON _SOLID_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -83,13 +83,17 @@ Material:
     - _StencilOpZFail: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
+    - _Thickness: 1
     - _UVSec: 0
     - _WidthPercentage: 0.108
     - _ZTestMode: 0
     - _ZWrite: 0
+    - _filletScale: 0.13825
     - _node_9070: 0.664
+    - _opacity: 0.164
+    - _solid: 1
     m_Colors:
     - _BaseColor: {r: 0.45882353, g: 0, b: 0.5568628, a: 1}
-    - _Color: {r: 0, g: 0.1421064, b: 0.36862746, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 0.1764706}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _MainColor: {r: 3.9999995, g: 3.9999995, b: 3.9999995, a: 1}

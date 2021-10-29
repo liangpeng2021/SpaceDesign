@@ -14,7 +14,7 @@ namespace OXRTK.ARHandTracking
         /// <summary>
         /// Event call back with int.<br>返回int的回调事件</br>
         /// </summary>
-        [System.Serializable]        
+        [System.Serializable]
         public class UnityEventInt : UnityEvent<int> { }
 
         /// <summary>
@@ -147,13 +147,14 @@ namespace OXRTK.ARHandTracking
         protected BaseHand m_ActiveHand = null;
         protected BoxCollider m_Collider;
         protected bool m_WaveLock = false;
-
+        protected Camera m_MainCamera;
         #endregion Internal Var
 
 
 
         protected virtual void Start()
         {
+            m_MainCamera = XR.XRCameraManager.Instance.stereoCamera.Cam;
             m_Collider = GetComponent<BoxCollider>();
             if (m_Collider == null)
             {
@@ -168,20 +169,25 @@ namespace OXRTK.ARHandTracking
         #region Wave Logic
 
         protected Vector2 m_InteractiveAreaSize = Vector2.zero;
-        Vector2 m_PrevPos = Vector2.zero;
-        Vector2 m_CenterPos = Vector2.zero;
-        Vector2 m_TraveledDistance = Vector2.zero;
+        Vector3 m_PrevPos = Vector2.zero;
+        Vector3 m_CenterPos = Vector2.zero;
+        Vector3 m_TraveledDistance = Vector2.zero;
         Vector2 m_TraveledTime = Vector2.zero;
         DirectionBool m_WaveReady = new DirectionBool(false, false, false, false);
         DirectionBool m_WaveVelocityReach = new DirectionBool(false, false, false, false);
         bool m_IsWaveCD = false;
         float m_WaveActiveTime = 0f;
 
+        protected virtual void ChangeHand(BaseHand hand)
+        {
+            m_ActiveHand = hand;
+        }
+
         protected virtual void WaveMainLogic()
         {
-            Vector2 currPos = GetHandPos();
+            Vector3 currPos = GetHandPos();
             //Current frame move total
-            Vector2 delta = currPos - m_PrevPos;
+            Vector3 delta = currPos - m_PrevPos;
             m_PrevPos = currPos;
 
             //Calculate delta relative to area size, normalized delta， 0-1 of the relative interative area size.
@@ -208,7 +214,7 @@ namespace OXRTK.ARHandTracking
             CheckWaveReadyDirection(delta);
         }
 
-        void CheckWaveBaseOnDistanceAndVelocity(Vector2 delta)
+        void CheckWaveBaseOnDistanceAndVelocity(Vector3 delta)
         {
             m_TraveledDistance += delta;
             m_TraveledTime.x += Time.deltaTime;
@@ -261,6 +267,7 @@ namespace OXRTK.ARHandTracking
 
         void WaveAction(Vector2Int dir)
         {
+            if (IsFist()) return;
             m_IsWaveCD = true;
             m_WaveActiveTime = Time.time + m_WaveCD;
             g_OnHandWave?.Invoke(dir);
@@ -271,7 +278,7 @@ namespace OXRTK.ARHandTracking
         {
             m_PrevPos = GetHandPos();
         }
-        protected virtual Vector2 GetHandPos()
+        protected virtual Vector3 GetHandPos()
         {
             Vector3 result = transform.InverseTransformPoint(m_ActiveHand.joints[12].transform.position);
             return result;
@@ -362,5 +369,31 @@ namespace OXRTK.ARHandTracking
 
         //}
         #endregion Debug
+
+        bool IsFist()
+        {   //0-13 vs 15-16  0-9 vs 11-12  0-5 vs 7-8
+            //m_HandController.activeHand.joints.Length
+            int fistFingerCount = 0;
+            if (IsThisFingerFist(0, 13, 15, 16))
+                fistFingerCount++;
+
+            if (IsThisFingerFist(0, 9, 11, 12))
+                fistFingerCount++;
+
+            if (IsThisFingerFist(0, 5, 7, 8))
+                fistFingerCount++;
+
+            return fistFingerCount >= 2;
+        }
+
+        bool IsThisFingerFist(int rootStart, int rootTip, int topStart, int topTip)
+        {
+            return
+                Vector3.Angle(
+                    (m_ActiveHand.joints[rootTip].position - m_ActiveHand.joints[rootStart].position).normalized,
+                    (m_ActiveHand.joints[topTip].position - m_ActiveHand.joints[topStart].position).normalized
+                    )
+                > 120f;
+        }
     }
 }
