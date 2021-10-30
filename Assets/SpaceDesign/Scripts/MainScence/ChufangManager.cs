@@ -191,6 +191,7 @@ namespace SpaceDesign
             }
             timeline.gameObject.SetActive(true);
             timeline.SetCurTimelineData("显示菜谱");
+            backBtn.gameObject.SetActive(false);
 
             //UI变化结束
             bUIChanging = false;
@@ -308,12 +309,15 @@ namespace SpaceDesign
         {
             if (curCai.Equals(""))
                 return;
+            Debug.Log(curCai);
             //先播放当前的菜流程消失，再显示开始菜谱
             timeline.SetCurTimelineData(curCai+"消失",
                 ()=>
                 {
+                    backBtn.gameObject.SetActive(false);
                     timeline.SetCurTimelineData("显示菜谱");
                 });
+           
         }
         /// <summary>
         /// 秋葵
@@ -329,9 +333,11 @@ namespace SpaceDesign
         /// </summary>
         void GotoCaipuliucheng()
         {
+            
             timeline.SetCurTimelineData("菜谱消失",
                 () =>
                 {
+                    backBtn.gameObject.SetActive(true);
                     timeline.SetCurTimelineData(curCai + "出现");
                 });
 
@@ -366,6 +372,7 @@ namespace SpaceDesign
         /// </summary>
         void GotoFanqie()
         {
+            Debug.Log("GotoFanqie");
             curCai = "番茄";
             // 转到菜谱内的流程
             GotoCaipuliucheng();

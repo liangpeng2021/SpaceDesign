@@ -47,6 +47,8 @@ public class TimelineControl : MonoBehaviour
     /// 结束时候的回调
     /// </summary>
     System.Action endAction;
+
+    public BoxCollider[] boxColliders;
     
     public void StartPause()
     {
@@ -56,6 +58,14 @@ public class TimelineControl : MonoBehaviour
         for (int i = 0; i < timelineDatas.Length; i++)
         {
             timeDataDic.Add(timelineDatas[i].fragmentName, timelineDatas[i]);
+        }
+    }
+
+    void SetCollidersEnable(bool isEnable)
+    {
+        for (int i = 0; i < boxColliders.Length; i++)
+        {
+            boxColliders[i].enabled = isEnable;
         }
     }
 
@@ -69,7 +79,10 @@ public class TimelineControl : MonoBehaviour
                 playableDirector.Pause();
                 startPlay = false;
 
+                SetCollidersEnable(true);
+
                 endAction?.Invoke();
+                endAction = null;
             }
         }
     }
@@ -92,12 +105,15 @@ public class TimelineControl : MonoBehaviour
     {
         if (timeDataDic.ContainsKey(name))
         {
+            Debug.Log("SetCurTimelineData:" + name);
             startPlay = true;
             curTimeData = timeDataDic[name];
 
             playableDirector.time = curTimeData.startTime;
 
             playableDirector.Play();
+
+            SetCollidersEnable(false);
         }
     }
 
@@ -109,6 +125,7 @@ public class TimelineControl : MonoBehaviour
     {
         if (timeDataDic.ContainsKey(name))
         {
+            Debug.Log("SetCurTimelineData:"+ name);
             startPlay = true;
             curTimeData = timeDataDic[name];
 
@@ -116,6 +133,7 @@ public class TimelineControl : MonoBehaviour
 
             playableDirector.Play();
             endAction = action;
+            SetCollidersEnable(false);
         }
     }
 

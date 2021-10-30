@@ -201,8 +201,8 @@ namespace SpaceDesign
             }
 
             //启动Mark
-            image2DTrackingTaideng.enabled = true;
-            image2DTrackingTaideng.StartTrack();
+            //image2DTrackingTaideng.enabled = true;
+            //image2DTrackingTaideng.StartTrack();
             //初始化
             taidengController.gameObject.SetActive(true);
             taidengController.Init();
@@ -312,8 +312,8 @@ namespace SpaceDesign
 
             timelineShow.SetActive(false);
 
-            image2DTrackingTaideng.StopTrack();
-            image2DTrackingTaideng.enabled = false;
+            //image2DTrackingTaideng.StopTrack();
+            //image2DTrackingTaideng.enabled = false;
 
             taidengController.PlaceTaideng();
         }
@@ -332,8 +332,8 @@ namespace SpaceDesign
             noOperationTime = 0;
 
             timelineShow.SetActive(false);
-            image2DTrackingTaideng.StopTrack();
-            image2DTrackingTaideng.enabled = false;
+            //image2DTrackingTaideng.StopTrack();
+            //image2DTrackingTaideng.enabled = false;
 
             taidengController.gameObject.SetActive(false);
         }
