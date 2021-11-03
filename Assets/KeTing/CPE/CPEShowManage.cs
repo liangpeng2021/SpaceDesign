@@ -6,11 +6,7 @@
 
 using OXRTK.ARHandTracking;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Playables;
-using UnityEngine.UI;
 
 namespace SpaceDesign.CPEShow
 {
@@ -40,7 +36,11 @@ namespace SpaceDesign.CPEShow
         //临时测距
         public TextMesh tt;
         //===========================================================================
-
+        void Awake()
+        {
+            animIconFar = traIcon.GetComponent<Animator>();
+            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+        }
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
@@ -49,7 +49,7 @@ namespace SpaceDesign.CPEShow
             btnLightOff.onPinchUp.AddListener(LightOn);
             btnQuit.onPinchUp.AddListener(Hide);
             sliderLamp.onValueChanged.AddListener(LightSlider);
-            sliderLamp.onInteractionEnd.AddListener(LightSliderCPE);
+            sliderLamp.onInteractionEnd.AddListener(SetBrightness);
         }
 
         void OnDisable()
@@ -63,35 +63,9 @@ namespace SpaceDesign.CPEShow
             sliderLamp.onInteractionEnd.RemoveAllListeners();
         }
 
-        void OnDestroy()
-        {
-            StopAllCoroutines();
-        }
+        void OnDestroy() { StopAllCoroutines(); }
 
-        void Start()
-        {
-            v3OriPos = this.transform.position;
-        }
-
-        //void Update()
-        //{
-        //    if (Input.GetKeyDown(KeyCode.Alpha1))
-        //    {
-        //        Show();
-        //    }
-        //    if (Input.GetKeyDown(KeyCode.Alpha2))
-        //    {
-        //        Hide();
-        //    }
-        //    if (Input.GetKeyDown(KeyCode.Alpha3))
-        //    {
-        //        LightOn();
-        //    }
-        //    if (Input.GetKeyDown(KeyCode.Alpha4))
-        //    {
-        //        LightOff();
-        //    }
-        //}
+        void Start() { v3OriPos = this.transform.position; }
 
         /// <summary>
         /// 刷新位置消息
@@ -115,19 +89,14 @@ namespace SpaceDesign.CPEShow
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else //if (_dis <= 5f && _dis > 1.5f)
+            else
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            //else if (_dis <= 1.5f)
-            //{
-            //    curPlayerPosState = PlayerPosState.Close;
-            //    if (lastPPS == PlayerPosState.Close)
-            //        return;
-            //}
 
+            StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
 
@@ -139,23 +108,11 @@ namespace SpaceDesign.CPEShow
         {
             print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
-            //WaitForSeconds _wfs = new WaitForSeconds(0.1f);
-
             if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
             {
                 /// 远距离=>中距离
                 yield return IEFarToMiddle();
             }
-            //else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Close)
-            //{
-            //    /// 中距离=>近距离
-            //    yield return IEMiddleToClose();
-            //}
-            //else if (lastPPS == PlayerPosState.Close && curPlayerPosState == PlayerPosState.Middle)
-            //{
-            //    /// 近距离=>中距离
-            //    yield return IECloseToMiddle(false);
-            //}
             else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Far)
             {
                 /// 中距离=>远距离
@@ -180,14 +137,13 @@ namespace SpaceDesign.CPEShow
                 v.enabled = false;
             //Icon自身上下浮动开启
             animIconFar.enabled = false;
-            traIcon.gameObject.SetActive(true);
 
-            timelineShow.gameObject.SetActive(true);
-            timelineHide.gameObject.SetActive(false);
+            timelineShow.SetActive(true);
+            timelineHide.SetActive(false);
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, 0.1f);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
@@ -196,8 +152,6 @@ namespace SpaceDesign.CPEShow
                 }
                 yield return 0;
             }
-
-            bUIShow = true;
 
             yield return 0;
             //UI变化结束
@@ -212,17 +166,13 @@ namespace SpaceDesign.CPEShow
             bUIChanging = true;
 
             //中距离=>远距离
-            traIcon.gameObject.SetActive(true);
 
-            if (bUIShow == true)
-            {
-                timelineShow.gameObject.SetActive(false);
-                timelineHide.gameObject.SetActive(true);
-            }
+            timelineShow.SetActive(false);
+            timelineHide.SetActive(true);
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, 0.1f);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
                 if (_fDis < fThreshold)
                 {
@@ -237,46 +187,43 @@ namespace SpaceDesign.CPEShow
             //Icon自身上下浮动关闭
             animIconFar.enabled = true;
 
-            bUIShow = false;
-
             yield return 0;
             //UI变化结束
             bUIChanging = false;
         }
 
-        #region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
-        [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
+        #region Icon变化，远距离
+        [Header("===Icon变化，远距离")]
+        //Icon对象的AR手势Button按钮
+        private ButtonRayReceiver btnIcon;
+        //吸引态，上下移动动画
+        private Animator animIconFar;
         //Icon的对象
         public Transform traIcon;
-        //Icon对象的AR手势Button按钮
-        public ButtonRayReceiver btnIcon;
-        //吸引态，上下移动动画
-        public Animator animIconFar;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
-        //Icon的移动速度
-        public float fIconSpeed = 1;
 
         /// <summary>
         /// 点击Icon
         /// </summary>
         public void ClickIcon()
         {
-            if (curPlayerPosState == PlayerPosState.Middle)
-                StartCoroutine(IEFarToMiddle());
+            if (curPlayerPosState != PlayerPosState.Far)
+            {
+                Show();
+            }
         }
 
         #endregion
 
-        #region 重交互，大UI，近距离（小于1.5米）
-        [Header("===重交互，大UI，近距离（小于1.5米）")]
+        #region 重交互，大UI，近距离
+        [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
         //Timeline：显示
-        public PlayableDirector timelineShow;
+        public GameObject timelineShow;
         //Timeline：隐藏
-        public PlayableDirector timelineHide;
-        public bool bUIShow = false;
+        public GameObject timelineHide;
 
         //开灯对象的AR手势Button按钮
         public ButtonRayReceiver btnLightOn;
@@ -292,59 +239,40 @@ namespace SpaceDesign.CPEShow
         private MeshRenderer lampRender;
         //优化render
         private MaterialPropertyBlock matPropBlock;
+        //灯泡亮度
+        public float fBrightness = 1;
+        //现实灯泡，开启状态
+        public bool bLampOn = true;
 
         public void Hide()
         {
-            StartCoroutine(IEMiddleToFar());
+            StopCoroutine("IEMiddleToFar");
+            StartCoroutine("IEMiddleToFar");
         }
         public void Show()
         {
-            StartCoroutine(IEFarToMiddle());
+            StopCoroutine("IEFarToMiddle");
+            StartCoroutine("IEFarToMiddle");
+        }
+        public void SetBrightness()
+        {
+            fBrightness = sliderLamp.sliderValue;
+            LightSliderCPE();
         }
         public void LightOn()
         {
-            float _f = sliderLamp.sliderValue;
-            if (_f <= 0)
-                _f = 1;
-            sliderLamp.sliderValue = _f;
-
-            //===========================================================================
-            //CPE发送：开灯
-            ClickLight("id=1&action=on");
-            //===========================================================================
-        }
-
-        public struct LightData
-        {
-            public int ErrorCode;
-            public int LampId;
-            public int Brightness;
-            public string Status;
-        }
-
-        void ClickLight(string str)
-        {
-            //开启新协程
-            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<LightData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/lamp/setting?"+str,
-                //回调
-                (sd) =>
-                {
-                    Debug.Log("MyLog::灯"+ str+":" + sd.Status);
-                }
-                );
-
-            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+            if (fBrightness <= 0)
+                fBrightness = 1;
+            sliderLamp.sliderValue = fBrightness;
+            LightSliderCPE();
         }
 
         public void LightOff()
         {
             sliderLamp.sliderValue = 0;
-            //===========================================================================
-            //CPE发送：关灯
-            ClickLight("id=1&action=off");
-            //===========================================================================
+            LightSliderCPE();
         }
-        
+
         public void LightSlider(float f)
         {
             f = 0.4f + f * 0.6f;
@@ -364,15 +292,78 @@ namespace SpaceDesign.CPEShow
                     btnLightOff.gameObject.SetActive(false);
             }
         }
+
+        #region 控制灯光实物
+        public struct LightData
+        {
+            public int ErrorCode;
+            public int LampId;
+            public int Brightness;
+            public string Status;
+        }
+
+        void ClickLight(string str)
+        {
+            print("发送灯光：" + str);
+            //开启新协程
+            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<LightData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/lamp/setting?" + str,
+                //回调
+                (sd) => { Debug.Log("MyLog::灯" + str + ":" + sd.Status); });
+
+            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+        }
+
+
         public void LightSliderCPE()
         {
-            //===========================================================================
-            //CPE发送：灯光亮度
-            string valuetest = (sliderLamp.sliderValue * 100).ToString("f0");
+            //发送信息状态【0：亮度】【1：开】【2：关】
+            int _iSendType = 0;
+
+            if (sliderLamp.sliderValue <= 0.1f)
+            {
+                _iSendType = 2;
+                bLampOn = false;
+            }
+            else
+            {
+                fBrightness = sliderLamp.sliderValue;
+
+                if (bLampOn)
+                {
+                    _iSendType = 0;
+                }
+                else
+                {
+                    bLampOn = true;
+                    _iSendType = 1;
+
+                    Invoke("_DelaySetSlider", 0.5f);
+                }
+            }
+
+            switch (_iSendType)
+            {
+                case 0://【0：亮度】
+                    _DelaySetSlider();
+                    break;
+                case 1://【1：开】
+                    ClickLight("id=1&action=on");
+                    break;
+                case 2://【2：关】
+                    ClickLight("id=1&action=off");
+                    break;
+            }
+
+        }
+        //设置抬起（关闭状态下，设置值大于0，先调用开启，再赋值）
+        void _DelaySetSlider()
+        {
+            string valuetest = (fBrightness * 100).ToString("f0");
             valuetest = "id=1&action=setBrightness&value=" + valuetest;
             ClickLight(valuetest);
-            //===========================================================================
         }
+        #endregion
+
         /// <summary>
         /// 设置材质属性，自定义颜色
         /// </summary>

@@ -12,15 +12,23 @@ namespace SpaceDesign.Magazine
         //Mark识别后，显隐的对象
         public GameObject objBtnShow;
         public Texture texture;
-        bool bCallback = false;
+        private bool bCallback = false;
+        //原来的父节点
+        private Transform oriParent;
         private void Awake()
         {
-            objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
+            oriParent = transform.parent;
+            //objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TrackingManager/root/child").gameObject;
+            objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child").gameObject;
             SetModelVisible(false);
         }
 
         public void StartTrack()
         {
+#if UNITY_EDITOR
+            return;
+#endif
+
             StopTrack();
 
             bCallback = true;
@@ -33,6 +41,10 @@ namespace SpaceDesign.Magazine
 
         public void StopTrack()
         {
+#if UNITY_EDITOR
+            return;
+#endif
+
             Image2DTrackingManager.Instance.TrackStop();
         }
 
@@ -90,12 +102,12 @@ namespace SpaceDesign.Magazine
             if (isVisible)
             {
                 MagazineManage.Inst.transform.SetParent(objTargetModel.transform);
-                MagazineManage.Inst.transform.localPosition = new Vector3(0, -0.05f, -0.3f);
+                MagazineManage.Inst.transform.localPosition = new Vector3(0, 0.05f, 0.25f);
                 MagazineManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
             }
             else
             {
-                MagazineManage.Inst.transform.SetParent(null);
+                MagazineManage.Inst.transform.SetParent(oriParent);
             }
             objBtnShow.SetActive(isVisible);
         }

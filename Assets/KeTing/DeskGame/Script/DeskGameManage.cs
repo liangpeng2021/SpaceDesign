@@ -10,11 +10,7 @@
 
 using OXRTK.ARHandTracking;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Playables;
-using UnityEngine.UI;
 
 namespace SpaceDesign.DeskGame
 {
@@ -45,7 +41,11 @@ namespace SpaceDesign.DeskGame
         //临时测距
         public TextMesh tt;
         //===========================================================================
-
+        void Awake()
+        {
+            animIconFar = traIcon.GetComponent<Animator>();
+            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+        }
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
@@ -64,37 +64,17 @@ namespace SpaceDesign.DeskGame
             btnGame03.onPinchUp.RemoveAllListeners();
         }
 
-        void OnDestroy()
-        {
-            StopAllCoroutines();
-        }
+        void OnDestroy() { StopAllCoroutines(); }
 
-        void Start()
-        {
-            v3OriPos = this.transform.position;
-        }
+        void Start() { v3OriPos = this.transform.position; }
 
-        /// <summary>
-        /// 点击Icon
-        /// </summary>
-        public void ClickIcon()
-        {
-            if (curPlayerPosState == PlayerPosState.Middle)
-                StartCoroutine(IEFarToMiddle());
-        }
-
-        public void CallApp(string strPackName)
-        {
-            //print($"拉起应用:{strPackName}");
-            XR.AppManager.StartApp(strPackName);
-        }
         /// <summary>
         /// 刷新位置消息
         /// </summary>
         public void RefreshPos(Vector3 pos)
         {
-            if (bUIChanging == true)
-                return;
+            //if (bUIChanging == true)
+            //    return;
 
             Vector3 _v3 = v3OriPos;
             _v3.y = pos.y;
@@ -110,19 +90,14 @@ namespace SpaceDesign.DeskGame
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else //if (_dis <= 5f) && _dis > 1.5f)
+            else
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            //else if (_dis <= 1.5f)
-            //{
-            //    if (lastPPS == PlayerPosState.Close)
-            //        return;
-            //    curPlayerPosState = PlayerPosState.Close;
-            //}
 
+            StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
 
@@ -141,16 +116,6 @@ namespace SpaceDesign.DeskGame
                 /// 远距离=>中距离
                 yield return IEFarToMiddle();
             }
-            //else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Close)
-            //{
-            //    /// 中距离=>近距离
-            //    yield return IEMiddleToClose();
-            //}
-            //else if (lastPPS == PlayerPosState.Close && curPlayerPosState == PlayerPosState.Middle)
-            //{
-            //    /// 近距离=>中距离
-            //    yield return IECloseToMiddle(false);
-            //}
             else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Far)
             {
                 /// 中距离=>远距离
@@ -177,12 +142,12 @@ namespace SpaceDesign.DeskGame
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
 
-            timelineShow.gameObject.SetActive(true);
-            timelineHide.gameObject.SetActive(false);
+            timelineShow.SetActive(true);
+            timelineHide.SetActive(false);
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fIconSpeed * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
@@ -191,8 +156,6 @@ namespace SpaceDesign.DeskGame
                 }
                 yield return 0;
             }
-
-            bUIShow = true;
 
             yield return 0;
             //UI变化结束
@@ -209,16 +172,12 @@ namespace SpaceDesign.DeskGame
             //中距离=>远距离
             traIcon.gameObject.SetActive(true);
 
-            if (bUIShow == true)
-            {
-                timelineShow.gameObject.SetActive(false);
-                timelineHide.gameObject.SetActive(true);
-
-            }
+            timelineShow.SetActive(false);
+            timelineHide.SetActive(true);
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
                 if (_fDis < fThreshold)
                 {
@@ -233,50 +192,65 @@ namespace SpaceDesign.DeskGame
             //Icon自身上下浮动关闭
             animIconFar.enabled = true;
 
-            bUIShow = false;
-
             yield return 0;
             //UI变化结束
             bUIChanging = false;
         }
 
-        #region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
-        [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
+        #region Icon变化，远距离
+        [Header("===Icon变化，远距离")]
+        //Icon对象的AR手势Button按钮
+        private ButtonRayReceiver btnIcon;
+        //吸引态，上下移动动画
+        private Animator animIconFar;
         //Icon的对象
         public Transform traIcon;
-        //Icon对象的AR手势Button按钮
-        public ButtonRayReceiver btnIcon;
-        //吸引态，上下移动动画
-        public Animator animIconFar;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
-        //Icon的移动速度
-        public float fIconSpeed = 1;
+
+        /// <summary>
+        /// 点击Icon
+        /// </summary>
+        public void ClickIcon()
+        {
+            if (curPlayerPosState == PlayerPosState.Middle)
+            {
+                Show();
+            }
+        }
+
         #endregion
 
-        #region 重交互，大UI，近距离（小于1.5米）
-        [Header("===重交互，大UI，近距离（小于1.5米）")]
+        #region 重交互，大UI，近距离
+        [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
         //Timeline：显示
-        public PlayableDirector timelineShow;
+        public GameObject timelineShow;
         //Timeline：隐藏
-        public PlayableDirector timelineHide;
+        public GameObject timelineHide;
         //游戏1按钮
         public ButtonRayReceiver btnGame01;
         //游戏2按钮
         public ButtonRayReceiver btnGame02;
         //游戏3按钮
         public ButtonRayReceiver btnGame03;
-        private bool bUIShow = false;
 
         public void Hide()
         {
-            StartCoroutine(IEMiddleToFar());
+            StopCoroutine("IEMiddleToFar");
+            StartCoroutine("IEMiddleToFar");
         }
         public void Show()
         {
-            StartCoroutine(IEFarToMiddle());
+            StopCoroutine("IEFarToMiddle");
+            StartCoroutine("IEFarToMiddle");
+        }
+
+        public void CallApp(string strPackName)
+        {
+            //print($"拉起应用:{strPackName}");
+            XR.AppManager.StartApp(strPackName);
         }
         #endregion
 

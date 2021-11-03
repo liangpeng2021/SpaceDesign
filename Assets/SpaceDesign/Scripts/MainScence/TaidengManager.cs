@@ -35,8 +35,17 @@ namespace SpaceDesign
         /// 无操作时间
         /// </summary>
         [HideInInspector]
-        public float noOperationTime=0;
-        
+        public float noOperationTime = 0;
+
+        //===========================================================================
+        //临时测距
+        public TextMesh tt;
+        //===========================================================================
+        void Awake()
+        {
+            animIconFar = traIcon.GetComponent<Animator>();
+            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+        }
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
@@ -55,18 +64,22 @@ namespace SpaceDesign
             v3OriPos = this.transform.position;
             timelineShow.SetActive(false);
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-            Invoke("SetIconParent", 0.1f);
+            //Invoke("SetIconParent", 0.1f);
         }
-
-        void SetIconParent()
+        void OnDestroy()
         {
-            if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
-                traIconRoot.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
-            else
-                traIconRoot.SetParent(null);
+            StopAllCoroutines();
+            GameObject obj = traIconRoot.gameObject;
+            if (obj != null)
+                DestroyImmediate(obj);
         }
-        
-        public TextMesh tt;
+        //void SetIconParent()
+        //{
+        //    if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
+        //        traIconRoot.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
+        //    else
+        //        traIconRoot.SetParent(null);
+        //}
 
         /// <summary>
         /// 刷新位置消息
@@ -78,9 +91,9 @@ namespace SpaceDesign
             Vector3 _v3 = v3OriPos;
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
-            
+
             tt.text = _dis.ToString();
-            
+
             PlayerPosState lastPPS = curPlayerPosState;
 
             if (_dis > 5f)
@@ -102,37 +115,45 @@ namespace SpaceDesign
                 curPlayerPosState = PlayerPosState.Close;
             }
 
+            StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
-        
+
         /// <summary>
         /// UI等刷新位置消息
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
             //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
-            
-            if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
-            {
-                /// 远距离=>中距离
-                yield return IEFarToMiddle();
-            }
-            else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Close)
-            {
-                /// 中距离=>近距离
-                yield return IEMiddleToClose();
-            }
-            else if (lastPPS == PlayerPosState.Close && curPlayerPosState == PlayerPosState.Middle)
-            {
-                /// 近距离=>中距离
-                yield return IECloseToMiddle();
-            }
-            else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Far)
-            {
-                /// 中距离=>远距离
-                yield return IEMiddleToFar();
-            }
 
+            if (lastPPS == PlayerPosState.Far)
+            {
+                if (curPlayerPosState == PlayerPosState.Middle)/// 远距离=>中距离
+                    yield return IEFarToMiddle();/// 远距离=>中距离
+                else if (curPlayerPosState == PlayerPosState.Close)/// 远距离=>近距离
+                {
+                    yield return IEFarToMiddle();
+                    yield return IEMiddleToClose();
+                }
+            }
+            else if (lastPPS == PlayerPosState.Middle)
+            {
+                if (curPlayerPosState == PlayerPosState.Close)/// 中距离=>近距离
+                    yield return IEMiddleToClose();
+
+                else if (curPlayerPosState == PlayerPosState.Far)/// 中距离=>远距离
+                    yield return IEMiddleToFar();
+            }
+            else if (lastPPS == PlayerPosState.Close)
+            {
+                if (curPlayerPosState == PlayerPosState.Middle)/// 近距离=>中距离
+                    yield return IECloseToMiddle();
+                else if (curPlayerPosState == PlayerPosState.Far)/// 近距离=>远距离
+                {
+                    yield return IECloseToMiddle();
+                    yield return IEMiddleToFar();
+                }
+            }
             yield return 0;
         }
 
@@ -169,7 +190,11 @@ namespace SpaceDesign
             //Icon从动态变成静态
             //Icon的自旋转动画关闭
             foreach (var v in animIconMiddle)
+            {
+                v.Play(0, -1, 0f);
+                v.Update(0);
                 v.enabled = false;
+            }
             //Icon自身上下浮动关闭
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
@@ -190,7 +215,7 @@ namespace SpaceDesign
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, 0.1f);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
@@ -224,7 +249,7 @@ namespace SpaceDesign
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, 0.1f);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
                 if (_fDis < fThreshold)
                 {
@@ -240,22 +265,19 @@ namespace SpaceDesign
             bUIChanging = false;
         }
 
-#region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
-        [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
+        #region Icon变化，远距离
+        [Header("===Icon变化，远距离")]
         //Icon的对象的总根节点
         public Transform traIconRoot;
         //Icon的对象
         public Transform traIcon;
+        //Icon对象的AR手势Button按钮
+        private ButtonRayReceiver btnIcon;
         //吸引态，上下移动动画
-        public Animator animIconFar;
+        private Animator animIconFar;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
-        //Icon的移动速度
-        public float fIconSpeed = 1;
-        /// <summary>
-        /// 触点按钮
-        /// </summary>
-        public ButtonRayReceiver chudianBtn;
+
         /// <summary>
         /// 关闭按钮
         /// </summary>
@@ -276,33 +298,36 @@ namespace SpaceDesign
         {
             noOperationTime = 0;
             if (curPlayerPosState == PlayerPosState.Close)
-                StartCoroutine(IEMiddleToClose());
+            {
+                StopCoroutine("IEMiddleToClose");
+                StartCoroutine("IEMiddleToClose");
+            }
         }
 
         void AddButtonRayEvent()
         {
-            chudianBtn.onPinchDown.AddListener(ClickIcon);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
             closeBtn.onPinchDown.AddListener(OnClose);
             placeBtn.onPinchDown.AddListener(OnCheckPlace);
         }
 
         void RemoveButtonRayEvent()
         {
-            chudianBtn.onPinchDown.RemoveListener(ClickIcon);
+            btnIcon.onPinchDown.RemoveListener(ClickIcon);
             closeBtn.onPinchDown.RemoveListener(OnClose);
             placeBtn.onPinchDown.RemoveListener(OnCheckPlace);
         }
 
-#endregion
+        #endregion
 
-#region 重交互，大UI，近距离（小于1.5米）
+        #region 重交互，大UI，近距离（小于1.5米）
         [Header("===重交互，大UI，近距离（小于1.5米）")]
         //UI的变化速度
         public float fUISpeed = 5;
         //Mark追踪对象
         public Image2DTrackingTaideng image2DTrackingTaideng;
         public GameObject timelineShow;
-        
+
         /// <summary>
         /// 空间放置按钮响应
         /// </summary>
@@ -312,8 +337,8 @@ namespace SpaceDesign
 
             timelineShow.SetActive(false);
 
-            //image2DTrackingTaideng.StopTrack();
-            //image2DTrackingTaideng.enabled = false;
+            image2DTrackingTaideng.StopTrack();
+            image2DTrackingTaideng.enabled = false;
 
             taidengController.PlaceTaideng();
         }
@@ -321,6 +346,7 @@ namespace SpaceDesign
         void OnClose()
         {
             OnQuit();
+            StopCoroutine("IECloseToMiddle");
             StartCoroutine("IECloseToMiddle");
         }
 
@@ -332,11 +358,11 @@ namespace SpaceDesign
             noOperationTime = 0;
 
             timelineShow.SetActive(false);
-            //image2DTrackingTaideng.StopTrack();
-            //image2DTrackingTaideng.enabled = false;
+            image2DTrackingTaideng.StopTrack();
+            image2DTrackingTaideng.enabled = false;
 
             taidengController.gameObject.SetActive(false);
         }
-#endregion
+        #endregion
     }
 }

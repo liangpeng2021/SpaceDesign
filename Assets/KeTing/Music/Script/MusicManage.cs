@@ -6,9 +6,7 @@
 
 using OXRTK.ARHandTracking;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace SpaceDesign.Music
@@ -85,7 +83,11 @@ namespace SpaceDesign.Music
         //临时测距
         public TextMesh tt;
         //===========================================================================
-
+        void Awake()
+        {
+            animIconFar = traIcon.GetComponent<Animator>();
+            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+        }
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
@@ -985,19 +987,19 @@ namespace SpaceDesign.Music
         }
 
 
-        #region 吸引态，Icon变化，原距离（大于5米）
-        [Header("=====吸引态，Icon变化，原距离（大于5米）")]
+        #region 吸引态，Icon变化，远距离
+        [Header("=====吸引态，Icon变化，远距离")]
 
         //远距离Icon的位置
         public Transform traIconFarPos;
         //中距离Icon的位置
         public Transform traIconMiddlePos;
+        //Icon对象的AR手势Button按钮
+        private ButtonRayReceiver btnIcon;
+        //吸引态，上下移动动画
+        private Animator animIconFar;
         //Icon的对象
         public Transform traIcon;
-        //Icon对象的AR手势Button按钮
-        public ButtonRayReceiver btnIcon;
-        //吸引态，上下移动动画
-        public Animator animIconFar;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
         //Icon的移动速度
@@ -1010,8 +1012,8 @@ namespace SpaceDesign.Music
         }
         #endregion
 
-        #region 轻交互，小UI，中距离（小于5米，大于1.5米）
-        [Header("=====轻交互，小UI，中距离（小于5米，大于1.5米）")]
+        #region 轻交互，小UI，中距离
+        [Header("=====轻交互，小UI，中距离")]
         //小UI（不包含更多音乐按钮，因为动画变化不同）
         public Transform traMinUI;
         //小UI的图片总对象
@@ -1046,9 +1048,9 @@ namespace SpaceDesign.Music
 
         #endregion
 
-        #region 重交互，大UI，近距离（小于1.5米）
+        #region 重交互，大UI，近距离
 
-        [Header("=====重交互，大UI，近距离（小于1.5米）")]
+        [Header("=====重交互，大UI，近距离")]
         //重交互，开始计时，N长时间后无操作，自动变为轻交互
         private bool bMaxTiming;
         //重交互到轻交互，计时用
@@ -1217,7 +1219,7 @@ namespace SpaceDesign.Music
                 //回调
                 (sd) =>
                 {
-                    Debug.Log("MyLog::音乐"+str+":"+sd.MusicId);
+                    Debug.Log("MyLog::音乐" + str + ":" + sd.MusicId);
                 }
                 );
 
@@ -1246,7 +1248,7 @@ namespace SpaceDesign.Music
                 audioSource.Play();
                 //===========================================================================
                 //CPE发送：带序号播放
-                ClickMusic("play?id="+index.ToString());
+                ClickMusic("play?id=" + index.ToString());
                 //===========================================================================
             }
         }
@@ -1297,7 +1299,7 @@ namespace SpaceDesign.Music
             //进度CPE赋值：数值即为当前秒数
             //===========================================================================
             //CPE发送：进度
-            ClickMusic("setting?action=setPace&value="+ fTime.ToString());
+            ClickMusic("setting?action=setPace&value=" + fTime.ToString());
             //===========================================================================
         }
 

@@ -1,14 +1,12 @@
 ﻿/* Create by zh at 2021-09-22
 
     语音通话总控制脚本
-
+    
  */
 
 using OXRTK.ARHandTracking;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
@@ -42,7 +40,11 @@ namespace SpaceDesign.Phone
         //临时测距
         public TextMesh tt;
         //===========================================================================
-
+        void Awake()
+        {
+            animIconFar = traIcon.GetComponent<Animator>();
+            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+        }
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
@@ -71,10 +73,7 @@ namespace SpaceDesign.Phone
             v3OriPos = this.transform.position;
         }
 
-        void OnDestroy()
-        {
-            StopAllCoroutines();
-        }
+        void OnDestroy() { StopAllCoroutines(); }
 
         void Update()
         {
@@ -86,6 +85,8 @@ namespace SpaceDesign.Phone
                     fCallingTempTime = 0;
                     bCalling = false;
                     btnRingOff.onPinchUp.Invoke();
+                    ////未接挂断跟
+                    //StartCoroutine("_IERingOff", true);
                 }
             }
             else if (bTalking)
@@ -148,10 +149,9 @@ namespace SpaceDesign.Phone
                     return;
             }
 
-            StopAllCoroutines();
+            StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
-
 
         /// <summary>
         /// UI等刷新位置消息
@@ -159,8 +159,6 @@ namespace SpaceDesign.Phone
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
             print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
-
-            //WaitForSeconds _wfs = new WaitForSeconds(0.1f);
 
             if (lastPPS == PlayerPosState.Far)
             {
@@ -226,7 +224,11 @@ namespace SpaceDesign.Phone
             //Icon从动态变成静态
             //Icon的自旋转动画关闭
             foreach (var v in animIconMiddle)
+            {
+                v.Play(0, -1, 0f);
+                v.Update(0);
                 v.enabled = false;
+            }
             //Icon自身上下浮动关闭
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
@@ -248,21 +250,31 @@ namespace SpaceDesign.Phone
 
             bCalling = true;
 
+            if (audioSource.isPlaying)
+                audioSource.Stop();
+            audioSource.loop = true;
+            audioSource.clip = adClipCalling;
+            audioSource.Play();
+
             Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
+            float _fSp;
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fIconSpeed * Time.deltaTime);
-                traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, _v3, fUISpeed * Time.deltaTime);
+                _fSp = fUISpeed * Time.deltaTime;
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, _fSp);
+                traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, _v3, _fSp);
                 float _fDis = Vector3.Distance(traTotalUI.localScale, _v3);
                 if (_fDis < fThreshold)
                 {
                     traIcon.localScale = Vector3.zero;
-                    traTotalUI.localScale = _v3;
+                    //这里界面先放大再缩小，所以这里不用赋值位置最大值（否则会跳一下的感觉）
+                    //traTotalUI.localScale = _v3;
                     break;
                 }
                 yield return 0;
             }
             _v3 = Vector3.one;
+            yield return new WaitForSeconds(0.1f);
             while (true)
             {
                 traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, _v3, fUISpeed * Time.deltaTime);
@@ -270,6 +282,7 @@ namespace SpaceDesign.Phone
                 if (_fDis < fThreshold)
                 {
                     traTotalUI.localScale = _v3;
+
                     break;
                 }
                 yield return 0;
@@ -298,15 +311,20 @@ namespace SpaceDesign.Phone
             //近距离=>中距离
             animAnswer.enabled = false;
 
+            float _fSp;
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * Time.deltaTime);
-                traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+                _fSp = fUISpeed * Time.deltaTime;
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, _fSp);
+                traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, Vector3.zero, _fSp);
                 float _fDis = Vector3.Distance(traTotalUI.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
                     traIcon.localScale = Vector3.one;
                     traTotalUI.localScale = Vector3.zero;
+
+                    if (audioSource.isPlaying)
+                        audioSource.Stop();
                     break;
                 }
                 yield return 0;
@@ -332,7 +350,6 @@ namespace SpaceDesign.Phone
                 bUIChanging = false;
                 animAnswer.enabled = false;
                 animReCalling.enabled = false;
-                //StopAllCoroutines();
                 //===========================================================================
             }
         }
@@ -351,13 +368,16 @@ namespace SpaceDesign.Phone
                 float _fDis = Vector3.Distance(traCallingUI.localScale, _v3);
                 if (_fDis < fThreshold)
                 {
-                    traCallingUI.localScale = _v3;
+                    if (bShow == false)
+                        traCallingUI.localScale = _v3;
                     break;
                 }
                 yield return 0;
             }
+
             if (bShow)
             {
+                yield return new WaitForSeconds(0.1f);
                 _v3 = Vector3.one;
                 while (true)
                 {
@@ -394,6 +414,7 @@ namespace SpaceDesign.Phone
             }
             if (bShow)
             {
+                yield return new WaitForSeconds(0.1f);
                 _v3 = Vector3.one;
                 while (true)
                 {
@@ -432,6 +453,13 @@ namespace SpaceDesign.Phone
 
             if (bShow)
             {
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+                audioSource.loop = true;
+                audioSource.clip = adClipReCalling;
+                audioSource.Play();
+
+                yield return new WaitForSeconds(0.1f);
                 _v3 = Vector3.one;
                 while (true)
                 {
@@ -447,6 +475,7 @@ namespace SpaceDesign.Phone
 
                 //等待N秒
                 yield return new WaitForSeconds(4);
+                audioSource.Stop();
 
                 //===========================================================================
                 //等待过程中播放呼叫语音
@@ -468,7 +497,6 @@ namespace SpaceDesign.Phone
                 //    yield return 0;
                 //}
                 yield return IEReCallUI(false);
-
                 yield return IETalkingUI(true);
             }
         }
@@ -478,6 +506,8 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IETalkingUI(bool bShow)
         {
+            print("接通");
+
             //fTalkTempTime音频时长赋值，必须在bTalking赋值之前，否则Update函数中，计时错误
             if (bShow)
             {
@@ -503,6 +533,7 @@ namespace SpaceDesign.Phone
             if (bShow)
             {
                 _v3 = Vector3.one;
+                yield return new WaitForSeconds(0.1f);
                 while (true)
                 {
                     traTalkingUI.localScale = Vector3.Lerp(traTalkingUI.localScale, _v3, fUISpeed * Time.deltaTime);
@@ -519,18 +550,16 @@ namespace SpaceDesign.Phone
 
         }
 
-        #region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
-        [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
+        #region Icon变化，远距离
+        [Header("===Icon变化，远距离")]
+        //Icon对象的AR手势Button按钮
+        private ButtonRayReceiver btnIcon;
+        //吸引态，上下移动动画
+        private Animator animIconFar;
         //Icon的对象
         public Transform traIcon;
-        //Icon对象的AR手势Button按钮
-        public ButtonRayReceiver btnIcon;
-        //吸引态，上下移动动画
-        public Animator animIconFar;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
-        //Icon的移动速度
-        public float fIconSpeed = 1;
 
         /// <summary>
         /// 点击Icon
@@ -539,15 +568,21 @@ namespace SpaceDesign.Phone
         {
             if (curPlayerPosState != PlayerPosState.Far)
             {
-                StopAllCoroutines();
-                StartCoroutine(IEMiddleToClose());
+                StopCoroutine("IEMiddleToClose");
+                StartCoroutine("IEMiddleToClose");
             }
         }
 
         #endregion
 
-        #region 重交互，大UI，近距离（小于1.5米）
-        [Header("===重交互，大UI，近距离（小于1.5米）")]
+        #region 重交互，大UI，近距离
+        [Header("===重交互，大UI，近距离")]
+        //音频播放
+        public AudioSource audioSource;
+        public AudioClip adClipCalling;
+        public AudioClip adClipMissed_short;
+        public AudioClip adClipReCalling;
+
         //UI的变化速度
         public float fUISpeed = 5;
         //小UI（不包含更多音乐按钮，因为动画变化不同）
@@ -592,12 +627,19 @@ namespace SpaceDesign.Phone
 
         public void OnRingOff()
         {
-            bCalling = false;
+            //这里需要停止所有协程
             StopAllCoroutines();
             StartCoroutine("_IERingOff");
         }
         IEnumerator _IERingOff()
         {
+            bCalling = false;
+
+            if (audioSource.isPlaying)
+                audioSource.Stop();
+            audioSource.clip = adClipMissed_short;
+            audioSource.loop = false;
+            audioSource.Play();
             yield return IECallingUI(false);
             yield return IEReCallUI(false);
             yield return IEMissedUI(true);
@@ -606,17 +648,22 @@ namespace SpaceDesign.Phone
         public void OnAnswer()
         {
             bCalling = false;
+            //这里需要停止所有协程
             StopAllCoroutines();
             StartCoroutine("_IEAnswer");
         }
         IEnumerator _IEAnswer()
         {
+            if (audioSource.isPlaying)
+                audioSource.Stop();
+
             yield return IECallingUI(false);
             yield return IETalkingUI(true);
         }
 
         public void OnReCall()
         {
+            //这里需要停止所有协程
             StopAllCoroutines();
             StartCoroutine("_IEReCall");
         }
@@ -629,10 +676,10 @@ namespace SpaceDesign.Phone
         public void OnTalkingOff()
         {
             videoPlayer.Stop();
+            //这里需要停止所有协程
             StopAllCoroutines();
             StartCoroutine("IECloseToMiddle", true);
         }
         #endregion
-
     }
 }

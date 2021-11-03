@@ -36,6 +36,7 @@ public class MyShortcuts
                 rct.localPosition = Vector3.zero;
                 rct.localEulerAngles = Vector3.zero;
                 rct.localScale = Vector3.one;
+                rct.offsetMax = rct.offsetMin = Vector2.zero;
             }
         }
     }

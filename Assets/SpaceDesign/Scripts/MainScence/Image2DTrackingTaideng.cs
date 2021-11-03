@@ -14,10 +14,14 @@ namespace SpaceDesign
         public GameObject objBtnShow;
         public Texture texture;
         bool bCallback = false;
+        //原来的父节点
+        private Transform oriParent;
         private void Awake()
         {
-            objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
-            //SetModelVisible(false);
+            oriParent = transform.parent;
+            //objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
+            objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child").gameObject;
+            SetModelVisible(false);
         }
 
         public void StartTrack()
@@ -30,8 +34,10 @@ namespace SpaceDesign
 
             bCallback = true;
 
+            //Image2DTrackingManager.Instance.m_TrackerPath = "Taideng";
+            //Image2DTrackingManager.Instance.m_feamName = "3c11f9a3e98c523a45f23f07b76586ab_28062021145112";
             Image2DTrackingManager.Instance.m_TrackerPath = "Taideng";
-            Image2DTrackingManager.Instance.m_feamName = "3c11f9a3e98c523a45f23f07b76586ab_28062021145112";
+            Image2DTrackingManager.Instance.m_feamName = "fdf32e7865fe1f195eee4f5444e8ef65_30102021172742";
             Image2DTrackingManager.Instance.m_TargetTexture = texture;
             Image2DTrackingManager.Instance.TrackStart();
         }
@@ -100,27 +106,29 @@ namespace SpaceDesign
             {
                 //Debug.Log("MyLog::objTargetModel:" + objTargetModel);
                 TaidengManager.Inst.transform.SetParent(objTargetModel.transform);
-                TaidengManager.Inst.transform.localPosition = new Vector3(0, -0.3f, 0);
-                //TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
+                TaidengManager.Inst.transform.localPosition = new Vector3(0, 0.05f, 0.25f);
+                TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
+                //TaidengManager.Inst.transform.localScale = new Vector3(1f, 1f, 1f);
             }
             else
             {
-                Invoke("SetIconParent", 0.1f);
+                //Invoke("SetIconParent", 0.1f);
+                TaidengManager.Inst.transform.SetParent(oriParent);
             }
             objBtnShow.SetActive(isVisible);
         }
-       
-        void SetIconParent()
-        {
-            //Debug.Log("MyLog::GetActiveScene:"+ SceneManager.GetActiveScene().name.Equals("EditorScence"));
-            //Debug.Log("MyLog::TaidengManager:" + TaidengManager.Inst);
-            //Debug.Log("MyLog::EditorControl:" + EditorControl.Instance);
-            //Debug.Log("MyLog::loadPreviewScence:" + EditorControl.Instance.loadPreviewScence);
-            //Debug.Log("MyLog::ObjParent:" + EditorControl.Instance.loadPreviewScence.ObjParent);
-            if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
-                TaidengManager.Inst.transform.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
-            else
-                TaidengManager.Inst.transform.SetParent(null);
-        }
+
+        //void SetIconParent()
+        //{
+        //    //Debug.Log("MyLog::GetActiveScene:"+ SceneManager.GetActiveScene().name.Equals("EditorScence"));
+        //    //Debug.Log("MyLog::TaidengManager:" + TaidengManager.Inst);
+        //    //Debug.Log("MyLog::EditorControl:" + EditorControl.Instance);
+        //    //Debug.Log("MyLog::loadPreviewScence:" + EditorControl.Instance.loadPreviewScence);
+        //    //Debug.Log("MyLog::ObjParent:" + EditorControl.Instance.loadPreviewScence.ObjParent);
+        //    if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
+        //        TaidengManager.Inst.transform.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
+        //    else
+        //        TaidengManager.Inst.transform.SetParent(null);
+        //}
     }
 }

@@ -13,26 +13,37 @@ namespace SpaceDesign.Translate
         public GameObject objBtnShow;
         public Texture texture;
         bool bCallback = false;
-
+        //原来的父节点
+        private Transform oriParent;
         private void Awake()
         {
-            objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
+            oriParent = transform.parent;
+            //objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
+            objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child").gameObject;
             SetModelVisible(false);
         }
 
         public void StartTrack()
         {
+#if UNITY_EDITOR
+            return;
+#endif
             StopTrack();
             bCallback = true;
 
+            //Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
+            //Image2DTrackingManager.Instance.m_feamName = "c2dd24647f17a05fdc273e7aa95bc674_21102021003932";
             Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
-            Image2DTrackingManager.Instance.m_feamName = "c2dd24647f17a05fdc273e7aa95bc674_21102021003932";
+            Image2DTrackingManager.Instance.m_feamName = "7c47ed6410de1f914d06e1075c52e1e8_01112021175446";
             Image2DTrackingManager.Instance.m_TargetTexture = texture;
             Image2DTrackingManager.Instance.TrackStart();
         }
 
         public void StopTrack()
         {
+#if UNITY_EDITOR
+            return;
+#endif
             Image2DTrackingManager.Instance.TrackStop();
         }
 
@@ -90,12 +101,12 @@ namespace SpaceDesign.Translate
             if (isVisible)
             {
                 TranslateManage.Inst.transform.SetParent(objTargetModel.transform);
-                TranslateManage.Inst.transform.localPosition = new Vector3(0, -0.05f, -0.3f);
+                TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.05f, 0.25f);
                 TranslateManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
             }
             else
             {
-                TranslateManage.Inst.transform.SetParent(null);
+                TranslateManage.Inst.transform.SetParent(oriParent);
             }
             objBtnShow.SetActive(isVisible);
         }

@@ -11,10 +11,10 @@ public class EditCameraRay : MonoBehaviour
 {
     Camera editCamera;
     public LineRenderer line;
-    
+
     RayPointerHandler _currayPointerHandler;
     RayPointerHandler _lastrayPointerHandler;
-    
+
     bool isMouseDown;
 
     RayPointerHandler hitpointhandler;
@@ -23,12 +23,12 @@ public class EditCameraRay : MonoBehaviour
     {
 #if UNITY_EDITOR
 
-        if (editCamera==null)
+        if (editCamera == null)
             editCamera = XRCameraManager.Instance.eventCamera;
         Ray ray = editCamera.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit hit;
-        if (line!=null)
+        if (line != null)
             line.positionCount = 2;
         if (Physics.Raycast(ray, out hit, 1000f))
         {
@@ -48,14 +48,18 @@ public class EditCameraRay : MonoBehaviour
                         _lastrayPointerHandler.OnPointerExit();
                     //次目标响应指向事件，这里可以根据自己需求写点击移开指向事件
                     _currayPointerHandler.OnPointerEnter();
-                    
+
                     _lastrayPointerHandler = _currayPointerHandler;//这次目标付给_lastButton
                 }
                 if (Input.GetMouseButtonDown(0))
                 {
                     isMouseDown = true;
-                    hitpointhandler= hit.collider.GetComponent<RayPointerHandler>();
+                    hitpointhandler = hit.collider.GetComponent<RayPointerHandler>();
                     _currayPointerHandler.OnPinchDown(ray.origin, ray.direction, hit.point);
+                }
+                else if (Input.GetMouseButtonUp(0))
+                {
+                    _currayPointerHandler.OnPinchUp();
                 }
             }
             else
@@ -67,7 +71,7 @@ public class EditCameraRay : MonoBehaviour
                     _lastrayPointerHandler = null;
                 }
             }
-            
+
             //if (isMouseDown)
             //{
             //    if (!hitpointhandler.gameObject.activeInHierarchy)

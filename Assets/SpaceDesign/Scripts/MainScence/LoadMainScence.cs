@@ -14,7 +14,7 @@ using XR;
 /// </summary>
 public class LoadMainScence : MonoBehaviour
 {
-    ScenceData objectDatas;
+    public ScenceData objectDatas;
 
     public GameObject roomPrefab;
 
@@ -23,81 +23,81 @@ public class LoadMainScence : MonoBehaviour
     public Canvas[] canvas;
 
     public GameObject kaichangObj;
-    #region 拉起其他应用
-    /// <summary>
-    /// 奇幻森林按钮
-    /// </summary>
-    public ButtonRayReceiver artowermotionBtn;
-    /// <summary>
-    /// 忒依亚传说
-    /// </summary>
-    public ButtonRayReceiver omobaBtn;
-    /// <summary>
-    /// AR动物园
-    /// </summary>
-    public ButtonRayReceiver findanimalsBtn;
+    //#region 拉起其他应用
+    ///// <summary>
+    ///// 奇幻森林按钮
+    ///// </summary>
+    //public ButtonRayReceiver artowermotionBtn;
+    ///// <summary>
+    ///// 忒依亚传说
+    ///// </summary>
+    //public ButtonRayReceiver omobaBtn;
+    ///// <summary>
+    ///// AR动物园
+    ///// </summary>
+    //public ButtonRayReceiver findanimalsBtn;
 
-    /// <summary>
-    /// 测试demo
-    /// </summary>
-    public ButtonRayReceiver testBtn;
+    ///// <summary>
+    ///// 测试demo
+    ///// </summary>
+    //public ButtonRayReceiver testBtn;
 
-    /// <summary>
-    /// 奇幻森林
-    /// </summary>
-    void ClickLaqiArtowermotion()
-    {
-        AppManager.StartApp("com.gabor.artowermotion");
-    }
-    /// <summary>
-    /// 忒依亚传说（moba)
-    /// </summary>
-    void ClickLaqiOmoba()
-    {
-        AppManager.StartApp("com.baymax.omoba");
-    }
-    /// <summary>
-    /// AR动物园
-    /// </summary>
-    void ClickLaqiFindanimals()
-    {
-        AppManager.StartApp("com.xyani.findanimals");
-        //Debug.Log("MyLog::ClickLaqi:"+ CallApp("com.LenQiy.TestInput"));
-    }
+    ///// <summary>
+    ///// 奇幻森林
+    ///// </summary>
+    //void ClickLaqiArtowermotion()
+    //{
+    //    AppManager.StartApp("com.gabor.artowermotion");
+    //}
+    ///// <summary>
+    ///// 忒依亚传说（moba)
+    ///// </summary>
+    //void ClickLaqiOmoba()
+    //{
+    //    AppManager.StartApp("com.baymax.omoba");
+    //}
+    ///// <summary>
+    ///// AR动物园
+    ///// </summary>
+    //void ClickLaqiFindanimals()
+    //{
+    //    AppManager.StartApp("com.xyani.findanimals");
+    //    //Debug.Log("MyLog::ClickLaqi:"+ CallApp("com.LenQiy.TestInput"));
+    //}
 
-    void ClickTestInput()
-    {
-        AppManager.StartApp("com.LenQiy.TestInput");
-    }
+    //void ClickTestInput()
+    //{
+    //    AppManager.StartApp("com.LenQiy.TestInput");
+    //}
 
-    void AddLaqiEvent()
-    {
-        findanimalsBtn.onPinchDown.AddListener(ClickLaqiFindanimals);
-        omobaBtn.onPinchDown.AddListener(ClickLaqiOmoba);
-        artowermotionBtn.onPinchDown.AddListener(ClickLaqiArtowermotion);
-        testBtn.onPinchDown.AddListener(ClickTestInput);
-    }
+    //void AddLaqiEvent()
+    //{
+    //    findanimalsBtn.onPinchDown.AddListener(ClickLaqiFindanimals);
+    //    omobaBtn.onPinchDown.AddListener(ClickLaqiOmoba);
+    //    artowermotionBtn.onPinchDown.AddListener(ClickLaqiArtowermotion);
+    //    testBtn.onPinchDown.AddListener(ClickTestInput);
+    //}
 
-    void RemoveLaqiEvent()
-    {
-        artowermotionBtn.onPinchDown.RemoveAllListeners();
-        omobaBtn.onPinchDown.RemoveAllListeners();
-        findanimalsBtn.onPinchDown.RemoveAllListeners();
-        testBtn.onPinchDown.RemoveAllListeners();
-    }
+    //void RemoveLaqiEvent()
+    //{
+    //    artowermotionBtn.onPinchDown.RemoveAllListeners();
+    //    omobaBtn.onPinchDown.RemoveAllListeners();
+    //    findanimalsBtn.onPinchDown.RemoveAllListeners();
+    //    testBtn.onPinchDown.RemoveAllListeners();
+    //}
 
-    #endregion
+    //#endregion
 
     private void OnEnable()
     {
         backto.onClick.AddListener(QuitApp);
-        AddLaqiEvent();
+        //AddLaqiEvent();
     }
 
     private void OnDisable()
     {
         backto.onClick.RemoveListener(QuitApp);
-        RemoveLaqiEvent();
+        //RemoveLaqiEvent();
     }
 
     void BackToLoginScence()
@@ -114,8 +114,9 @@ public class LoadMainScence : MonoBehaviour
     {
         roomPrefab = null;
 
-        objectDatas.Clear();
-        
+        if (objectDatas != null)
+            objectDatas.Clear();
+
         backto = null;
 
         for (int i = 0; i < canvas.Length; i++)
@@ -124,9 +125,9 @@ public class LoadMainScence : MonoBehaviour
         }
         canvas = null;
 
-        artowermotionBtn = null;
-        omobaBtn = null;
-        findanimalsBtn = null;
+        //artowermotionBtn = null;
+        //omobaBtn = null;
+        //findanimalsBtn = null;
     }
 
     private void Start()
@@ -138,7 +139,7 @@ public class LoadMainScence : MonoBehaviour
         }
         //播放开场动效
         kaichangObj.SetActive(true);
-        Invoke("HideKaichang",7.1f);
+        Invoke("HideKaichang", 7.1f);
     }
 
     void HideKaichang()
@@ -147,13 +148,23 @@ public class LoadMainScence : MonoBehaviour
         //加载物体
         LoadGameObjectData();
     }
-    
+
     void LoadGameObjectData()
     {
+        //===========================================================================
+
+
+
+        //return;
+
+
+
+        //===========================================================================
+
         //BitConverter方式
         string path = EditorControl.GetPth();
         path = Path.Combine(path, "scence.scn");
-        //Debug.Log("MyLog::path" + path);
+        Debug.Log("MyLog::path" + path);
         objectDatas = MyDeSerial(path);
 
         if (objectDatas == null)
@@ -166,10 +177,10 @@ public class LoadMainScence : MonoBehaviour
             GameObject obj = Instantiate(roomPrefab);
             RoomControl roomControl = obj.GetComponent<RoomControl>();
             if (objectDatas.roomDatasList[i] != null)
-                roomControl.SetRoomData(objectDatas.roomDatasList[i],LoadPrefab.prefabDic);
+                roomControl.SetRoomData(objectDatas.roomDatasList[i], LoadPrefab.prefabDic);
             else
             {
-                Debug.Log("MyLog::第" + i.ToString()+"房间为空");
+                Debug.Log("MyLog::第" + i.ToString() + "房间为空");
             }
         }
         //Debug.Log("MyLog::objectDatas.roomDatasList.Count:" + objectDatas.roomDatasList.Count);
@@ -203,7 +214,7 @@ public class LoadMainScence : MonoBehaviour
             {
                 clickNum++;
             }
-            
+
             //1秒内连续点击超过3次，进入编辑模式
             if (clickNum > 2)
             {

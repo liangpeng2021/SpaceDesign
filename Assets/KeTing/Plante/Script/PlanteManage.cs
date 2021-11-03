@@ -6,11 +6,7 @@
 
 using OXRTK.ARHandTracking;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Playables;
-using UnityEngine.UI;
 
 namespace SpaceDesign.Plante
 {
@@ -40,7 +36,11 @@ namespace SpaceDesign.Plante
         //临时测距
         public TextMesh tt;
         //===========================================================================
-
+        void Awake()
+        {
+            animIconFar = traIcon.GetComponent<Animator>();
+            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+        }
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
@@ -55,22 +55,8 @@ namespace SpaceDesign.Plante
             btnQuit.onPinchUp.RemoveAllListeners();
         }
 
-        void Start()
-        {
-            v3OriPos = this.transform.position;
-        }
-        void OnDestroy()
-        {
-            StopAllCoroutines();
-        }
-
-        //void Update()
-        //{
-        //    if (Input.GetKeyDown(KeyCode.A))
-        //    {
-        //        Hide();
-        //    }
-        //}
+        void OnDestroy() { StopAllCoroutines(); }
+        void Start() { v3OriPos = this.transform.position; }
 
         /// <summary>
         /// 刷新位置消息
@@ -94,22 +80,15 @@ namespace SpaceDesign.Plante
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else //if (_dis <= 5f && _dis > 1.5f)
+            else
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            //else if (_dis <= 1.5f)
-            //{
-            //    if (lastPPS == PlayerPosState.Close)
-            //        return;
-            //    curPlayerPosState = PlayerPosState.Close;
-            //}
-
+            StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
-
 
         /// <summary>
         /// UI等刷新位置消息
@@ -118,23 +97,11 @@ namespace SpaceDesign.Plante
         {
             print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
-            //WaitForSeconds _wfs = new WaitForSeconds(0.1f);
-
             if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
             {
                 /// 远距离=>中距离
                 yield return IEFarToMiddle();
             }
-            //else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Close)
-            //{
-            //    /// 中距离=>近距离
-            //    yield return IEMiddleToClose();
-            //}
-            //else if (lastPPS == PlayerPosState.Close && curPlayerPosState == PlayerPosState.Middle)
-            //{
-            //    /// 近距离=>中距离
-            //    yield return IECloseToMiddle(false);
-            //}
             else if (lastPPS == PlayerPosState.Middle && curPlayerPosState == PlayerPosState.Far)
             {
                 /// 中距离=>远距离
@@ -161,13 +128,12 @@ namespace SpaceDesign.Plante
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
 
-            timelineShow.time = 0;
-            timelineHide.Stop();
-            timelineShow.Play();
+            timelineShow.SetActive(true);
+            timelineHide.SetActive(false);
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, 0.1f);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
@@ -176,8 +142,6 @@ namespace SpaceDesign.Plante
                 }
                 yield return 0;
             }
-
-            bUIShow = true;
 
             yield return 0;
             //UI变化结束
@@ -194,16 +158,12 @@ namespace SpaceDesign.Plante
             //中距离=>远距离
             traIcon.gameObject.SetActive(true);
 
-            if (bUIShow == true)
-            {
-                timelineHide.time = 0;
-                timelineShow.Stop();
-                timelineHide.Play();
-            }
+            timelineShow.SetActive(false);
+            timelineHide.SetActive(true);
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, 0.1f);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
                 if (_fDis < fThreshold)
                 {
@@ -218,25 +178,21 @@ namespace SpaceDesign.Plante
             //Icon自身上下浮动关闭
             animIconFar.enabled = true;
 
-            bUIShow = false;
-
             yield return 0;
             //UI变化结束
             bUIChanging = false;
         }
 
-        #region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
-        [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
+        #region Icon变化，远距离
+        [Header("===Icon变化，远距离")]
+        //吸引态，上下移动动画
+        private Animator animIconFar;
+        //Icon对象的AR手势Button按钮
+        private ButtonRayReceiver btnIcon;
         //Icon的对象
         public Transform traIcon;
-        //吸引态，上下移动动画
-        public Animator animIconFar;
-        //Icon对象的AR手势Button按钮
-        public ButtonRayReceiver btnIcon;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
-        //Icon的移动速度
-        public float fIconSpeed = 1;
 
         /// <summary>
         /// 点击Icon
@@ -244,29 +200,33 @@ namespace SpaceDesign.Plante
         public void ClickIcon()
         {
             if (curPlayerPosState == PlayerPosState.Middle)
-                StartCoroutine(IEFarToMiddle());
+            {
+                Show();
+            }
         }
 
         #endregion
 
-        #region 重交互，大UI，近距离（小于1.5米）
-        [Header("===重交互，大UI，近距离（小于1.5米）")]
+        #region 重交互，大UI，近距离
+        [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
         //Timeline：显示
-        public PlayableDirector timelineShow;
+        public GameObject timelineShow;
         //Timeline：隐藏
-        public PlayableDirector timelineHide;
+        public GameObject timelineHide;
+        //关闭按钮
         public ButtonRayReceiver btnQuit;
-        private bool bUIShow = false;
 
         public void Hide()
         {
-            StartCoroutine(IEMiddleToFar());
+            StopCoroutine("IEMiddleToFar");
+            StartCoroutine("IEMiddleToFar");
         }
         public void Show()
         {
-            StartCoroutine(IEFarToMiddle());
+            StopCoroutine("IEFarToMiddle");
+            StartCoroutine("IEFarToMiddle");
         }
         #endregion
 

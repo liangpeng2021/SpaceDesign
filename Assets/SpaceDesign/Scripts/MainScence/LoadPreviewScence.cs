@@ -24,16 +24,16 @@ public class LoadPreviewScence : MonoBehaviour
     /// 生成的对象的父节点
     /// </summary>
     public Transform ObjParent;
-    
+
     public GameObject roomPrefab;
-    
+
     private void OnDestroy()
     {
         roomPrefab = null;
-        
+
         ObjParent = null;
     }
-    
+
     public void ClearChild()
     {
         int childCount = ObjParent.childCount;
@@ -62,7 +62,7 @@ public class LoadPreviewScence : MonoBehaviour
             GameObject obj = Instantiate(roomPrefab);
             RoomControl roomControl = obj.GetComponent<RoomControl>();
             obj.transform.parent = ObjParent;
-            roomControl.SetRoomData(objectDatas.roomDatasList[i],LoadPrefab.prefabDic);
+            roomControl.SetRoomData(objectDatas.roomDatasList[i], LoadPrefab.prefabDic);
         }
     }
 
@@ -84,5 +84,5 @@ public class LoadPreviewScence : MonoBehaviour
 
         return gameObjectDatas;
     }
-    
+
 }

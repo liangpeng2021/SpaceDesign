@@ -223,7 +223,7 @@ namespace SpaceDesign
         }
 
 #region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
-        [Header("===Icon变化，原距离（大于5米，或者小于5米，大于1.5米）")]
+        [Header("===Icon变化，远距离（大于5米，或者小于5米，大于1.5米）")]
         //Icon的对象
         public Transform traIcon;
         //吸引态，上下移动动画
