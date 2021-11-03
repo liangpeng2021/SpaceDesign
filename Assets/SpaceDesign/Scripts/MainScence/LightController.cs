@@ -21,6 +21,8 @@ public class LightController : MonoBehaviour
     {
         image = GetComponent<Image>();
         image.sprite = lightOn;
+        islightOn = true;
+        lightObj.SetActive(true);
     }
     /// <summary>
     /// 修改按钮精灵
@@ -29,9 +31,9 @@ public class LightController : MonoBehaviour
     {
         islightOn = !islightOn;
         if (islightOn)
-            image.sprite = lightoff;
-        else
             image.sprite = lightOn;
+        else
+            image.sprite = lightoff;
         lightObj.SetActive(islightOn);
     }
     /// <summary>

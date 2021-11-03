@@ -34,7 +34,11 @@ public class PrefabManager : MonoBehaviour
     /// 翻到下页
     /// </summary>
     public ButtonRayReceiver turnPageNextBtn;
-    
+
+    void Awake()
+    {
+        totalPageNum = pages.Length - 1;
+    }
     /// <summary>
     /// 翻到上一页
     /// </summary>
@@ -47,7 +51,7 @@ public class PrefabManager : MonoBehaviour
 
         for (int i = 0; i < pages.Length; i++)
         {
-            pages[i].SetActive(i==curPageId);
+            pages[i].SetActive(i == curPageId);
         }
         //如果是第一页，关掉上一页按钮
         if (curPageId == 0)
@@ -74,7 +78,7 @@ public class PrefabManager : MonoBehaviour
         //更新页数显示
         pageNumText.text = (curPageId + 1).ToString() + "/" + (totalPageNum + 1).ToString();
     }
-    
+
     void InitPage()
     {
         pageNumText.gameObject.SetActive(true);
@@ -95,9 +99,9 @@ public class PrefabManager : MonoBehaviour
 
     public ButtonRayReceiver backtoRoomBtn;
     #region 预设管理
-    
+
     public PrefabData[] prefabDatas;
-    Dictionary<string,Material> materialDic=new Dictionary<string, Material>();
+    Dictionary<string, Material> materialDic = new Dictionary<string, Material>();
 
     public Dictionary<string, GameObject> editorPrefabDic = new Dictionary<string, GameObject>();
     public Dictionary<string, GameObject> icon2DDic = new Dictionary<string, GameObject>();
@@ -105,7 +109,7 @@ public class PrefabManager : MonoBehaviour
     {
         deletePrefab = null;
         backtoRoomBtn = null;
-        
+
         for (int i = 0; i < prefabDatas.Length; i++)
         {
             prefabDatas[i].Clear();
@@ -144,8 +148,8 @@ public class PrefabManager : MonoBehaviour
         turnPageLastBtn.onPinchDown.RemoveAllListeners();
         turnPageNextBtn.onPinchDown.RemoveAllListeners();
     }
-    
-    void CreatePrefab3D(int index,string str)
+
+    void CreatePrefab3D(int index, string str)
     {
         GameObject obj3d = prefabDatas[index].prefab3D;
 
@@ -211,7 +215,7 @@ public class PrefabManager : MonoBehaviour
     private void OnDisable()
     {
         backtoRoomBtn.onPinchDown.RemoveListener(BackToRoom);
-        
+
         Remove2DObjEvent();
     }
 
@@ -222,9 +226,9 @@ public class PrefabManager : MonoBehaviour
     //删除当前编辑的物体
     public void DeleteObj()
     {
-        if (deleteObjBtn!=null)
+        if (deleteObjBtn != null)
             deleteObjBtn.onPinchDown.RemoveAllListeners();
-        string id= EditorControl.Instance.roomManager.RemoveCurRoomObj();
+        string id = EditorControl.Instance.roomManager.RemoveCurRoomObj();
         ResetObjUI(id);
         //deleteObjBtn.gameObject.SetActive(false);
     }
@@ -243,13 +247,14 @@ public class PrefabManager : MonoBehaviour
         if (deleteObjBtn == null)
         {
             deleteObjBtn = Instantiate(deletePrefab).GetComponent<ButtonRayReceiver>();
+            deleteObjBtn.onPinchDown.AddListener(DeleteObj);
         }
         if (deleteObjBtn != null)
         {
             deleteObjBtn.transform.SetParent(parent);
             deleteObjBtn.transform.localEulerAngles = Vector3.zero;
             deleteObjBtn.transform.localPosition = new Vector3(0, -0.228f, -0.152f);
-            deleteObjBtn.transform.localScale = Vector3.one*0.001f;
+            deleteObjBtn.transform.localScale = Vector3.one * 0.001f;
         }
 
         //deleteObjBtn.gameObject.SetActive(true);

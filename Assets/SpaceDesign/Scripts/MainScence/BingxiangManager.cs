@@ -155,6 +155,7 @@ namespace SpaceDesign
                 curPlayerPosState = PlayerPosState.Close;
             }
 
+            StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
 
@@ -240,6 +241,8 @@ namespace SpaceDesign
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
 
+            OnQuit();
+
             yield return 0;
             //UI变化结束
             bUIChanging = false;
@@ -293,6 +296,9 @@ namespace SpaceDesign
             }
             bingxiangTimeline.gameObject.SetActive(false);
             lastDoorState = "";
+
+            OnQuit();
+
             //UI变化结束
             bUIChanging = false;
         }
@@ -313,16 +319,16 @@ namespace SpaceDesign
         /// </summary>
         public TimelineControl bingxiangTimeline;
 
-        //Icon的移动速度
-        public float fIconSpeed = 1;
-
         /// <summary>
         /// 点击Icon
         /// </summary>
         void ClickIcon()
         {
             if (curPlayerPosState == PlayerPosState.Close)
-                StartCoroutine(IEMiddleToClose());
+            {
+                StopCoroutine("IEMiddleToClose");
+                StartCoroutine("IEMiddleToClose");
+            }
         }
 
         void AddButtonRayEvent()
@@ -387,5 +393,13 @@ namespace SpaceDesign
             bingxiangTimeline.SetCurTimelineData("点击购买");
         }
         #endregion
+
+        /// <summary>
+        /// 关闭界面响应
+        /// </summary>
+        public void OnQuit()
+        {
+           
+        }
     }
 }

@@ -29,7 +29,7 @@ namespace SpaceDesign
 #if UNITY_EDITOR
             return;
 #endif
-            Debug.Log("MyLog::StartTrack");
+            //Debug.Log("MyLog::StartTrack");
             StopTrack();
 
             bCallback = true;
@@ -47,7 +47,7 @@ namespace SpaceDesign
 #if UNITY_EDITOR
             return;
 #endif
-            Debug.Log("MyLog::StopTrack");
+            //Debug.Log("MyLog::StopTrack");
             Image2DTrackingManager.Instance.TrackStop();
         }
 
@@ -106,9 +106,11 @@ namespace SpaceDesign
             {
                 //Debug.Log("MyLog::objTargetModel:" + objTargetModel);
                 TaidengManager.Inst.transform.SetParent(objTargetModel.transform);
-                TaidengManager.Inst.transform.localPosition = new Vector3(0, 0.05f, 0.25f);
+                TaidengManager.Inst.transform.localPosition = new Vector3(0, -0.15f, 0);
                 TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
                 //TaidengManager.Inst.transform.localScale = new Vector3(1f, 1f, 1f);
+
+                TaidengManager.Inst.taidengController.ResetTaidengTra();
             }
             else
             {

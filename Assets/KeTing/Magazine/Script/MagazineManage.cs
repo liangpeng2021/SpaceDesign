@@ -66,9 +66,12 @@ namespace SpaceDesign.Magazine
         void OnDestroy()
         {
             StopAllCoroutines();
-            GameObject obj = traIconRoot.gameObject;
-            if (obj != null)
-                DestroyImmediate(obj);
+            if (traIconRoot != null)
+            {
+                GameObject obj = traIconRoot.gameObject;
+                if (obj != null)
+                    DestroyImmediate(obj);
+            }
         }
 
         /// <summary>

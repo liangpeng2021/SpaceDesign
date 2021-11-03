@@ -30,8 +30,14 @@ public class TaidengController : MonoBehaviour
     /// 开始购买后显示的对象
     /// </summary>
     public GameObject payObj;
+    //台灯原始位置
+    Vector3 taidengOriPos;
+    //台灯原始旋转
+    Vector3 taidengOriEur;
+    //台灯原始缩放
+    Vector3 taidengOriSca;
 
-    bool showBoundBox = false;
+    public bool showBoundBox = false;
     BoundingBox boundingBox;
     BoxCollider boxCollider;
     GameObject boundingChild;
@@ -51,11 +57,17 @@ public class TaidengController : MonoBehaviour
 
     bool hideBoxScale = false;
 
+    void Awake()
+    {
+        taidengOriPos = transform.localPosition;
+        taidengOriEur = transform.localEulerAngles;
+        taidengOriSca = transform.localScale;
+    }
     private void Update()
     {
         if (showBoundBox)
         {
-            Debug.Log("EnableBoundBox");
+            //Debug.Log("EnableBoundBox");
             EnableBoundBox();
         }
         else
@@ -72,8 +84,18 @@ public class TaidengController : MonoBehaviour
         justpayRayReceiver = null;
     }
 
+    public void ResetTaidengTra()
+    {
+        transform.localPosition = taidengOriPos;
+        transform.localEulerAngles = taidengOriEur;
+        transform.localScale = taidengOriSca;
+    }
+
     public void Init()
     {
+
+        showBoundBox = false;
+
         firstObj.SetActive(true);
         secondObj.SetActive(false);
         payObj.SetActive(false);
@@ -120,7 +142,7 @@ public class TaidengController : MonoBehaviour
     //有操作
     void PointDown()
     {
-         TaidengManager.Inst.noOperationTime = 0;
+        TaidengManager.Inst.noOperationTime = 0;
     }
     /// <summary>
     /// 隐藏台灯移动旋转功能
@@ -176,6 +198,17 @@ public class TaidengController : MonoBehaviour
                 hideBoxScale = true;
             }
         }
+
+        //if (boundingBox.edgeObjects == null)
+        //    return;
+        //for (int i = 0; i < boundingBox.edgeObjects.Length; i++)
+        //{
+        //    //x、z不旋转
+        //    if (i < 4 || (i >= 8 && i < 12))
+        //    {
+        //        boundingBox.edgeObjects[i].SetActive(false);
+        //    }
+        //}
     }
 
     /// <summary>

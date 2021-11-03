@@ -102,7 +102,7 @@ namespace SpaceDesign.Magazine
             if (isVisible)
             {
                 MagazineManage.Inst.transform.SetParent(objTargetModel.transform);
-                MagazineManage.Inst.transform.localPosition = new Vector3(0, 0.05f, 0.25f);
+                MagazineManage.Inst.transform.localPosition = new Vector3(0, 0.02f, -0.25f);
                 MagazineManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
             }
             else

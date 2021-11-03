@@ -62,16 +62,21 @@ namespace SpaceDesign
         {
             taidengController.gameObject.SetActive(false);
             v3OriPos = this.transform.position;
-            timelineShow.SetActive(false);
+            //timelineShow.SetActive(false);
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
             //Invoke("SetIconParent", 0.1f);
+            //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
+            traIconRoot.SetParent(null);
         }
         void OnDestroy()
         {
             StopAllCoroutines();
-            GameObject obj = traIconRoot.gameObject;
-            if (obj != null)
-                DestroyImmediate(obj);
+            if (traIconRoot != null)
+            {
+                GameObject obj = traIconRoot.gameObject;
+                if (obj != null)
+                    DestroyImmediate(obj);
+            }
         }
         //void SetIconParent()
         //{
@@ -199,6 +204,8 @@ namespace SpaceDesign
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
 
+            OnQuit();
+
             yield return 0;
             //UI变化结束
             bUIChanging = false;
@@ -224,18 +231,17 @@ namespace SpaceDesign
                 }
                 yield return 0;
             }
-
-            //启动Mark
-            //image2DTrackingTaideng.enabled = true;
-            //image2DTrackingTaideng.StartTrack();
             //初始化
             taidengController.gameObject.SetActive(true);
             taidengController.Init();
 
+            //启动Mark
+            image2DTrackingTaideng.enabled = true;
+            image2DTrackingTaideng.StartTrack();
             //UI变化结束
             bUIChanging = false;
 
-            timelineShow.SetActive(true);
+            //timelineShow.SetActive(true);
         }
 
         /// <summary>
@@ -306,22 +312,22 @@ namespace SpaceDesign
 
         void AddButtonRayEvent()
         {
-            btnIcon.onPinchDown.AddListener(ClickIcon);
-            closeBtn.onPinchDown.AddListener(OnClose);
-            placeBtn.onPinchDown.AddListener(OnCheckPlace);
+            btnIcon.onPinchUp.AddListener(ClickIcon);
+            closeBtn.onPinchUp.AddListener(OnClose);
+            placeBtn.onPinchUp.AddListener(OnCheckPlace);
         }
 
         void RemoveButtonRayEvent()
         {
-            btnIcon.onPinchDown.RemoveListener(ClickIcon);
-            closeBtn.onPinchDown.RemoveListener(OnClose);
-            placeBtn.onPinchDown.RemoveListener(OnCheckPlace);
+            btnIcon.onPinchUp.RemoveAllListeners();
+            closeBtn.onPinchUp.RemoveAllListeners();
+            placeBtn.onPinchUp.RemoveAllListeners();
         }
 
         #endregion
 
-        #region 重交互，大UI，近距离（小于1.5米）
-        [Header("===重交互，大UI，近距离（小于1.5米）")]
+        #region 重交互，大UI，近距离
+        [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
         //Mark追踪对象
@@ -335,7 +341,7 @@ namespace SpaceDesign
         {
             noOperationTime = 0;
 
-            timelineShow.SetActive(false);
+            //timelineShow.SetActive(false);
 
             image2DTrackingTaideng.StopTrack();
             image2DTrackingTaideng.enabled = false;
@@ -357,10 +363,11 @@ namespace SpaceDesign
         {
             noOperationTime = 0;
 
-            timelineShow.SetActive(false);
+            //timelineShow.SetActive(false);
             image2DTrackingTaideng.StopTrack();
             image2DTrackingTaideng.enabled = false;
 
+            taidengController.Init();
             taidengController.gameObject.SetActive(false);
         }
         #endregion

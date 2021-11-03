@@ -101,7 +101,7 @@ namespace SpaceDesign.Translate
             if (isVisible)
             {
                 TranslateManage.Inst.transform.SetParent(objTargetModel.transform);
-                TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.05f, 0.25f);
+                TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.02f, -0.25f);
                 TranslateManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
             }
             else
