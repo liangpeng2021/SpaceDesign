@@ -36,7 +36,7 @@ namespace SpaceDesign
         void Awake()
         {
             animIconFar = traIcon.GetComponent<Animator>();
-            //btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
         }
         void OnEnable()
         {
@@ -245,16 +245,16 @@ namespace SpaceDesign
         //Icon的对象
         public Transform traIcon;
         //吸引态，上下移动动画
-        public Animator animIconFar;
+        private Animator animIconFar;
+        /// <summary>
+        /// 触点按钮
+        /// </summary>
+        private ButtonRayReceiver btnIcon;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
 
         //Icon的移动速度
         public float fIconSpeed = 1;
-        /// <summary>
-        /// 触点按钮
-        /// </summary>
-        public ButtonRayReceiver chudianBtn;
 
         /// <summary>
         /// 点击Icon
@@ -267,7 +267,7 @@ namespace SpaceDesign
 
         void AddButtonRayEvent()
         {
-            chudianBtn.onPinchDown.AddListener(ClickIcon);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
             qiukuiBtn.onPinchDown.AddListener(GotoQiukui);
             fanqieBtn.onPinchDown.AddListener(GotoFanqie);
             bocaiBtn.onPinchDown.AddListener(GotoBocai);
@@ -276,7 +276,7 @@ namespace SpaceDesign
 
         void RemoveButtonRayEvent()
         {
-            chudianBtn.onPinchDown.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
             qiukuiBtn.onPinchDown.RemoveAllListeners();
             fanqieBtn.onPinchDown.RemoveAllListeners();
             bocaiBtn.onPinchDown.RemoveAllListeners();

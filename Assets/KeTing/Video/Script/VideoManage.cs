@@ -360,11 +360,8 @@ namespace SpaceDesign.Video
             //如果是AR模式，不关闭扩展界面
             if (bReminder == true)
                 SetReminder(false);
-            if (bTV)
-            {
-                if (bReminder == true)
-                    SetExpand(false);
-            }
+            else if (bExpand == true)
+                SetExpand(false);
 
             ////近距离=>中距离
             //animAnswer.enabled = false;
@@ -658,8 +655,10 @@ namespace SpaceDesign.Video
             bTV = false;
             OnTV();
             //再设置是否2D视频
-            b2D = false;
-            OnVideo2D();
+            //b2D = false;
+            //OnVideo2D();
+            b2D = true;
+            OnVideo3D();
         }
 
         /// <summary>
@@ -765,6 +764,7 @@ namespace SpaceDesign.Video
 
             if (bTV)
             {
+                //电视推送完会回调
                 tvCtr.OnPush(true);
                 btnAR.GetComponentInChildren<TextMesh>().text = b2D ? "AR模式" : "3D全息模式";
                 btnAR.gameObject.SetActive(true);
