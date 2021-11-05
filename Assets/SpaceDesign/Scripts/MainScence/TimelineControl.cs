@@ -63,10 +63,10 @@ public class TimelineControl : MonoBehaviour
 
     void SetCollidersEnable(bool isEnable)
     {
-        for (int i = 0; i < boxColliders.Length; i++)
-        {
-            boxColliders[i].enabled = isEnable;
-        }
+        //for (int i = 0; i < boxColliders.Length; i++)
+        //{
+        //    boxColliders[i].enabled = isEnable;
+        //}
     }
 
     // Update is called once per frame
@@ -74,7 +74,7 @@ public class TimelineControl : MonoBehaviour
     {
 		if (startPlay)
         {
-            if (playableDirector.time > curTimeData.endTime && !isAutoContinue)
+            if (playableDirector.time >= curTimeData.endTime && !isAutoContinue)
             {
                 playableDirector.Pause();
                 startPlay = false;
@@ -105,7 +105,6 @@ public class TimelineControl : MonoBehaviour
     {
         if (timeDataDic.ContainsKey(name))
         {
-            Debug.Log("SetCurTimelineData:" + name);
             startPlay = true;
             curTimeData = timeDataDic[name];
 
@@ -125,7 +124,6 @@ public class TimelineControl : MonoBehaviour
     {
         if (timeDataDic.ContainsKey(name))
         {
-            Debug.Log("SetCurTimelineData:"+ name);
             startPlay = true;
             curTimeData = timeDataDic[name];
 

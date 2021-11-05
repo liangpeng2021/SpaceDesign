@@ -8,7 +8,7 @@ namespace SpaceDesign
     /// The class for slate scrolling control. <br>
     /// 控制面板滚动交互的类。
     /// </summary>
-    public class MySlateController : MonoBehaviour
+    public class ChufangSlateController : MonoBehaviour
     {
         protected Vector3 startPoint;
         protected float x;
@@ -22,24 +22,16 @@ namespace SpaceDesign
         public virtual void UpdatePinchPointerEnd()
         {
             x = endPoint.x - startPoint.x;
-            //if (Mathf.Abs(x) < 0.01f)
-            //{
-            //    if (gameObject.name.Equals("3"))
-            //    {
-            //        MusicMaxMag.Inst.OnPlay();
-            //    }
-            //}
-            //else
-            //{
-            //    if (x > 0)
-            //    {
-            //        MusicMaxMag.Inst.OnRight();
-            //    }
-            //    else if (x < 0)
-            //    {
-            //        MusicMaxMag.Inst.OnLeft();
-            //    }
-            //}
+            //Debug.Log("MyLog::endPoint.x:"+ endPoint.x);
+            //Debug.Log("MyLog::startPoint.x:" + startPoint.x);
+            if (x > 0)
+            {
+                ChufangManager.Inst.ChangeLiuChengLastAnimation(false);
+            }
+            else if (x < 0)
+            {
+                ChufangManager.Inst.ChangeLiuChengLastAnimation(true);
+            }
         }
         public virtual void UpdatePinchPointer(Vector3 pointOnSlate)
         {

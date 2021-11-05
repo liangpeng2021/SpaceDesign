@@ -10,7 +10,7 @@ namespace SpaceDesign
     /// The class for slate scrolling control. <br>
     /// 控制面板滚动交互的类。
     /// </summary>
-    public class ScrollViewSlateController : MySlateController
+    public class ScrollViewSlateController : ChufangSlateController
     {
         BoxCollider boxCollider;
         RectTransform rectTransform;

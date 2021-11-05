@@ -1,6 +1,7 @@
 ﻿using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 管理台灯的部分效果，/*create by 梁鹏 2021-10-18 */
@@ -84,7 +85,16 @@ namespace SpaceDesign
             {
                 if (lastPPS == PlayerPosState.Middle)
                     return;
-                curPlayerPosState = PlayerPosState.Middle;
+                //从近距离到中距离，大于2m切换状态
+                if (lastPPS == PlayerPosState.Close)
+                {
+                    if (_dis > 2f)
+                        curPlayerPosState = PlayerPosState.Middle;
+                }//否则1.5m就切换状态
+                else
+                {
+                    curPlayerPosState = PlayerPosState.Middle;
+                }
             }
             else if (_dis <= 1.5f)
             {
@@ -272,6 +282,10 @@ namespace SpaceDesign
             fanqieBtn.onPinchDown.AddListener(GotoFanqie);
             bocaiBtn.onPinchDown.AddListener(GotoBocai);
             backBtn.onPinchDown.AddListener(BackToCaipu);
+
+            //waveInteractionGazeHandle.g_OnHandWave.AddListener(WaveHandle);
+            //waveInteractionGazeHandle.g_OnHandVirtualPress.AddListener(()=> { ChangePressState(true); });
+            //waveInteractionGazeHandle.g_OnHandVirtualRelease.AddListener(() => { ChangePressState(false); });
         }
 
         void RemoveButtonRayEvent()
@@ -281,6 +295,10 @@ namespace SpaceDesign
             fanqieBtn.onPinchDown.RemoveAllListeners();
             bocaiBtn.onPinchDown.RemoveAllListeners();
             backBtn.onPinchDown.RemoveAllListeners();
+
+            //waveInteractionGazeHandle.g_OnHandWave.RemoveAllListeners();
+            //waveInteractionGazeHandle.g_OnHandVirtualPress.RemoveAllListeners();
+            //waveInteractionGazeHandle.g_OnHandVirtualRelease.RemoveAllListeners();
         }
 
         #endregion
@@ -324,6 +342,10 @@ namespace SpaceDesign
         /// </summary>
         int lastIndex;
         int curIndex;
+        /// <summary>
+        /// 菜谱第一条文字，手动修改enable
+        /// </summary>
+        public Text[] firstTexts;
 
         /// <summary>
         /// 返回到菜单选择界面
@@ -332,7 +354,7 @@ namespace SpaceDesign
         {
             if (curCai.Equals(""))
                 return;
-            Debug.Log(curCai);
+            //Debug.Log(curCai);
             //先播放当前的菜流程消失，再显示开始菜谱
             timeline.SetCurTimelineData(curCai + "消失",
                 () =>
@@ -356,7 +378,6 @@ namespace SpaceDesign
         /// </summary>
         void GotoCaipuliucheng()
         {
-
             timeline.SetCurTimelineData("菜谱消失",
                 () =>
                 {
@@ -365,6 +386,11 @@ namespace SpaceDesign
                 });
 
             lastIndex = curIndex = 1;
+
+            for (int i = 0; i < firstTexts.Length; i++)
+            {
+                firstTexts[i].enabled = true;
+            }
         }
         /// <summary>
         /// 切换具体的菜谱流程
@@ -386,16 +412,52 @@ namespace SpaceDesign
                 }
             }
 
-            timeline.SetCurTimelineData(curCai + lastIndex.ToString() + "-" + curIndex.ToString());
+            if (curIndex == 1)
+            {
+                for (int i = 0; i < firstTexts.Length; i++)
+                {
+                    firstTexts[i].enabled = true;
+                }
+            }
+
+            timeline.SetCurTimelineData(curCai + lastIndex.ToString() + "-" + curIndex.ToString(),
+                ()=>
+                {
+                    if (curIndex != 1)
+                    {
+                        for (int i = 0; i < firstTexts.Length; i++)
+                        {
+                            firstTexts[i].enabled = false;
+                        }
+                    }
+                });
             lastIndex = curIndex;
         }
 
+        //#region 挥手,不稳定
+        //public WaveInteractionGazeHandle waveInteractionGazeHandle;
+        //bool isPressed;
+        //void WaveHandle(Vector2Int dir)
+        //{
+        //    //if (isPressed)
+        //    {
+        //        Debug.Log("MyLog::WaveHandle:" + dir.ToString());
+        //    }
+        //}
+
+        //void ChangePressState(bool press)
+        //{
+        //    isPressed = press;
+        //}
+
+        //#endregion
+        
         /// <summary>
         /// 番茄
         /// </summary>
         void GotoFanqie()
         {
-            Debug.Log("GotoFanqie");
+            //Debug.Log("GotoFanqie");
             curCai = "番茄";
             // 转到菜谱内的流程
             GotoCaipuliucheng();
