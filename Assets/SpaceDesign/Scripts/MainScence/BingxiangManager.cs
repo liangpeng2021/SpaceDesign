@@ -41,12 +41,16 @@ namespace SpaceDesign
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
             AddButtonRayEvent();
+
+            AddTestEvent();
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             RemoveButtonRayEvent();
+
+            RemoveTestEvent();
         }
 
         void Start()
@@ -57,19 +61,35 @@ namespace SpaceDesign
         }
         void OnDestroy() { StopAllCoroutines(); }
 
+        #region 测试
+        [Header("测试")]
+        public ButtonRayReceiver opentBtn;
+        public ButtonRayReceiver closeBtn;
+
+        /// <summary>
+        /// 添加测试事件
+        /// </summary>
+        void AddTestEvent()
+        {
+            opentBtn.onPinchDown.AddListener(()=> { SetBingxiangAnimation("Open"); });
+            closeBtn.onPinchDown.AddListener(() => { SetBingxiangAnimation("Closed"); });
+        }
+
+        void RemoveTestEvent()
+        {
+            opentBtn.onPinchDown.RemoveAllListeners();
+            closeBtn.onPinchDown.RemoveAllListeners();
+        }
+        
+        #endregion
+
         private void Update()
         {
             timeCount += Time.deltaTime;
             if (timeCount > 0.5f)
             {
                 timeCount = 0;
-#if UNITY_EDITOR
-                if (Input.GetKey(KeyCode.O))
-                    SetBingxiangAnimation("Open");
-                if (Input.GetKey(KeyCode.P))
-                    SetBingxiangAnimation("Closed");
-                return;
-#endif
+
                 ClickGetDoorState();
             }
         }
@@ -101,10 +121,13 @@ namespace SpaceDesign
         {
             if (lastDoorState.Equals(state))
                 return;
+            ////近处才触发
+            //if (curPlayerPosState != PlayerPosState.Close)
+            //    return;
+
             //保存之前的状态
             lastDoorState = state;
-            if (curPlayerPosState != PlayerPosState.Close)
-                return;
+
             //发生变化的瞬间触发一次
             if (lastDoorState.Equals("Open"))
             {
@@ -117,7 +140,7 @@ namespace SpaceDesign
                 bingxiangTimeline.SetCurTimelineData("提示到信息");
             }
 
-            Debug.Log("MyLog::获取门禁状态:" + state);
+            //Debug.Log("MyLog::获取门禁状态:" + state);
         }
 
         /// <summary>
