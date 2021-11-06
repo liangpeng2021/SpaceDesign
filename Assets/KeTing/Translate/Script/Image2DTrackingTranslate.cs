@@ -17,14 +17,12 @@ namespace SpaceDesign.Translate
                 if (objTarget == null)
                 {
                     objTarget = Image2DTrackingManager.Instance.transform.Find("root/child");
-                    objShow3 = objTarget.Find("Capsule").gameObject;
                 }
                 return objTarget;
             }
         }
         //Mark识别后，显隐的对象
         public GameObject objBtnShow;
-        GameObject objShow3;
         public Texture texture;
         bool bCallback = false;
         //原来的父节点
@@ -119,13 +117,18 @@ namespace SpaceDesign.Translate
                 TranslateManage.Inst.transform.SetParent(objTargetModel);
                 TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.02f, -0.25f);
                 TranslateManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
+
+                //翻译按钮缩放，代替显隐
+                objBtnShow.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f);
             }
             else
             {
                 TranslateManage.Inst.transform.SetParent(oriParent);
+
+                //翻译按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
+                objBtnShow.transform.localScale = Vector3.zero;
             }
-            objBtnShow.SetActive(isVisible);
-            objShow3.SetActive(isVisible);
+            //objBtnShow.SetActive(isVisible);
         }
     }
 }

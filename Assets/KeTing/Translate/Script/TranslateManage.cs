@@ -304,7 +304,8 @@ namespace SpaceDesign.Translate
         /// </summary>
         public void OnCheckTranslate()
         {
-            btnCheckTranslate.gameObject.SetActive(false);
+            btnCheckTranslate.transform.localScale = Vector3.zero;
+            //btnCheckTranslate.gameObject.SetActive(false);
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
             markTrackTranslate.StopTrack();

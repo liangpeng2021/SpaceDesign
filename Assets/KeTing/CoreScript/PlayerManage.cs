@@ -52,10 +52,10 @@ namespace SpaceDesign
         //计时
         private float fTime;
 
-        private void Start()
-        {
-            print("房间原尺寸是50，实际场景按照5米算，房间缩放到0.15，相当于7.5米");
-        }
+        //private void Start()
+        //{
+        //    print("房间原尺寸是50，实际场景按照5米算，房间缩放到0.15，相当于7.5米");
+        //}
         void Update()
         {
             fTime += Time.deltaTime;

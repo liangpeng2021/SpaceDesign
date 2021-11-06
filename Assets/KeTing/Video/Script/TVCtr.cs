@@ -8,7 +8,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -70,97 +69,6 @@ namespace SpaceDesign.Video
         //    //textLocal.text = url + "===" + Directory.Exists(url);
         //}
 
-        public Text textLocal;
-
-        public const byte MsgInitSuc = 0;
-        public const byte MsgSearch = 1;
-        public const byte MsgConnect = 2;
-        public const byte MsgConnectIndex = 3;
-        public const byte MsgPlay = 4;
-        public const byte MsgResume = 5;
-        public const byte MsgPause = 6;
-        public const byte MsgLoading = 7;
-
-        public Text textTemp;
-        public string strNetInfo;
-        public string strConnectNam;
-        public void CallbackMesg(byte bty, string nam, string val)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            switch (bty)
-            {
-                case MsgInitSuc:
-                    if (nam.Equals("InitSuc"))
-                    {
-                        //初始化成功开始搜索
-                        Invoke("OnStartSearch", 1);
-                    }
-                    else if (nam.Equals("NetInfo"))
-                    {
-                        strNetInfo = val;
-                    }
-
-                    break;
-                case MsgSearch:
-                    if (nam.Equals("SearchSuc"))
-                    {
-                        OnStopSearch();
-                        //搜索成功开始连接
-                        Invoke("OnStartConnect", 1);
-                    }
-                    break;
-                case MsgConnect:
-                    if (nam.Equals("ConnectSuc"))
-                    {
-                        //连接回调
-                        bConnected = true;
-                        strConnectNam = val;
-                    }
-                    else if (nam.Equals("DisConnectSuc"))
-                    {
-                        bConnected = false;
-                        strConnectNam = null;
-                    }
-                    break;
-                case MsgConnectIndex:
-                    break;
-                case MsgPlay:
-                    break;
-                case MsgResume:
-                    break;
-                case MsgPause:
-                    break;
-                case MsgLoading:
-                    break;
-            }
-
-
-            sb.AppendLine(strNetInfo)
-                .AppendLine(strConnectNam)
-                .AppendLine()
-                ;
-
-            textTemp.text = sb.ToString();
-        }
-
-        //public void CallbackTemp(string typ, string value)
-        //{
-        //    StringBuilder sb = new StringBuilder();
-        //    textTemp.text = null;
-        //    switch (typ)
-        //    {
-        //        case "NetInfo":
-
-        //            break;
-        //    }
-
-        //    sb.Append(strNetInfo)
-        //        .AppendLine();
-
-        //    textTemp.text = sb.ToString();
-        //}
-
 
         /// <summary>
         /// 设置Lebo的回调监听，并初始化SDK
@@ -175,6 +83,25 @@ namespace SpaceDesign.Video
             {
                 TempLog("初始化报错：/n" + exc.ToString());
             }
+        }
+        public Text textLocal;
+        /// <summary>
+        /// 初始化回调
+        /// </summary>
+        public void CallbackLocal(string s)
+        {
+            textLocal.text = s + "\n自动搜索";
+
+            if (s.Contains("InitSuc"))
+            {
+                Invoke("OnStartSearch", 1);
+            }
+        }
+
+        public Text textConnectIndexCallback;
+        public void CallbackConnectIndex(string s)
+        {
+            textConnectIndexCallback.text = s;
         }
 
         /// <summary>
@@ -191,25 +118,6 @@ namespace SpaceDesign.Video
                 TempLog("开始搜索报错/n" + exc.ToString());
             }
         }
-        ///// <summary>
-        ///// 初始化回调
-        ///// </summary>
-        //public void CallbackLocal(string s)
-        //{
-        //    textLocal.text = s + "\n自动搜索";
-
-        //    if (s.Contains("InitSuc"))
-        //    {
-        //        Invoke("OnStartSearch", 1);
-        //    }
-        //}
-
-        public Text textConnectIndexCallback;
-        public void CallbackConnectIndex(string s)
-        {
-            textConnectIndexCallback.text = s;
-        }
-
         /// <summary>
         /// 停止搜索
         /// </summary>
@@ -308,20 +216,20 @@ namespace SpaceDesign.Video
         }
 
         public Text textConnect;
-        ///// <summary>
-        ///// 连接回调
-        ///// </summary>
-        //public void CallbackConnect(string s)
-        //{
-        //    textConnect.text = s;
+        /// <summary>
+        /// 连接回调
+        /// </summary>
+        public void CallbackConnect(string s)
+        {
+            textConnect.text = s;
 
-        //    if (s.Contains("ConnectSuc"))
-        //    {
-        //        //连接回调
-        //        textLocal.text = "连接成功";
-        //        bConnected = true;
-        //    }
-        //}
+            if (s.Contains("ConnectSuc"))
+            {
+                //连接回调
+                textLocal.text = "连接成功";
+                bConnected = true;
+            }
+        }
 
         string GetBlackImgPth()
         {

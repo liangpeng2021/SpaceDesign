@@ -18,16 +18,14 @@ namespace SpaceDesign
                 if (objTarget == null)
                 {
                     objTarget = Image2DTrackingManager.Instance.transform.Find("root/child");
-                    objShow3 = objTarget.Find("Capsule").gameObject;
                 }
                 return objTarget;
             }
         }
         //Mark识别后，显隐的对象
-        public GameObject objBtnShow;
+        public GameObject objModel;
         //Mark识别后，显隐的对象2号
-        public GameObject objShow2;
-        GameObject objShow3;
+        public GameObject objUI;
         public Texture texture;
         bool bCallback = false;
         //原来的父节点
@@ -128,18 +126,26 @@ namespace SpaceDesign
                 //TaidengManager.Inst.transform.localScale = new Vector3(1f, 1f, 1f);
 
                 TaidengManager.Inst.taidengController.ResetTaidengTra();
+
+                //翻译按钮缩放，代替显隐
+                objModel.SetActive(true);
+                objUI.transform.localScale = new Vector3(0.00025f, 0.00025f, 0.00025f);
+                //objShow2.transform.localScale = Vector3.one;
             }
             else
             {
                 //Invoke("SetIconParent", 0.1f);
                 TaidengManager.Inst.transform.SetParent(oriParent);
+
+                //翻译按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
+                objModel.SetActive(false);
+                objUI.transform.localScale = Vector3.zero;
             }
-#if UNITY_EDITOR
-            return;
-#endif
-            objBtnShow.SetActive(isVisible);
-            objShow2.SetActive(isVisible);
-            objShow3.SetActive(isVisible);
+            //#if UNITY_EDITOR
+            //            return;
+            //#endif
+            //            objBtnShow.SetActive(isVisible);
+            //            objShow2.SetActive(isVisible);
         }
 
         //void SetIconParent()

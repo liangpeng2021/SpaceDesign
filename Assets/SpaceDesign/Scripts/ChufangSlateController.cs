@@ -14,7 +14,7 @@ namespace SpaceDesign
         protected float x;
         protected float y;
         protected Vector3 endPoint;
-        
+
         public virtual void UpdatePinchPointerStart(Vector3 pointOnSlate)
         {
             startPoint = pointOnSlate;
@@ -24,11 +24,13 @@ namespace SpaceDesign
             x = endPoint.x - startPoint.x;
             //Debug.Log("MyLog::endPoint.x:"+ endPoint.x);
             //Debug.Log("MyLog::startPoint.x:" + startPoint.x);
-            if (x > 0)
+            //if (x > 0)
+            if (x > 0.15f)
             {
                 ChufangManager.Inst.ChangeLiuChengLastAnimation(false);
             }
-            else if (x < 0)
+            //else if (x < 0)
+            else if (x < -0.15f)
             {
                 ChufangManager.Inst.ChangeLiuChengLastAnimation(true);
             }

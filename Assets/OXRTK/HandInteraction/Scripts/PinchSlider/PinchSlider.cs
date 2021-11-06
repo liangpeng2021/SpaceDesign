@@ -216,10 +216,10 @@ namespace OXRTK.ARHandTracking
             }
         }
 
-        private void Update()
-        {
-            Debug.Log("transform.right:" + transform.right);
-        }
+        //private void Update()
+        //{
+        //    Debug.Log("transform.right:" + transform.right);
+        //}
 
         void UpdateHandlerPos()
         {
