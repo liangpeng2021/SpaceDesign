@@ -422,7 +422,10 @@ namespace SpaceDesign
         /// </summary>
         public void OnQuit()
         {
-           
+            //-------------  CL   ------------------------
+            bingxiangTimeline.gameObject.SetActive(true);
+            bingxiangTimeline.SetCurTimelineData("关门");
+            //--------------------------------------------
         }
     }
 }
