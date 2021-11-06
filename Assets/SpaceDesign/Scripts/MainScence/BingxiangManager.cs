@@ -32,6 +32,10 @@ namespace SpaceDesign
         public TextMesh tt;
         //===========================================================================
 
+
+        private bool isBought;  // 是否已购买
+
+
         void Awake()
         {
             animIconFar = traIcon.GetComponent<Animator>();
@@ -58,6 +62,10 @@ namespace SpaceDesign
             v3OriPos = this.transform.position;
             bingxiangTimeline.StartPause();
             bingxiangTimeline.gameObject.SetActive(false);
+
+            //  ------------CL----------------------
+            isBought = false;
+            //--------------------------------------
         }
         void OnDestroy() { StopAllCoroutines(); }
 
@@ -71,8 +79,8 @@ namespace SpaceDesign
         /// </summary>
         void AddTestEvent()
         {
-            opentBtn.onPinchDown.AddListener(()=> { SetBingxiangAnimation("Open"); });
-            closeBtn.onPinchDown.AddListener(() => { SetBingxiangAnimation("Closed"); });
+            opentBtn.onPinchDown.AddListener(()=> { JudgeOpen("Open"); });
+            closeBtn.onPinchDown.AddListener(() => { JudgeOpen("Closed"); });
         }
 
         void RemoveTestEvent()
@@ -107,7 +115,7 @@ namespace SpaceDesign
                 //回调
                 (sd) =>
                 {
-                    SetBingxiangAnimation(sd.Status);
+                    JudgeOpen(sd.Status);
                 }
                 );
 
@@ -117,7 +125,7 @@ namespace SpaceDesign
         /// 根据是否开门设置冰箱UI
         /// </summary>
         /// <param name="state"></param>
-        void SetBingxiangAnimation(string state)
+        void JudgeOpen(string state)
         {
             if (lastDoorState.Equals(state))
                 return;
@@ -131,13 +139,18 @@ namespace SpaceDesign
             //发生变化的瞬间触发一次
             if (lastDoorState.Equals("Open"))
             {
-                bingxiangTimeline.gameObject.SetActive(true);
-                bingxiangTimeline.SetCurTimelineData("开冰箱");
+                //bingxiangTimeline.gameObject.SetActive(true);
+                //bingxiangTimeline.SetCurTimelineData("开冰箱");
+
+                SetTimelineData("开冰箱");
             }
             else
             {
-                bingxiangTimeline.gameObject.SetActive(true);
-                bingxiangTimeline.SetCurTimelineData("提示到信息");
+                //bingxiangTimeline.gameObject.SetActive(true);
+                //bingxiangTimeline.SetCurTimelineData("提示到信息");
+
+                SetTimelineData("关门");
+
             }
 
             //Debug.Log("MyLog::获取门禁状态:" + state);
@@ -290,8 +303,10 @@ namespace SpaceDesign
                 }
                 yield return 0;
             }
-            bingxiangTimeline.gameObject.SetActive(true);
-            bingxiangTimeline.SetCurTimelineData("提示到信息");
+            //bingxiangTimeline.gameObject.SetActive(true);
+            //bingxiangTimeline.SetCurTimelineData("提示到信息");
+
+            SetTimelineData("提示到信息");
 
             //UI变化结束
             bUIChanging = false;
@@ -398,22 +413,27 @@ namespace SpaceDesign
 
         void OnClosePay()
         {
-            bingxiangTimeline.SetCurTimelineData("关闭购买");
+            //bingxiangTimeline.SetCurTimelineData("关闭购买");
+            SetTimelineData("关闭购买");
         }
 
         void GoChoose()
         {
-            bingxiangTimeline.SetCurTimelineData("点击可乐");
+            //bingxiangTimeline.SetCurTimelineData("点击可乐");
+            SetTimelineData("点击可乐");
         }
 
         void DirectPay()
         {
-            bingxiangTimeline.SetCurTimelineData("一键复购");
+            //bingxiangTimeline.SetCurTimelineData("一键复购");
+            SetTimelineData("一键复购");
         }
 
         void ChoosePay()
         {
-            bingxiangTimeline.SetCurTimelineData("点击购买");
+            //bingxiangTimeline.SetCurTimelineData("点击购买");
+            SetTimelineData("点击购买");
+            isBought = true;
         }
         #endregion
 
@@ -422,10 +442,56 @@ namespace SpaceDesign
         /// </summary>
         public void OnQuit()
         {
-            //-------------  CL   ------------------------
+            switch (curTimelineState)
+            {
+                case "提示到信息":
+                    SetTimelineData("关闭提示信息");
+                    break;
+                case "开冰箱":
+                    SetTimelineData("关闭开冰箱信息");
+                    break;
+                case "点击可乐":
+                    SetTimelineData("关闭点击可乐信息");
+                    break;
+                //case "点击购买":
+                //    SetTimelineData("关闭购买");
+                //    break;
+                //case "一键复购":
+                //    SetTimelineData("关闭购买");
+                //    break;
+                //case "关闭购买":
+                //    SetTimelineData("");
+                //    break;
+                case "关门":
+                    {
+                        SetTimelineData("关门消失");
+                        //if (isBought)
+                        //    SetTimelineData("关门消失");
+
+                        //else
+                        //    SetTimelineData("未购买关门");
+
+                    }
+                    break;
+                //case "点击购买":
+                //    SetTimelineData("关闭购买");
+                //    break;
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 当前Timeline的状态
+        /// </summary>
+        public string curTimelineState;
+
+        void SetTimelineData(string state)
+        {
+            Debug.Log("-----------进入设置");
+            curTimelineState = state;
             bingxiangTimeline.gameObject.SetActive(true);
-            bingxiangTimeline.SetCurTimelineData("关门");
-            //--------------------------------------------
+            bingxiangTimeline.SetCurTimelineData(curTimelineState);
         }
     }
 }
