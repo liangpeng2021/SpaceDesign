@@ -304,7 +304,8 @@ namespace SpaceDesign.Magazine
         /// </summary>
         public void OnCheckDetail()
         {
-            btnCheckDetail.gameObject.SetActive(false);
+            btnCheckDetail.transform.localScale = Vector3.zero;
+            //btnCheckDetail.gameObject.SetActive(false);
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
             markTrackMagazine.StopTrack();

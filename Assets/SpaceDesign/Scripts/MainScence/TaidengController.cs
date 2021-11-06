@@ -238,6 +238,8 @@ public class TaidengController : MonoBehaviour
         //{
         //    showFirst = true;
         //}
+        taiDengUI.localScale = new Vector3(1.3f, 1.3f, 1.3f);
+        //taiDengUI.gameObject.SetActive(true);
         taidengModel.SetActive(true);
         firstObj.SetActive(false);
         startpayRayReceiver.gameObject.SetActive(true);

@@ -11,15 +11,15 @@ using UnityEngine.UI;
 
 namespace SpaceDesign.Music
 {
-    public enum MusicAnimType
-    {
-        Center,//【唯一】最中间居中的
-        AllRight,//【唯一】全部（包括不显示的）：最右边的
-        AlLeft,//【唯一】全部（包括不显示的）：最左边的
-        ShowRight,//【唯一】显示：最右边的
-        ShowLeft,//【唯一】显示：最左边的
-        Other,//【不唯一】
-    }
+    //public enum MusicAnimType
+    //{
+    //    Center,//【唯一】最中间居中的
+    //    AllRight,//【唯一】全部（包括不显示的）：最右边的
+    //    AlLeft,//【唯一】全部（包括不显示的）：最左边的
+    //    ShowRight,//【唯一】显示：最右边的
+    //    ShowLeft,//【唯一】显示：最左边的
+    //    Other,//【不唯一】
+    //}
     public enum MusicPlayState
     {
         AllLoop,
@@ -41,8 +41,10 @@ namespace SpaceDesign.Music
             }
         }
 
-        [Header("(7个图片内容，最右边从0开始，从右往左，依次增大)")]
-        public EachMusicAnim[] aryEachMusicAnim;
+        [Header("(7首歌曲，最右边从0开始，从右往左，依次增大)")]
+        public EachMusicAttr[] aryEachMusicAttr;
+        //[Header("(7个图片内容，最右边从0开始，从右往左，依次增大)")]
+        //public EachMusicAnim[] aryEachMusicAnim;
 
         //重交互到轻交互，等待的时长
         public float fAutoTurnUITime = 60f;
@@ -153,6 +155,8 @@ namespace SpaceDesign.Music
 
         void OnDestroy()
         {
+            if (audioSource.isPlaying)
+                audioSource.Stop();
             StopAllCoroutines();
         }
 
@@ -169,47 +173,31 @@ namespace SpaceDesign.Music
             //播放的循环，不用该值控制
             audioSource.loop = false;
 
-            //开始的时候刷新一下数据
+            ////开始的时候刷新一下数据
             _SetCurMusicNum(1);
-            OnLeft();
-            OnRight();
+            _InitEachMusicAnim();
 
+            //OnLeft();
+            //OnRight();
+            traImgCenter.localScale = Vector3.zero;
+
+            targetRotation = traMaxUIImage.localRotation;
         }
+
+        private Quaternion targetRotation;    //声明旋转目标角度
+        private float RotateAngle = 51.5f;       //定义每次旋转的角度
+        Vector3 v3ScaleCenter = new Vector3(480f, 480f, 1.5f);
+        Vector3 v3ScaleNormal = new Vector3(320f, 320f, 1f);
 
         void Update()
         {
-            //if (Input.GetKeyDown(KeyCode.Z))
-            //{
-            //    OnLeft();
-            //}
-            //if (Input.GetKeyDown(KeyCode.X))
-            //{
-            //    OnRight();
-            //}
-            //if (Input.GetKeyDown(KeyCode.C))
-            //{
-            //    OnPlay();
-            //}
-            //if (Input.GetKeyDown(KeyCode.V))
-            //{
-            //    OnPause();
-            //}
 
-            //if (Input.GetMouseButtonDown(0))
-            //{
-            //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            //    if (Physics.Raycast(ray, out RaycastHit hit, 50)) //如果碰撞检测到物体
-            //    {
-            //        if (hit.transform.gameObject.Equals(objEffect))
-            //            EffectToMinUI();
-            //    }
-            //}
+            if (bUIChanging)
+                return;
 
             if (bPlaying)
             {
                 imgSliderMin.fillAmount = pinchSliderMusicMax.sliderValue;//slidMusicMax.value;
-                //traSliderMinPoint.localEulerAngles = new Vector3(0, 0, -180 * imgSliderMin.fillAmount);
 
                 //播放中，中距离，小UI，倒计时，自动变音符特效对象
                 if (bMinTiming)
@@ -217,7 +205,7 @@ namespace SpaceDesign.Music
                     fMinToEffectTemp += Time.deltaTime;
                     if (fMinToEffectTemp > fAutoTurnUITime)
                     {
-                        StopAllCoroutines();
+                        StopCoroutine("IEMiddleToFar");
                         StartCoroutine("IEMiddleToFar");
                         fMinToEffectTemp = 0;
                     }
@@ -230,7 +218,7 @@ namespace SpaceDesign.Music
                 fMaxToMinTemp += Time.deltaTime;
                 if (fMaxToMinTemp > fAutoTurnUITime)
                 {
-                    StopAllCoroutines();
+                    StopCoroutine("IEMaxToMin");
                     StartCoroutine("IEMaxToMin");
                     fMaxToMinTemp = 0;
                 }
@@ -238,14 +226,19 @@ namespace SpaceDesign.Music
 
             if (bGoAnim)
             {
-                bGoAnim = false;
-                foreach (var v in aryEachMusicAnim)
+                traMaxUIImage.localRotation = Quaternion.Slerp(traMaxUIImage.localRotation, targetRotation, Time.deltaTime * fUISpeed);
+
+                if (Quaternion.Angle(targetRotation, traMaxUIImage.localRotation) < fThreshold)
                 {
-                    //有一个未完成，这里都要继续
-                    if (v.RefreshMotion() == false)
-                    {
-                        bGoAnim = true;
-                    }
+                    traMaxUIImage.localRotation = targetRotation;
+                    bGoAnim = false;
+
+                    //移动完之后，赋值中间位置的对象
+                    Transform _tra = aryEachMusicAttr[iCurMusicNum - 1].transform;
+                    _tra.SetParent(traImgCenter);
+                    _tra.localScale = v3ScaleCenter;
+                    _tra.localPosition = Vector3.zero;
+                    traImgCenter.GetComponent<BoxCollider>().enabled = true;
                 }
             }
 
@@ -268,9 +261,6 @@ namespace SpaceDesign.Music
                                 OnRight();
                                 break;
                             case MusicPlayState.OneLoop:
-                                //audioSource.Stop();
-                                //audioSource.time = 0;
-                                //audioSource.Play();
                                 OnPlay(iCurMusicNum);
                                 break;
                             case MusicPlayState.Order:
@@ -279,7 +269,6 @@ namespace SpaceDesign.Music
                                 else
                                 {
                                     SetAudioTime(0);
-                                    //audioSource.time = 0;
                                     OnPause();
                                 }
                                 break;
@@ -295,10 +284,12 @@ namespace SpaceDesign.Music
 
             if (iImgCenterEnterOrExit == 0)
             {
+                RestartTimeMaxToMin();
+
                 float _f = Vector3.Distance(traImgCenter.localScale, v3ImgCenterEnter);
                 if (_f > 0.01f)
                 {
-                    traImgCenter.localScale = Vector3.Lerp(traImgCenter.localScale, v3ImgCenterEnter, 0.1f);
+                    traImgCenter.localScale = Vector3.Lerp(traImgCenter.localScale, v3ImgCenterEnter, fUISpeed * Time.deltaTime);
                 }
                 else
                 {
@@ -308,15 +299,32 @@ namespace SpaceDesign.Music
             }
             else if (iImgCenterEnterOrExit == 1)
             {
+                RestartTimeMaxToMin();
+
                 float _f = Vector3.Distance(traImgCenter.localScale, Vector3.one);
                 if (_f > 0.01f)
                 {
-                    traImgCenter.localScale = Vector3.Lerp(traImgCenter.localScale, Vector3.one, 0.1f);
+                    traImgCenter.localScale = Vector3.Lerp(traImgCenter.localScale, Vector3.one, fUISpeed * Time.deltaTime);
                 }
                 else
                 {
                     iImgCenterEnterOrExit = -1;
                     traImgCenter.localScale = Vector3.one;
+                }
+            }
+            else if (iImgCenterEnterOrExit == 2)
+            {
+                RestartTimeMaxToMin();
+
+                float _f = Vector3.Distance(traImgCenter.localScale, Vector3.zero);
+                if (_f > 0.01f)
+                {
+                    traImgCenter.localScale = Vector3.Lerp(traImgCenter.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+                }
+                else
+                {
+                    iImgCenterEnterOrExit = -1;
+                    traImgCenter.localScale = Vector3.zero;
                 }
             }
         }
@@ -359,7 +367,6 @@ namespace SpaceDesign.Music
         {
             bSlideDragging = false;
             SetAudioTime(pinchSliderMusicMax.sliderValue * fTotalPlayTime);
-            //audioSource.time = (pinchSliderMusicMax.sliderValue * fTotalPlayTime);
         }
 
         /// <summary>
@@ -369,8 +376,7 @@ namespace SpaceDesign.Music
         {
             if (curPlayerPosState == PlayerPosState.Middle)
             {
-                print(11111);
-                StopAllCoroutines();
+                StopCoroutine("IEFarToMiddle");
                 StartCoroutine("IEFarToMiddle");
             }
         }
@@ -380,7 +386,7 @@ namespace SpaceDesign.Music
         /// </summary>
         public void OnMoreMusicMin()
         {
-            StopAllCoroutines();
+            StopCoroutine("IEMinToMax");
             StartCoroutine("IEMinToMax");
         }
 
@@ -441,7 +447,6 @@ namespace SpaceDesign.Music
             btnPlayMax.gameObject.SetActive(!bPlaying);
             btnPauseMin.gameObject.SetActive(bPlaying);
             btnPlayMin.gameObject.SetActive(!bPlaying);
-            //audioSource.Pause();
             SetAudioPause();
         }
 
@@ -471,72 +476,50 @@ namespace SpaceDesign.Music
         {
             if (audioSource.isPlaying)
             {
-                //audioSource.time = 0;
-                SetAudioTime(0);
                 _SetCurPlayTime(true);
-                //audioSource.Stop();
                 SetAudioStop();
             }
 
-            int _iLen = aryEachMusicAnim.Length;
+            int _iLen = aryEachMusicAttr.Length;
+
+            Vector3 _v3 = targetRotation.eulerAngles;
 
             if (bClockWise)
-            {
-                for (int i = 0; i < _iLen; i++)
-                {
-                    EachMusicAnim emp = null;
-                    if (i < _iLen - 1)
-                        emp = aryEachMusicAnim[i + 1];
-                    else if (i == (_iLen - 1))
-                        emp = aryEachMusicAnim[0];
-                    else
-                        break;
-                    aryEachMusicAnim[i].Init(emp);
-                }
-            }
+                _v3.y -= 51.5f;
             else
+                _v3.y += 51.5f;
+            targetRotation.eulerAngles = _v3;
+
+
+            if (bMinTiming)
             {
-                for (int i = _iLen - 1; i >= 0; i--)
-                {
-                    EachMusicAnim emp = null;
-                    if (i > 0)
-                        emp = aryEachMusicAnim[i - 1];
-                    else if (i == 0)
-                        emp = aryEachMusicAnim[_iLen - 1];
-                    else
-                        break;
-                    aryEachMusicAnim[i].Init(emp);
-                }
+                //移动完之后，赋值中间位置的对象
+                Transform _tra = aryEachMusicAttr[iCurMusicNum - 1].transform;
+                _tra.SetParent(traImgCenter);
+                _tra.localScale = v3ScaleCenter;
+                _tra.localPosition = Vector3.zero;
+                _tra.localEulerAngles = Vector3.zero;
+                iImgCenterEnterOrExit = -1;
+                traImgCenter.localScale = Vector3.zero;
+                traImgCenter.GetComponent<BoxCollider>().enabled = false;
             }
 
-            foreach (var v in aryEachMusicAnim)
+
+            EachMusicAttr _ema = aryEachMusicAttr[iCurMusicNum - 1];
+            SetAudioTime(0);
+
+            _SetCurPlayTime(true);
+            textCurMusicNameMax.text = $"{_ema.strName} - {_ema.strAuthor}";
+            textCurMusicNameMin.text = _ema.strName;
+            textCurMusicAuthorMin.text = _ema.strAuthor;
+            imgCurMusicMin.sprite = _ema.sprite;
+            imgTempImage.sprite = _ema.sprite;
+            audioSource.clip = _ema.audioClip;
+            fTotalPlayTime = audioSource.clip.length;
+            textTotalPlayTime.text = ((int)(fTotalPlayTime / 60)).ToString("D2") + ":" + ((int)(fTotalPlayTime % 60)).ToString("D2");
+            if (bPlaying)
             {
-                v.SetValue();
-                //最中间的音乐播放
-                if (v.musicPicType == MusicAnimType.Center)
-                {
-                    ////bool _bAutoPlay = audioSource.isPlaying;
-                    ////if (_bAutoPlay)
-                    ////    audioSource.Stop();
-
-                    //audioSource.time = 0;
-                    SetAudioTime(0);
-
-                    _SetCurPlayTime(true);
-                    textCurMusicNameMax.text = $"{v.emaCurChild.strName} - {v.emaCurChild.strAuthor}";
-                    textCurMusicNameMin.text = v.emaCurChild.strName;
-                    textCurMusicAuthorMin.text = v.emaCurChild.strAuthor;
-                    imgCurMusicMin.sprite = v.emaCurChild.sprite;
-                    imgTempImage.sprite = v.emaCurChild.sprite;
-                    audioSource.clip = v.emaCurChild.audioClip;
-                    fTotalPlayTime = audioSource.clip.length;
-                    textTotalPlayTime.text = ((int)(fTotalPlayTime / 60)).ToString("D2") + ":" + ((int)(fTotalPlayTime % 60)).ToString("D2");
-                    if (bPlaying)
-                    {
-                        //audioSource.Play();
-                        SetAudioPlay(iCurMusicNum);
-                    }
-                }
+                SetAudioPlay(iCurMusicNum);
             }
 
             bGoAnim = true;
@@ -548,19 +531,23 @@ namespace SpaceDesign.Music
             fCurPlayTime = audioSource.time;
             if (bSetSlider)
             {
-                //slidMusicMax.SetValueWithoutNotify(fCurPlayTime / fTotalPlayTime);
                 pinchSliderMusicMax.sliderValue = (fCurPlayTime / fTotalPlayTime);
             }
-            //print($"{((int)(_f / 60))}----{((int)(_f % 60))}");
             textCurPlayTime.text = ((int)(fCurPlayTime / 60)).ToString("D2") + ":" + ((int)(fCurPlayTime % 60)).ToString("D2");
         }
-
 
         /// <summary>
         /// 设置并显示当前的音乐序号
         /// </summary>
         void _SetCurMusicNum(int iNum)
         {
+            traImgCenter.GetComponent<BoxCollider>().enabled = false;
+            Transform _tra = aryEachMusicAttr[iCurMusicNum - 1].transform;
+            _tra.SetParent(traMaxUIImage.GetChild(iCurMusicNum - 1));
+            _tra.localScale = Vector3.one;
+            _tra.localPosition = Vector3.zero;
+            _tra.localEulerAngles = Vector3.zero;
+
             RestartTimeMaxToMin();
 
             iCurMusicNum = iNum;
@@ -606,7 +593,7 @@ namespace SpaceDesign.Music
             //        return;
             //}
 
-            StopAllCoroutines();
+            StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
 
@@ -640,6 +627,9 @@ namespace SpaceDesign.Music
         /// </summary>
         IEnumerator IEFarToMiddle()
         {
+            //UI开始变化
+            bUIChanging = true;
+
             bMaxTiming = false;
             bMinTiming = true;
 
@@ -710,13 +700,17 @@ namespace SpaceDesign.Music
                 yield return 0;
             }
 
-
+            //UI开始变化
+            bUIChanging = false;
         }
         /// <summary>
         /// 中距离=>远距离
         /// </summary>
         IEnumerator IEMiddleToFar()
         {
+            //UI开始变化
+            bUIChanging = true;
+
             //中距离=>远距离
             if (bMaxTiming)
                 yield return IEMaxToMin();
@@ -772,9 +766,12 @@ namespace SpaceDesign.Music
                 btnEffect.gameObject.SetActive(true);
                 //print("音符特效");
             }
+            //UI开始变化
+            bUIChanging = false;
         }
 
-
+        public float fRotAngle = -5f;
+        public float fRotSpeed2 = 0.1f;
         /// <summary>
         /// 轻交互=>重交互
         /// </summary>
@@ -823,7 +820,77 @@ namespace SpaceDesign.Music
                 yield return 0;
             }
 
-            //2、MaxUI的控制按钮放大，图片旋转出现
+
+
+            ////2、MaxUI的控制按钮放大，图片旋转出现
+
+            traMaxUIImage.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+
+            float _fOri = traMaxUIImage.localEulerAngles.y;
+
+            Quaternion _quaOri = traMaxUIImage.localRotation;
+            Quaternion _quaTar = _quaOri;
+            Vector3 _v3Tar = _quaTar.eulerAngles;
+            _v3Tar.y -= 51.5f;
+            //_v3Tar.y -= 103f;
+            _quaTar.eulerAngles = _v3Tar;
+            traMaxUIImage.localRotation = _quaTar;
+            float _fTar = _fOri - 328.5f;
+            //float _fTar = _fOri - 257f;
+            float _fAbs = Mathf.Abs(fRotAngle) + 0.1f;
+
+            foreach (var v in aryEachMusicAttr)
+            {
+                v.transform.localScale = Vector3.zero;
+            }
+
+            //[0-6]
+            int _iCurRotNum = (iCurMusicNum - 1);
+            Transform _traTemp = aryEachMusicAttr[_iCurRotNum].transform;
+            float _y1 = traMaxUIImage.localEulerAngles.y;
+            float _y2 = _y1 - 51.5f;
+            if (_y2 <= 0)
+                _y2 = _y2 + 360f;
+
+            while (true)
+            {
+
+                traMaxUIImage.Rotate(traMaxUIImage.up, fRotAngle, Space.Self);
+                _y1 = traMaxUIImage.localEulerAngles.y;
+                if ((_y1 > (_fOri - _fAbs)) && (_y1 < (_fOri + _fAbs)))
+                {
+
+                    break;
+                }
+
+                //print(_y1 + ":::" + _y2);
+
+                _traTemp = aryEachMusicAttr[_iCurRotNum].transform;
+                _traTemp.localScale = Vector3.Lerp(_traTemp.localScale, Vector3.one, fRotSpeed2);
+
+                if ((_y1 > (_y2 - _fAbs)) && (_y1 < (_y2 + _fAbs)))
+                {
+
+                    _y2 = (_y1 - 51.5f);
+                    if (_y2 <= 0)
+                        _y2 = _y2 + 360f;
+
+                    _traTemp.localScale = Vector3.one;
+                    _iCurRotNum -= 1;
+                    if (_iCurRotNum == iCurMusicNum)
+                        _iCurRotNum -= 1;
+                    if (_iCurRotNum < 0)
+                        _iCurRotNum = 6;
+                }
+                yield return 0;
+            }
+
+            foreach (var v in aryEachMusicAttr)
+            {
+                v.transform.localScale = Vector3.one;
+            }
+
+            aryEachMusicAttr[iCurMusicNum - 1].transform.localScale = v3ScaleCenter;
 
             while (true)
             {
@@ -834,55 +901,62 @@ namespace SpaceDesign.Music
                 if (_fDis < fThreshold)
                 {
                     _traImgTempImage.localScale = Vector3.one;
-                    traMaxUICtr.localScale = _v3;
+                    //traMaxUICtr.localScale = _v3;
                     break;
                 }
                 yield return 0;
             }
-            traImgCenter.gameObject.SetActive(false);
-            Vector3 _v32 = new Vector3(1.7f, 1.7f, 1.7f);
+            //不用复原原点
+            //traMaxUIImage.localRotation = _quaOri;
+
+            Vector3 _v32 = new Vector3(1.5f, 1.5f, 1.5f);
+
             while (true)
             {
                 traMaxUICtr.localScale = Vector3.Lerp(traMaxUICtr.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, _v32, fUISpeed * Time.deltaTime);
+                //traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, _v32, fUISpeed * Time.deltaTime);
                 traMaxUIText.localScale = Vector3.Lerp(traMaxUIText.localScale, _v3, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traMaxUIText.localScale, _v3);
 
                 if (_fDis < fThreshold)
                 {
                     traMaxUICtr.localScale = Vector3.one;
-                    traMaxUIImage.localScale = _v32;
+                    //traMaxUIImage.localScale = _v32;
                     traMaxUIText.localScale = _v3;
                     break;
                 }
                 yield return 0;
             }
 
-            _v32 = new Vector3(1.5f, 1.5f, 1.5f);
-            while (true)
-            {
-                traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, _v32, fUISpeed * Time.deltaTime);
-                traMaxUIText.localScale = Vector3.Lerp(traMaxUICtr.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traMaxUIText.localScale, Vector3.one);
+            //_v32 = new Vector3(1.5f, 1.5f, 1.5f);
+            //while (true)
+            //{
+            //    //traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, _v32, fUISpeed * Time.deltaTime);
+            //    traMaxUIText.localScale = Vector3.Lerp(traMaxUICtr.localScale, Vector3.one, fUISpeed * Time.deltaTime);
+            //    float _fDis = Vector3.Distance(traMaxUIText.localScale, Vector3.one);
 
-                if (_fDis < fThreshold)
-                {
-                    traMaxUIImage.localScale = _v32;
-                    traMaxUIText.localScale = Vector3.one;
-                    break;
-                }
-                yield return 0;
-            }
+            //    if (_fDis < fThreshold)
+            //    {
+            //        //traMaxUIImage.localScale = _v32;
+            //        traMaxUIText.localScale = Vector3.one;
+            //        break;
+            //    }
+            //    yield return 0;
+            //}
 
-            traImgCenter.gameObject.SetActive(true);
+            //traImgCenter.gameObject.SetActive(true);
 
-            objMinPic.SetActive(true);
+            //objMinPic.SetActive(true);
             traMaxUIImage.gameObject.SetActive(true);
             _traImgTempImage.gameObject.SetActive(false);
-            _traImgTempImage.GetComponent<Image>().enabled = true;
-            _traImgTempImage.SetParent(traTempImageMinPos);
-            _traImgTempImage.localScale = Vector3.one;
-            _traImgTempImage.localPosition = Vector3.zero;
+            //_traImgTempImage.GetComponent<Image>().enabled = false;
+            //_traImgTempImage.SetParent(traTempImageMinPos);
+            //_traImgTempImage.localScale = Vector3.one;
+            //_traImgTempImage.localPosition = Vector3.zero;
+
+            traImgCenter.GetComponent<BoxCollider>().enabled = true;
+            traImgCenter.localScale = Vector3.one;
+            //traImgCenter.gameObject.SetActive(true);
 
             //UI变化结束
             bUIChanging = false;
@@ -901,38 +975,29 @@ namespace SpaceDesign.Music
             bMaxTiming = false;
             bMinTiming = true;
 
-            //traMaxUIImage.gameObject.SetActive(false);
+            //中心图片隐藏
+            iImgCenterEnterOrExit = 2;
+            traImgCenter.GetComponent<BoxCollider>().enabled = false;
+            traImgCenter.localScale = Vector3.zero;
 
             //中距离和近距离的同一个音乐的图片，这里不要动画
-            //Transform _traImgTempImage = imgTempImage.transform.parent.transform;
-            //_traImgTempImage.gameObject.SetActive(true);
-            //_traImgTempImage.SetParent(traTempImageMinPos);
+            Transform _traImgTempImage = imgTempImage.transform.parent.transform;
+            _traImgTempImage.gameObject.SetActive(true);
+            _traImgTempImage.SetParent(traTempImageMinPos);
+
 
             //1、MaxUI的控制按钮缩小，图片坠落隐藏
 
             while (true)
             {
-                traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
-                traMaxUIText.localScale = Vector3.Lerp(traMaxUIText.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traMaxUIText.localScale, Vector3.zero);
-
-                if (_fDis < fThreshold)
-                {
-                    traMaxUIImage.localScale = Vector3.zero;
-                    traMaxUIText.localScale = Vector3.zero;
-                    break;
-                }
-                yield return 0;
-            }
-
-            while (true)
-            {
                 traMaxUICtr.localScale = Vector3.Lerp(traMaxUICtr.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+                traMaxUIText.localScale = Vector3.Lerp(traMaxUIText.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traMaxUICtr.localScale, Vector3.zero);
 
                 if (_fDis < fThreshold)
                 {
                     traMaxUICtr.localScale = Vector3.zero;
+                    traMaxUIText.localScale = Vector3.zero;
                     break;
                 }
                 yield return 0;
@@ -943,9 +1008,16 @@ namespace SpaceDesign.Music
             RunIconMiddle();
             //更多音乐按钮对象
             Transform _traBtnMoreMusic = btnMoreMusicMin.transform;
-            Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
+            Vector3 _v3 = Vector3.one;//new Vector3(1.2f, 1.2f, 1.2f);
             while (true)
             {
+
+                _traImgTempImage.localScale = Vector3.Lerp(_traImgTempImage.localScale, Vector3.one, fUISpeed * Time.deltaTime);
+                _traImgTempImage.localPosition = Vector3.Lerp(_traImgTempImage.localPosition, Vector3.zero, 1.5f * fUISpeed * Time.deltaTime);
+
+                traMaxUIImage.localScale = Vector3.Lerp(traMaxUIImage.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+
+
                 traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * Time.deltaTime);
 
                 traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, _v3, fUISpeed * Time.deltaTime);
@@ -955,25 +1027,18 @@ namespace SpaceDesign.Music
                 float _fDis = Vector3.Distance(traMinUI.localScale, Vector3.one);
                 if (_fDis < fThreshold)
                 {
+                    _traImgTempImage.GetComponent<Image>().enabled = true;
+
+                    objMinPic.SetActive(true);
+                    _traImgTempImage.gameObject.SetActive(false);
+
+
+                    _traImgTempImage.localScale = Vector3.one;
+                    _traImgTempImage.localPosition = Vector3.zero;
+
+                    traMaxUIImage.localScale = Vector3.zero;
 
                     traIcon.localScale = Vector3.one;
-
-                    traMinUI.localScale = _v3;
-                    _traBtnMoreMusic.localScale = _v3;
-                    break;
-                }
-                yield return 0;
-            }
-
-            _v3 = Vector3.one;
-            while (true)
-            {
-                traMinUI.localScale = Vector3.Lerp(traMinUI.localScale, _v3, fUISpeed * Time.deltaTime);
-                _traBtnMoreMusic.localScale = Vector3.Lerp(_traBtnMoreMusic.localScale, _v3, fUISpeed * Time.deltaTime * 1.1f);
-
-                float _fDis = Vector3.Distance(traMinUI.localScale, Vector3.one);
-                if (_fDis < fThreshold)
-                {
 
                     traMinUI.localScale = _v3;
                     _traBtnMoreMusic.localScale = _v3;
@@ -1117,7 +1182,7 @@ namespace SpaceDesign.Music
         //当前音乐的名称（大UI）
         public Text textCurMusicNameMax;
         //是否运行动画
-        private bool bGoAnim = false;
+        public bool bGoAnim = false;
 
         //是否还碰触着音量按钮
         public bool bTouchBtnVolum = false;

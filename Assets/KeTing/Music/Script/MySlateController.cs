@@ -42,18 +42,18 @@ namespace SpaceDesign.Music
             {
                 if (x > 0.15f)
                 {
-                    MusicManage.Inst.OnRight();
+                    MusicManage.Inst.OnLeft();
                     if (x > 0.5f)
                     {
-                        MusicManage.Inst.OnRight();
+                        MusicManage.Inst.OnLeft();
                     }
                 }
                 else if (x < -0.15f)
                 {
-                    MusicManage.Inst.OnLeft();
+                    MusicManage.Inst.OnRight();
                     if (x < -0.5f)
                     {
-                        MusicManage.Inst.OnLeft();
+                        MusicManage.Inst.OnRight();
                     }
                 }
             }

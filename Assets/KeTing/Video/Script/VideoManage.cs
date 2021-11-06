@@ -125,8 +125,6 @@ namespace SpaceDesign.Video
 
         void Start()
         {
-            btnAR.gameObject.SetActive(true);
-            btnTV.gameObject.SetActive(true);
             tvCtr.OnInit();
             fTotalPlayTime2D = (float)vdp2D.length;
             vdp3D.PrepareVideo(() =>
@@ -932,10 +930,10 @@ namespace SpaceDesign.Video
                 //print("计算帧率");
             }
 
-            if (bSetSlider)
+            //if (bSetSlider)
             {
-                sliderVideo.sliderValue = fCurTime / fTotalPlayTime;
-                //sliderVideo.sliderValueWithoutEvent = fCurTime / fTotalPlayTime;
+                //sliderVideo.sliderValue = fCurTime / fTotalPlayTime;
+                sliderVideo.sliderValueWithoutEvent = fCurTime / fTotalPlayTime;
             }
 
             float s = (fCurTime % 60);

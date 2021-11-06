@@ -455,7 +455,7 @@ RectTransform:
   m_GameObject: {fileID: 1953136228875546979}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 1953136228875546007}
   m_Father: {fileID: 1953136228875545995}
@@ -5722,7 +5722,7 @@ Transform:
   m_GameObject: {fileID: 1953136228875547314}
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
   m_LocalPosition: {x: 0, y: 0.25, z: 0}
-  m_LocalScale: {x: 0.075, y: 0.075, z: 0.075}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_Children:
   - {fileID: 1953136228875550576}
   - {fileID: 1953136228875550571}
@@ -5991,8 +5991,8 @@ MonoBehaviour:
   OnLossTargetEvent:
     m_PersistentCalls:
       m_Calls: []
-  objBtnShow: {fileID: 1085138113022772462}
-  objShow2: {fileID: 1953136228875547290}
+  objModel: {fileID: 1085138113022772462}
+  objUI: {fileID: 1953136228875547290}
   texture: {fileID: 2800000, guid: 2bc0a5391cb86ef409a5c51254b4a1a0, type: 3}
 --- !u!1 &1953136228875547318
 GameObject:
