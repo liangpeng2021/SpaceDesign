@@ -125,8 +125,8 @@ namespace SpaceDesign.Karting
 
             while (true)
             {
-                //bool bTest = false;
-                //if (bTest)
+                bool bTest = false;
+                if (bTest)
                 {
                     UnityWebRequest www = UnityWebRequest.Get("http://192.168.31.123:8020/iot/bike/deviceInfo");
                     //yield return www.SendWebRequest();
@@ -182,8 +182,8 @@ namespace SpaceDesign.Karting
                     }
                 }
 
-                //0.5秒请求一次
-                _fTotalTime += 0.5f;
+                //0.1秒请求一次
+                _fTotalTime += 0.1f;
 
                 //速度大于0.2（cpeBikeData.Speed / fSpeedSpeed），每秒加0.09卡路里，这里是0.5秒一次
                 if (Speed > 0.2)

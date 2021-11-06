@@ -488,7 +488,7 @@ namespace SpaceDesign
 
         void SetTimelineData(string state)
         {
-            Debug.Log("-----------进入设置");
+            //Debug.Log("-----------进入设置");
             curTimelineState = state;
             bingxiangTimeline.gameObject.SetActive(true);
             bingxiangTimeline.SetCurTimelineData(curTimelineState);

@@ -238,7 +238,7 @@ public class TaidengController : MonoBehaviour
         //{
         //    showFirst = true;
         //}
-        taiDengUI.localScale = new Vector3(1.3f, 1.3f, 1.3f);
+        taiDengUI.localScale = new Vector3(0.00025f, 0.00025f, 0.00025f);
         //taiDengUI.gameObject.SetActive(true);
         taidengModel.SetActive(true);
         firstObj.SetActive(false);

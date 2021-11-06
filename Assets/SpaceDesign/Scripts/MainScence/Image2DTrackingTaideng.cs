@@ -128,8 +128,8 @@ namespace SpaceDesign
                 TaidengManager.Inst.taidengController.ResetTaidengTra();
 
                 //翻译按钮缩放，代替显隐
-                objModel.transform.localScale = Vector3.one;
-                objUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f);
+                objModel.SetActive(true);
+                objUI.transform.localScale = new Vector3(0.00025f, 0.00025f, 0.00025f);
                 //objShow2.transform.localScale = Vector3.one;
             }
             else
@@ -138,7 +138,7 @@ namespace SpaceDesign
                 TaidengManager.Inst.transform.SetParent(oriParent);
 
                 //翻译按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
-                objModel.transform.localScale = Vector3.zero;
+                objModel.SetActive(false);
                 objUI.transform.localScale = Vector3.zero;
             }
             //#if UNITY_EDITOR

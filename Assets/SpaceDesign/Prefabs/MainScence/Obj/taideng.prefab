@@ -683,11 +683,11 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953136228875546980}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.66666675, z: 0}
-  m_LocalScale: {x: 6.666666, y: 6.666666, z: 6.666666}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: -1}
+  m_LocalPosition: {x: 0, y: 0.15, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_Children: []
-  m_Father: {fileID: 1953136228875550568}
+  m_Father: {fileID: 1953136228875550569}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!23 &1953136228875543749
@@ -1876,7 +1876,7 @@ Transform:
   m_Children:
   - {fileID: 1953136228875548829}
   m_Father: {fileID: 1953136228875550569}
-  m_RootOrder: 1
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1953136228875547268
 GameObject:
@@ -4095,7 +4095,7 @@ Transform:
   - {fileID: 1953136228875545984}
   - {fileID: 4184610817867406795}
   m_Father: {fileID: 1953136228875550569}
-  m_RootOrder: 0
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1953136228875542623
 BoxCollider:
@@ -5722,12 +5722,11 @@ Transform:
   m_GameObject: {fileID: 1953136228875547314}
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
   m_LocalPosition: {x: 0, y: 0.25, z: 0}
-  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
+  m_LocalScale: {x: 0.075, y: 0.075, z: 0.075}
   m_Children:
-  - {fileID: 1953136228875550576}
   - {fileID: 1953136228875550571}
   m_Father: {fileID: 1953136228875550569}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1953136228875547315
 GameObject:
@@ -5841,7 +5840,7 @@ Transform:
   - {fileID: 1953136228875550479}
   - {fileID: 1953136228875549469}
   m_Father: {fileID: 1953136228875550568}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &1953136228875542983
 Animator:
@@ -5928,9 +5927,10 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 1953136228875550576}
+  - {fileID: 1953136228875550568}
   - {fileID: 1953136228875548825}
   - {fileID: 1953136228875548824}
-  - {fileID: 1953136228875550568}
   m_Father: {fileID: 1953136228875548818}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
