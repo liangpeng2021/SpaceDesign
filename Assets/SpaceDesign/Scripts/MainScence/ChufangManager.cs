@@ -88,7 +88,7 @@ namespace SpaceDesign
                 //从近距离到中距离，大于2m切换状态
                 if (lastPPS == PlayerPosState.Close)
                 {
-                    if (_dis > 2f)
+                    if (_dis > 2.5f)
                         curPlayerPosState = PlayerPosState.Middle;
                 }//否则1.5m就切换状态
                 else

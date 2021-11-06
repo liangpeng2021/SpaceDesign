@@ -69,6 +69,12 @@ public class TaidengController : MonoBehaviour
 
     bool hideBoxScale = false;
 
+    //-----  CL 音效  -----------------------
+    public AudioSource audioSource;
+    public AudioClip successClip;
+    public AudioClip zhixiangClip;
+    //---------------------------------------
+
     void Awake()
     {
         taidengOriPos = transform.localPosition;
@@ -265,19 +271,35 @@ public class TaidengController : MonoBehaviour
     void ShowPaySucess()
     {
         paySuccessObj.SetActive(true);
+
+        //---CL  ----------------------------------
+        audioSource.PlayOneShot(successClip);
+        //-----------------------------------------
         Invoke("ShowPeisong", 3f);
     }
 
     void ShowPeisong()
     {
         paySuccessObj.SetActive(false);
+
+        //---CL  ----------------------------------
+        audioSource.Stop();
+        //-----------------------------------------
+
         peisongObj.SetActive(true);
+        //---CL  ----------------------------------
+        audioSource.PlayOneShot(zhixiangClip);
+        //-----------------------------------------
+
         Invoke("HidePeisong", 3f);
     }
 
     void HidePeisong()
     {
         peisongObj.SetActive(false);
+        //---CL  ----------------------------------
+        audioSource.Stop();
+        //-----------------------------------------
     }
 
     /// <summary>

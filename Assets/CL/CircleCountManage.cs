@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 卡丁车计圈、读数、特效   Created by CL on 2021.11.5
+/// </summary>
+
 public class CircleCountManage : MonoBehaviour
 {
     // 道路检测点
@@ -19,12 +23,17 @@ public class CircleCountManage : MonoBehaviour
     public GameObject geWei;
     public GameObject shiWei;
     public GameObject baiWei;
+
     private Image geImage;
     private Image shiImage;
     private Image baiImage;
 
     public GameObject circleAnimObj;
     private Animation circleAnimation;
+
+    //音效
+    public AudioSource audioSource;
+    public AudioClip winClip;
 
     void Start()
     {
@@ -59,8 +68,8 @@ public class CircleCountManage : MonoBehaviour
             {
                 curCircleCount += 1;
 
-                winEffect.Play(true);
-              
+                audioSource.PlayOneShot(winClip);
+                winEffect.Play(true);           
                 ShowNum();
             }
 
@@ -126,5 +135,6 @@ public class CircleCountManage : MonoBehaviour
     public void HideNum()
     {
         circleAnimation.Stop();
+        audioSource.Stop();
     }
 }
