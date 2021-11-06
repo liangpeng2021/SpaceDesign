@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -69,6 +70,97 @@ namespace SpaceDesign.Video
         //    //textLocal.text = url + "===" + Directory.Exists(url);
         //}
 
+        public Text textLocal;
+
+        public const byte MsgInitSuc = 0;
+        public const byte MsgSearch = 1;
+        public const byte MsgConnect = 2;
+        public const byte MsgConnectIndex = 3;
+        public const byte MsgPlay = 4;
+        public const byte MsgResume = 5;
+        public const byte MsgPause = 6;
+        public const byte MsgLoading = 7;
+
+        public Text textTemp;
+        public string strNetInfo;
+        public string strConnectNam;
+        public void CallbackMesg(byte bty, string nam, string val)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            switch (bty)
+            {
+                case MsgInitSuc:
+                    if (nam.Equals("InitSuc"))
+                    {
+                        //初始化成功开始搜索
+                        Invoke("OnStartSearch", 1);
+                    }
+                    else if (nam.Equals("NetInfo"))
+                    {
+                        strNetInfo = val;
+                    }
+
+                    break;
+                case MsgSearch:
+                    if (nam.Equals("SearchSuc"))
+                    {
+                        OnStopSearch();
+                        //搜索成功开始连接
+                        Invoke("OnStartConnect", 1);
+                    }
+                    break;
+                case MsgConnect:
+                    if (nam.Equals("ConnectSuc"))
+                    {
+                        //连接回调
+                        bConnected = true;
+                        strConnectNam = val;
+                    }
+                    else if (nam.Equals("DisConnectSuc"))
+                    {
+                        bConnected = false;
+                        strConnectNam = null;
+                    }
+                    break;
+                case MsgConnectIndex:
+                    break;
+                case MsgPlay:
+                    break;
+                case MsgResume:
+                    break;
+                case MsgPause:
+                    break;
+                case MsgLoading:
+                    break;
+            }
+
+
+            sb.AppendLine(strNetInfo)
+                .AppendLine(strConnectNam)
+                .AppendLine()
+                ;
+
+            textTemp.text = sb.ToString();
+        }
+
+        //public void CallbackTemp(string typ, string value)
+        //{
+        //    StringBuilder sb = new StringBuilder();
+        //    textTemp.text = null;
+        //    switch (typ)
+        //    {
+        //        case "NetInfo":
+
+        //            break;
+        //    }
+
+        //    sb.Append(strNetInfo)
+        //        .AppendLine();
+
+        //    textTemp.text = sb.ToString();
+        //}
+
 
         /// <summary>
         /// 设置Lebo的回调监听，并初始化SDK
@@ -83,25 +175,6 @@ namespace SpaceDesign.Video
             {
                 TempLog("初始化报错：/n" + exc.ToString());
             }
-        }
-        public Text textLocal;
-        /// <summary>
-        /// 初始化回调
-        /// </summary>
-        public void CallbackLocal(string s)
-        {
-            textLocal.text = s + "\n自动搜索";
-
-            if (s.Contains("InitSuc"))
-            {
-                Invoke("OnStartSearch", 1);
-            }
-        }
-
-        public Text textConnectIndexCallback;
-        public void CallbackConnectIndex(string s)
-        {
-            textConnectIndexCallback.text = s;
         }
 
         /// <summary>
@@ -118,6 +191,25 @@ namespace SpaceDesign.Video
                 TempLog("开始搜索报错/n" + exc.ToString());
             }
         }
+        ///// <summary>
+        ///// 初始化回调
+        ///// </summary>
+        //public void CallbackLocal(string s)
+        //{
+        //    textLocal.text = s + "\n自动搜索";
+
+        //    if (s.Contains("InitSuc"))
+        //    {
+        //        Invoke("OnStartSearch", 1);
+        //    }
+        //}
+
+        public Text textConnectIndexCallback;
+        public void CallbackConnectIndex(string s)
+        {
+            textConnectIndexCallback.text = s;
+        }
+
         /// <summary>
         /// 停止搜索
         /// </summary>
@@ -216,20 +308,20 @@ namespace SpaceDesign.Video
         }
 
         public Text textConnect;
-        /// <summary>
-        /// 连接回调
-        /// </summary>
-        public void CallbackConnect(string s)
-        {
-            textConnect.text = s;
+        ///// <summary>
+        ///// 连接回调
+        ///// </summary>
+        //public void CallbackConnect(string s)
+        //{
+        //    textConnect.text = s;
 
-            if (s.Contains("ConnectSuc"))
-            {
-                //连接回调
-                textLocal.text = "连接成功";
-                bConnected = true;
-            }
-        }
+        //    if (s.Contains("ConnectSuc"))
+        //    {
+        //        //连接回调
+        //        textLocal.text = "连接成功";
+        //        bConnected = true;
+        //    }
+        //}
 
         string GetBlackImgPth()
         {
@@ -242,11 +334,16 @@ namespace SpaceDesign.Video
             return Path.Combine(Application.persistentDataPath, (b2D ? "2.ts" : "3.ts"));
         }
 
+        //推送的是关闭的黑色图
+        public bool bPushBackAutoPlay = false;
+        //推送回调，直接设置进度条（AR模式切TV模式）
+        public bool bCallBackSetSlider = false;
         /// <summary>
         /// 关闭（推送一个黑色的图片）
         /// </summary>
         public void OnClose()
         {
+            bPushBackAutoPlay = false;
             print("关闭（推送一个黑色的图片）");
 
             if (bConnected == false)
@@ -270,8 +367,13 @@ namespace SpaceDesign.Video
         /// <summary>
         /// 推送
         /// </summary>
-        public void OnPush(bool b2D)
+        /// <param name="b2D">播放的是2D视频</param>
+        /// <param name="bCallbackAutoPlay">回调后自动播放</param>
+        /// <param name="bCallbackSetSlider">回调后设置进度条（AR模式切TV模式）</param>
+        public void OnPush(bool b2D, bool bCallbackAutoPlay, bool bCallbackSetSlider)
         {
+            bPushBackAutoPlay = bCallbackAutoPlay;
+            bCallBackSetSlider = bCallbackSetSlider;
             TempLog("开始推送视频2D：" + b2D);
 
             //if (bConnected == false)
@@ -300,18 +402,36 @@ namespace SpaceDesign.Video
         public void CallbackPush(string s)
         {
             textPush.text = "推送回调：" + s;
-            if (s.Contains("VideoStart"))
+
+            //推送的不是黑色关闭图，才触发回调
+            //播放的时候也有判断（切换TV和AR模式，先推送，再设置进度，所以第一遍的推送不自动开始）
+            if (VideoManage.Inst.bTV)
             {
-                if (iAutoPlay == 2 || iAutoPlay == 3)
+                if (s.Contains("VideoStart"))
                 {
-                    VideoManage.Inst.sliderVideo.sliderValue = 0;
-                    VideoManage.Inst.PlayAR();
+                    if (bPushBackAutoPlay == true)
+                    {
+                        bPushBackAutoPlay = false;
+                        if (iAutoPlay == 2 || iAutoPlay == 3)
+                        {
+                            VideoManage.Inst.sliderVideo.sliderValue = 0;
+                            VideoManage.Inst.PlayAR();
+                        }
+                    }
+                    else
+                    {
+                        if (bCallBackSetSlider)
+                        {
+                            bCallBackSetSlider = false;
+                            VideoManage.Inst.SliderVideoPointerUp(false);
+                        }
+                    }
                 }
-            }
-            else if (s.Contains("VideoFinish"))
-            {
-                //VideoManage.Inst.OnPause();
-                VideoManage.Inst.OnStop();
+                //else if (s.Contains("VideoFinish"))
+                //{
+                //    //VideoManage.Inst.OnPause();
+                //    VideoManage.Inst.OnStop();
+                //}
             }
         }
 
@@ -432,10 +552,27 @@ namespace SpaceDesign.Video
         /// </summary>
         public void CallbackSlider(string strTime)
         {
-            float _fTime = float.Parse(strTime);
+            string[] ss = strTime.Split('-');
+            int duration = int.Parse(ss[0]);
+            int position = int.Parse(ss[1]);
 
-            //VideoManage.Inst.sliderVideo.sliderValue = (_fTime / VideoManage.Inst.fTotalPlayTime);
-            //VideoManage.Inst.SetSliderValue(false);
+            //float _fTime = float.Parse(strTime);
+            float _fTime = (float)position / (float)duration;
+
+            textLocal.text = "进度条回调：" + _fTime.ToString();
+            textPush.text = "进度条回调：" + _fTime.ToString();
+            //textSearch.text = "进度条回调：" + _fTime.ToString();
+
+            //这里回调之后，乐播其实还没推送完，所以，进度条的回调播放，还是要在CallBackPush里面的“播放成功”中
+            bPushBackAutoPlay = true;
+            if (VideoManage.Inst.bTV)
+            {
+                VideoManage.Inst.SetSliderByTV(_fTime);
+                ////VideoManage.Inst.sliderVideo.sliderValue = _fTime;
+                //VideoManage.Inst.SliderVideoPointerUp(false);
+                //VideoManage.Inst.SetTextCurPlayTime(true);
+                ////VideoManage.Inst.PlayAR();
+            }
         }
     }
 }

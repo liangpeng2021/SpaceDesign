@@ -8,18 +8,34 @@ namespace SpaceDesign.Translate
     public class Image2DTrackingTranslate : TrackableEventHandler
     {
         //Mark识别后，目标出现（移动）的对象，现在把要用的移动到目标位置
-        private GameObject objTargetModel;
+        private Transform objTarget;
+        //有切换场景，所以这里不能在Awake只找一次
+        private Transform objTargetModel
+        {
+            get
+            {
+                if (objTarget == null)
+                {
+                    objTarget = Image2DTrackingManager.Instance.transform.Find("root/child");
+                    objShow3 = objTarget.Find("Capsule").gameObject;
+                }
+                return objTarget;
+            }
+        }
         //Mark识别后，显隐的对象
         public GameObject objBtnShow;
+        GameObject objShow3;
         public Texture texture;
         bool bCallback = false;
         //原来的父节点
         private Transform oriParent;
+
         private void Awake()
         {
             oriParent = transform.parent;
             //objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
-            objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child").gameObject;
+            //objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child");
+            //objShow3 = objTargetModel.Find("Capsule").gameObject;
             SetModelVisible(false);
         }
 
@@ -100,7 +116,7 @@ namespace SpaceDesign.Translate
             //objTargetModel.SetActive(isVisible);
             if (isVisible)
             {
-                TranslateManage.Inst.transform.SetParent(objTargetModel.transform);
+                TranslateManage.Inst.transform.SetParent(objTargetModel);
                 TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.02f, -0.25f);
                 TranslateManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
             }
@@ -109,6 +125,7 @@ namespace SpaceDesign.Translate
                 TranslateManage.Inst.transform.SetParent(oriParent);
             }
             objBtnShow.SetActive(isVisible);
+            objShow3.SetActive(isVisible);
         }
     }
 }

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace OXRTK.ARHandTracking 
+namespace OXRTK.ARHandTracking
 {
     /// <summary>
     /// The class for pinch slider. <br>
@@ -16,13 +16,13 @@ namespace OXRTK.ARHandTracking
         /// Slider interaction type. <br>
         /// 滑条交互方式。
         /// </summary>
-        public InteractionAvailability interactionAvailability 
-        { 
-            get { return m_InteractionAvailablity; } 
-            set 
-            { 
-                m_InteractionAvailablity = value; 
-            } 
+        public InteractionAvailability interactionAvailability
+        {
+            get { return m_InteractionAvailablity; }
+            set
+            {
+                m_InteractionAvailablity = value;
+            }
         }
 
         [SerializeField]
@@ -31,12 +31,12 @@ namespace OXRTK.ARHandTracking
         /// Slider handler root. <br>
         /// 滑块根节点。
         /// </summary>
-        public Transform handlerRoot 
+        public Transform handlerRoot
         {
             get { return m_HandlerRoot; }
             set { m_HandlerRoot = value; }
         }
-        
+
         [SerializeField]
         Transform m_HandlerVisualization;
         /// <summary>
@@ -67,11 +67,11 @@ namespace OXRTK.ARHandTracking
         /// Slider axis. <br>
         /// 滑条移动轴。
         /// </summary>
-        public PinchSliderAxis sliderAxis 
+        public PinchSliderAxis sliderAxis
         {
             get { return m_SliderAxis; }
-            set 
-            { 
+            set
+            {
                 m_SliderAxis = value;
                 InitializeSliderAxis(m_SliderAxis);
             }
@@ -87,12 +87,29 @@ namespace OXRTK.ARHandTracking
         public float sliderValue
         {
             get { return m_SliderValue; }
-            set 
+            set
             {
                 float oldValue = m_SliderValue;
                 m_SliderValue = value;
                 UpdateHandlerPos();
                 onValueChanged?.Invoke(m_SliderValue);
+            }
+        }
+
+
+        /// <summary>
+        /// Slider value. <br>
+        /// 滑条数值。
+        /// </summary>
+        public float sliderValueWithoutEvent
+        {
+            get { return m_SliderValue; }
+            set
+            {
+                float oldValue = m_SliderValue;
+                m_SliderValue = value;
+                UpdateHandlerPos();
+                //onValueChanged?.Invoke(m_SliderValue);
             }
         }
 
@@ -130,7 +147,7 @@ namespace OXRTK.ARHandTracking
         /// 滑条开始高亮时的事件更新。
         /// </summary>
         public UnityEvent onHighlightStart { get { return m_OnHighlightStart; } set { m_OnHighlightStart = value; } }
-        
+
         [SerializeField]
         UnityEvent m_OnHighlightEnd = new UnityEvent();
         /// <summary>
@@ -139,14 +156,14 @@ namespace OXRTK.ARHandTracking
         /// </summary>
         public UnityEvent onHighlightEnd { get { return m_OnHighlightEnd; } set { m_OnHighlightEnd = value; } }
 
-       [SerializeField]
+        [SerializeField]
         UnityEvent m_OnInteractionStart = new UnityEvent();
         /// <summary>
         /// UnityEvent when slider is start interacted. <br>
         /// 滑条开始交互时的事件更新。
         /// </summary>
         public UnityEvent onInteractionStart { get { return m_OnInteractionStart; } set { m_OnInteractionStart = value; } }
-        
+
         [SerializeField]
         UnityEvent m_OnInteractionEnd = new UnityEvent();
         /// <summary>
@@ -201,20 +218,38 @@ namespace OXRTK.ARHandTracking
 
         void UpdateHandlerPos()
         {
+            //------------ Modify by zh ------------
+            //位置旋转后，滑动条位置就错误了
+            Vector3 _v3 = Vector3.one;
+            //------------------End------------------
             Vector3 handlerMovementDir = default;
             switch (m_SliderAxis)
             {
                 case PinchSliderAxis.X:
                     handlerMovementDir = transform.right;
+                    //------------ Modify by zh ------------
+                    _v3 = new Vector3(1, 0, 0);
+                    //------------------End------------------
                     break;
                 case PinchSliderAxis.Y:
                     handlerMovementDir = transform.up;
+                    //------------ Modify by zh ------------
+                    _v3 = new Vector3(0, 1, 0);
+                    //------------------End------------------
                     break;
                 case PinchSliderAxis.Z:
                     handlerMovementDir = transform.forward;
+                    //------------ Modify by zh ------------
+                    _v3 = new Vector3(0, 0, 1);
+                    //------------------End------------------
                     break;
             }
             Vector3 newHandlerPos = handlerMovementDir * (startLocalValue + (endLocalValue - startLocalValue) * m_SliderValue);
+
+            //------------ Modify by zh ------------
+            newHandlerPos = new Vector3(newHandlerPos.x * _v3.x, newHandlerPos.y * _v3.y, newHandlerPos.z * _v3.z);
+            //------------------End------------------
+
             m_HandlerRoot.localPosition = newHandlerPos;
         }
 
@@ -243,7 +278,7 @@ namespace OXRTK.ARHandTracking
                             }
                             rayHelper.Init(this);
 
-                            if(m_HandlerVisualization.gameObject.GetComponent<PinchSliderTouchableReceiverHelper>() != null)
+                            if (m_HandlerVisualization.gameObject.GetComponent<PinchSliderTouchableReceiverHelper>() != null)
                             {
 #if UNITY_EDITOR
                                 UnityEditor.EditorApplication.delayCall += () =>

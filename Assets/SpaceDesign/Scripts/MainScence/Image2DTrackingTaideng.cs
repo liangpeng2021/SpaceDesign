@@ -9,9 +9,25 @@ namespace SpaceDesign
     public class Image2DTrackingTaideng : TrackableEventHandler
     {
         //Mark识别后，目标出现（移动）的对象，现在把要用的移动到目标位置
-        private GameObject objTargetModel;
+        private Transform objTarget;
+        //有切换场景，所以这里不能在Awake只找一次
+        private Transform objTargetModel
+        {
+            get
+            {
+                if (objTarget == null)
+                {
+                    objTarget = Image2DTrackingManager.Instance.transform.Find("root/child");
+                    objShow3 = objTarget.Find("Capsule").gameObject;
+                }
+                return objTarget;
+            }
+        }
         //Mark识别后，显隐的对象
         public GameObject objBtnShow;
+        //Mark识别后，显隐的对象2号
+        public GameObject objShow2;
+        GameObject objShow3;
         public Texture texture;
         bool bCallback = false;
         //原来的父节点
@@ -20,7 +36,8 @@ namespace SpaceDesign
         {
             oriParent = transform.parent;
             //objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
-            objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child").gameObject;
+            //objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child");
+            //objShow3 = objTargetModel.Find("Capsule").gameObject;
             SetModelVisible(false);
         }
 
@@ -105,7 +122,7 @@ namespace SpaceDesign
             if (isVisible)
             {
                 //Debug.Log("MyLog::objTargetModel:" + objTargetModel);
-                TaidengManager.Inst.transform.SetParent(objTargetModel.transform);
+                TaidengManager.Inst.transform.SetParent(objTargetModel);
                 TaidengManager.Inst.transform.localPosition = new Vector3(0, -0.15f, 0);
                 TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
                 //TaidengManager.Inst.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -117,7 +134,12 @@ namespace SpaceDesign
                 //Invoke("SetIconParent", 0.1f);
                 TaidengManager.Inst.transform.SetParent(oriParent);
             }
+#if UNITY_EDITOR
+            return;
+#endif
             objBtnShow.SetActive(isVisible);
+            objShow2.SetActive(isVisible);
+            objShow3.SetActive(isVisible);
         }
 
         //void SetIconParent()

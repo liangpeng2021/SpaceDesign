@@ -84,6 +84,7 @@ namespace SpaceDesign.Phone
                 {
                     fCallingTempTime = 0;
                     bCalling = false;
+                    bMissing = true;
                     btnRingOff.onPinchUp.Invoke();
                     ////未接挂断跟
                     //StartCoroutine("_IERingOff", true);
@@ -105,7 +106,7 @@ namespace SpaceDesign.Phone
                 textTalkTiming.text = $"{min.ToString("d2")}:{second.ToString("d2")}";
 
                 fTalkTempTime += Time.deltaTime;
-                if (fTalkTempTime > fTalkTotalTime)
+                if (fTalkTempTime >= fTalkTotalTime - 0.5f)
                 {
                     fTalkTempTime = 0;
                     bTalking = false;
@@ -136,13 +137,13 @@ namespace SpaceDesign.Phone
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 1.5f)
+            else if (_dis <= 5f && _dis > 2f)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 1.5f)
+            else if (_dis <= 2f)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
@@ -248,13 +249,17 @@ namespace SpaceDesign.Phone
             //中距离=>近距离
             animAnswer.enabled = true;
 
-            bCalling = true;
+            if (bMissing == false && bTalking == false)
+            {
+                bCalling = true;
 
-            if (audioSource.isPlaying)
-                audioSource.Stop();
-            audioSource.loop = true;
-            audioSource.clip = adClipCalling;
-            audioSource.Play();
+                traCallingUI.localScale = Vector3.one;
+                yield return IECallingUI(true);
+            }
+            else
+            {
+                traCallingUI.localScale = Vector3.zero;
+            }
 
             Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
             float _fSp;
@@ -296,6 +301,13 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IECloseToMiddle(bool bTalkOver)
         {
+            if (audioSource.isPlaying)
+                audioSource.Stop();
+
+            //接听之后的话，不中断协程（让通话界面继续放大）
+            if (bTalking == false)
+                StopSomeCoroutine();
+
             if (bTalkOver == false)
             {
                 ////呼叫中、或者视频通话中，距离变远也不隐藏
@@ -303,6 +315,15 @@ namespace SpaceDesign.Phone
                 //视频通话中，距离变远也不隐藏
                 if (bTalking == true)
                     yield break;
+            }
+            else
+            {
+                //这里是视频通话中，主动挂断，或者通话时间结束
+
+                //响一下挂断
+                audioSource.clip = adClipMissed_short;
+                audioSource.loop = false;
+                audioSource.Play();
             }
 
             //UI开始变化
@@ -330,6 +351,8 @@ namespace SpaceDesign.Phone
                 yield return 0;
             }
 
+            traReCallUI.localScale = Vector3.zero;
+            bRecalling = false;
 
             //UI变化结束
             bUIChanging = false;
@@ -338,13 +361,12 @@ namespace SpaceDesign.Phone
             {
                 //===========================================================================
                 //通话结束，初始化内容，不再进入，除非下次重置
-
                 traCallingUI.localScale = Vector3.one;
                 traMissedUI.localScale = Vector3.zero;
                 traReCallUI.localScale = Vector3.zero;
                 traTalkingUI.localScale = Vector3.zero;
 
-                bCalling = bTalking = false;
+                bCalling = bRecalling = bMissing = bTalking = false;
                 fTalkTempTime = 0;
                 //enabled = false;
                 bUIChanging = false;
@@ -359,7 +381,17 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IECallingUI(bool bShow)
         {
+            bCalling = bShow;
+            traMissedUI.localScale = Vector3.zero;
             animAnswer.enabled = bShow;
+            if (bCalling)
+            {
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+                audioSource.loop = true;
+                audioSource.clip = adClipCalling;
+                audioSource.Play();
+            }
             float _f = bShow ? 1 : 5;
             Vector3 _v3 = bShow ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.zero;
             while (true)
@@ -399,11 +431,16 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IEMissedUI(bool bShow)
         {
+            bMissing = bShow;
+
             float _f = bShow ? 1 : 5;
             Vector3 _v3 = bShow ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.zero;
             while (true)
             {
+                traCallingUI.localScale = Vector3.Lerp(traCallingUI.localScale, Vector3.zero, 2 * fUISpeed * Time.deltaTime);
+                traReCallUI.localScale = Vector3.Lerp(traReCallUI.localScale, Vector3.zero, 2 * fUISpeed * Time.deltaTime);
                 traMissedUI.localScale = Vector3.Lerp(traMissedUI.localScale, _v3, fUISpeed * Time.deltaTime);
+
                 float _fDis = Vector3.Distance(traMissedUI.localScale, _v3);
                 if (_fDis < fThreshold)
                 {
@@ -436,11 +473,14 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IEReCallUI(bool bShow)
         {
+            bRecalling = bShow;
+
             float _f = bShow ? 1 : 5;
             animReCalling.enabled = bShow;
             Vector3 _v3 = bShow ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.zero;
             while (true)
             {
+                traMissedUI.localScale = Vector3.Lerp(traMissedUI.localScale, Vector3.zero, 2 * fUISpeed * Time.deltaTime);
                 traReCallUI.localScale = Vector3.Lerp(traReCallUI.localScale, _v3, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traReCallUI.localScale, _v3);
                 if (_fDis < fThreshold)
@@ -476,26 +516,6 @@ namespace SpaceDesign.Phone
                 //等待N秒
                 yield return new WaitForSeconds(4);
                 audioSource.Stop();
-
-                //===========================================================================
-                //等待过程中播放呼叫语音
-                //===========================================================================
-
-                //等待4秒后，隐藏
-
-                //_v3 = Vector3.zero;
-                //_f = 5;
-                //while (true)
-                //{
-                //    traReCallUI.localScale = Vector3.Lerp(traReCallUI.localScale, _v3, fUISpeed*Time.deltaTime);
-                //    float _fDis = Vector3.Distance(traReCallUI.localScale, _v3);
-                //    if (_fDis < fThreshold)
-                //    {
-                //        traReCallUI.localScale = _v3;
-                //        break;
-                //    }
-                //    yield return 0;
-                //}
                 yield return IEReCallUI(false);
                 yield return IETalkingUI(true);
             }
@@ -506,8 +526,6 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IETalkingUI(bool bShow)
         {
-            print("接通");
-
             //fTalkTempTime音频时长赋值，必须在bTalking赋值之前，否则Update函数中，计时错误
             if (bShow)
             {
@@ -516,11 +534,14 @@ namespace SpaceDesign.Phone
                 videoPlayer.Play();
                 fTalkTempTime = 0;
             }
+            bTalking = bShow;
+
             float _f = bShow ? 1 : 5;
             Vector3 _v3 = bShow ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.zero;
-            bTalking = bShow;
             while (true)
             {
+                traCallingUI.localScale = Vector3.Lerp(traCallingUI.localScale, Vector3.zero, 2 * fUISpeed * Time.deltaTime);
+                traReCallUI.localScale = Vector3.Lerp(traReCallUI.localScale, Vector3.zero, 2 * fUISpeed * Time.deltaTime);
                 traTalkingUI.localScale = Vector3.Lerp(traTalkingUI.localScale, _v3, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traTalkingUI.localScale, _v3);
                 if (_fDis < fThreshold)
@@ -547,7 +568,6 @@ namespace SpaceDesign.Phone
                 }
             }
             yield return 0;
-
         }
 
         #region Icon变化，远距离
@@ -614,10 +634,18 @@ namespace SpaceDesign.Phone
         //通话中的挂断
         public ButtonRayReceiver btnTalkingOff;
         //是否开始呼叫计时
+        [SerializeField]
         private bool bCalling;
+        //是否回拨中
+        [SerializeField]
+        private bool bRecalling;
+        //是否未接来电中
+        [SerializeField]
+        private bool bMissing;
         //呼叫计时
         private float fCallingTempTime;
         //通话中
+        [SerializeField]
         private bool bTalking;
         //通话计时（时间到了自动停止用）
         private float fTalkTempTime;
@@ -625,59 +653,59 @@ namespace SpaceDesign.Phone
         private float fTalkTotalTime;
 
 
+        void StopSomeCoroutine()
+        {
+            StopCoroutine("IECallingUI");
+            StopCoroutine("IEMissedUI");
+            StopCoroutine("IEReCallUI");
+            StopCoroutine("IETalkingUI");
+        }
+
+        public void ResetBoolState()
+        {
+            bCalling = bRecalling = bMissing = bTalking = false;
+        }
+
         public void OnRingOff()
         {
             //这里需要停止所有协程
-            StopAllCoroutines();
-            StartCoroutine("_IERingOff");
-        }
-        IEnumerator _IERingOff()
-        {
-            bCalling = false;
+            StopSomeCoroutine();
+            ResetBoolState();
 
             if (audioSource.isPlaying)
                 audioSource.Stop();
             audioSource.clip = adClipMissed_short;
             audioSource.loop = false;
             audioSource.Play();
-            yield return IECallingUI(false);
-            yield return IEReCallUI(false);
-            yield return IEMissedUI(true);
+            StartCoroutine("IEMissedUI", true);
         }
 
         public void OnAnswer()
         {
-            bCalling = false;
             //这里需要停止所有协程
-            StopAllCoroutines();
-            StartCoroutine("_IEAnswer");
-        }
-        IEnumerator _IEAnswer()
-        {
+            StopSomeCoroutine();
+            ResetBoolState();
             if (audioSource.isPlaying)
                 audioSource.Stop();
 
-            yield return IECallingUI(false);
-            yield return IETalkingUI(true);
+            StartCoroutine("IETalkingUI", true);
         }
 
         public void OnReCall()
         {
             //这里需要停止所有协程
-            StopAllCoroutines();
-            StartCoroutine("_IEReCall");
+            StopSomeCoroutine();
+            ResetBoolState();
+            StartCoroutine("IEReCallUI", true);
         }
-        IEnumerator _IEReCall()
-        {
-            yield return IEMissedUI(false);
-            yield return IEReCallUI(true);
-        }
-
+       
         public void OnTalkingOff()
         {
             videoPlayer.Stop();
             //这里需要停止所有协程
-            StopAllCoroutines();
+            StopSomeCoroutine();
+            ResetBoolState();
+
             StartCoroutine("IECloseToMiddle", true);
         }
         #endregion

@@ -15,9 +15,6 @@ EditorBuildSettings:
     path: Assets/OXRTK/HandInteraction/Samples/Scenes/PressableButtonExample.unity
     guid: 46641ce0644d4a04f8754971f3bf97af
   - enabled: 0
-    path: Assets/OXRTK/HandInteraction/Samples/Scenes/RayInteractionExample.unity
-    guid: 15a4cb492a89fea42a42571d20a2ae4a
-  - enabled: 0
     path: Assets/OXRTK/HandInteraction/Samples/Scenes/SliderInteractionExample.unity
     guid: 82271ee9dd0972d468c64dae417fdc9f
   - enabled: 0
@@ -29,17 +26,8 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/SpaceDesign/Scences/MainScence_old.unity
     guid: 9abc70e2634ad4648861d2206250c332
-  - enabled: 1
-    path: Assets/SpaceDesign/Scences/MainScene.unity
-    guid: ee2ba7e380524ce4180af387a1613dc9
-  - enabled: 1
-    path: Assets/SpaceDesign/Scences/EditorScence.unity
-    guid: edc63cc1ca55d2f4ea150c681dbcec26
   - enabled: 0
-    path: Assets/Samples/XR Window SDK/0.9.0/XR Window SDK demos/Sample1-RayInteraction/Scenes/RayInteraction.unity
-    guid: 720e809814a7aae47ae25407d261a523
-  - enabled: 0
-    path: Assets/Samples/XR Window SDK/0.9.0/XR Window SDK demos/Sample3-Image2DTracking/Image2DTrackering/Scenes/TrackDemo.unity
+    path: Assets/Samples/XR Window SDK/1.0.0/XR Window SDK demos/Sample3-Image2DTracking/Image2DTrackering/Scenes/TrackDemo.unity
     guid: aee5af4dbb7b66c40a5d7d8f2492d0ac
   - enabled: 0
     path: Assets/Exercise/SpaceDesign_LuPing.unity
@@ -59,6 +47,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Exercise/SpaceDesign_Video_Coach.unity
     guid: a15ecc4d8d4200f4fbe42c4ebddab178
+  - enabled: 1
+    path: Assets/SpaceDesign/Scences/MainScene.unity
+    guid: ee2ba7e380524ce4180af387a1613dc9
+  - enabled: 1
+    path: Assets/SpaceDesign/Scences/EditorScence.unity
+    guid: edc63cc1ca55d2f4ea150c681dbcec26
+  - enabled: 0
+    path: Assets/SpaceDesign/Scences/MissTest.unity
+    guid: c6c1e76ee907bc74cb2c573e09bc4869
+  - enabled: 0
+    path: Assets/Samples/XR Window SDK/1.0.0/XR Window SDK demos/Sample1-RayInteraction/Scenes/RayInteraction.unity
+    guid: 720e809814a7aae47ae25407d261a523
   m_configObjects:
     com.oppoview.xr.window.setting: {fileID: 11400000, guid: 03ed929fe54ff8e4e958975ec533d18f,
       type: 2}

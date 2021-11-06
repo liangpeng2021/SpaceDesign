@@ -25,7 +25,16 @@ namespace SpaceDesign
         public MeshRenderer lightRender;
         //优化render
         private MaterialPropertyBlock matPropBlock;
-        
+
+        Material mat1;
+        Material mat2;
+
+        private void Start()
+        {
+            mat1 = lightRender.materials[1];
+            mat2= lightRender.materials[4];
+        }
+
         private void OnEnable()
         {
             for (int i = 0; i < lightData.Length; i++)
@@ -83,10 +92,12 @@ namespace SpaceDesign
         {
             if (lightRender == null)
                 return;
-            matPropBlock = new MaterialPropertyBlock();
-            lightRender.GetPropertyBlock(matPropBlock);
-            matPropBlock.SetColor("_Color",f);
-            lightRender.SetPropertyBlock(matPropBlock);
+            mat1.color = f;
+            mat2.color = f;
+            //matPropBlock = new MaterialPropertyBlock();
+            //lightRender.GetPropertyBlock(matPropBlock);
+            //matPropBlock.SetColor("_Color",f);
+            //lightRender.SetPropertyBlock(matPropBlock);
         }
     }
 }

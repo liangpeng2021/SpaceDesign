@@ -27,6 +27,10 @@ public class TaidengController : MonoBehaviour
     /// </summary>
     public GameObject secondObj;
     /// <summary>
+    /// 台灯的灯光，跟随第二次显示的对象一起开启关闭（但是台灯单独旋转，不属于其子节点）
+    /// </summary>
+    public GameObject pointLight;
+    /// <summary>
     /// 开始购买后显示的对象
     /// </summary>
     public GameObject payObj;
@@ -54,6 +58,14 @@ public class TaidengController : MonoBehaviour
     /// 配送中
     /// </summary>
     public GameObject peisongObj;
+    /// <summary>
+    /// 台灯旁边的UI（不跟随台灯旋转）
+    /// </summary>
+    public Transform taiDengUI;
+    /// <summary>
+    /// 台灯旁边UI的父节点
+    /// </summary>
+    public Transform tdUIParent;
 
     bool hideBoxScale = false;
 
@@ -79,6 +91,7 @@ public class TaidengController : MonoBehaviour
         startpayRayReceiver = null;
         firstObj = null;
         secondObj = null;
+        pointLight = null;
         payObj = null;
         boundingBox = null;
         justpayRayReceiver = null;
@@ -93,19 +106,18 @@ public class TaidengController : MonoBehaviour
 
     public void Init()
     {
-
         showBoundBox = false;
 
         firstObj.SetActive(true);
         secondObj.SetActive(false);
+        pointLight.SetActive(false);
         payObj.SetActive(false);
         peisongObj.SetActive(false);
         paySuccessObj.SetActive(false);
 
         startpayRayReceiver.gameObject.SetActive(false);
         paySuccessObj.SetActive(false);
-        taidengModel.SetActive(true);
-        //showFirst = false;
+        //taidengModel.SetActive(true);
     }
 
     private void OnEnable()
@@ -220,9 +232,11 @@ public class TaidengController : MonoBehaviour
         //{
         //    showFirst = true;
         //}
+        taidengModel.SetActive(true);
         firstObj.SetActive(false);
         startpayRayReceiver.gameObject.SetActive(true);
         secondObj.SetActive(true);
+        pointLight.SetActive(true);
         showBoundBox = true;
         TaidengManager.Inst.noOperationTime = 0;
     }
@@ -233,6 +247,7 @@ public class TaidengController : MonoBehaviour
     {
         taidengModel.SetActive(false);
         secondObj.SetActive(false);
+        pointLight.SetActive(false);
         payObj.SetActive(true);
         startpayRayReceiver.gameObject.SetActive(false);
         showBoundBox = false;
@@ -257,11 +272,26 @@ public class TaidengController : MonoBehaviour
     {
         paySuccessObj.SetActive(false);
         peisongObj.SetActive(true);
-        Invoke("HidePeisong", 5f);
+        Invoke("HidePeisong", 3f);
     }
 
     void HidePeisong()
     {
         peisongObj.SetActive(false);
+    }
+
+    /// <summary>
+    /// 台灯开始旋转，把旁边的UI父节点放出去
+    /// </summary>
+    public void TaiDengStartRot()
+    {
+        taiDengUI.SetParent(tdUIParent.parent);
+    }
+    /// <summary>
+    /// 台灯旋转结束，把旁边的UI父节点放回来
+    /// </summary>
+    public void TarDengEndRot()
+    {
+        taiDengUI.SetParent(tdUIParent);
     }
 }
