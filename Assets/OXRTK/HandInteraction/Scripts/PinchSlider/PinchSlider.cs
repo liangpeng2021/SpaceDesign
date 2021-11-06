@@ -216,6 +216,11 @@ namespace OXRTK.ARHandTracking
             }
         }
 
+        private void Update()
+        {
+            Debug.Log("transform.right:" + transform.right);
+        }
+
         void UpdateHandlerPos()
         {
             //------------ Modify by zh ------------
@@ -244,11 +249,15 @@ namespace OXRTK.ARHandTracking
                     //------------------End------------------
                     break;
             }
-            Vector3 newHandlerPos = handlerMovementDir * (startLocalValue + (endLocalValue - startLocalValue) * m_SliderValue);
+            
+            //edit by lp
+            //Vector3 newHandlerPos = handlerMovementDir * (startLocalValue + (endLocalValue - startLocalValue) * m_SliderValue);
+            Vector3 newHandlerPos = _v3 * (startLocalValue + (endLocalValue - startLocalValue) * m_SliderValue);
 
             //------------ Modify by zh ------------
-            newHandlerPos = new Vector3(newHandlerPos.x * _v3.x, newHandlerPos.y * _v3.y, newHandlerPos.z * _v3.z);
+            //newHandlerPos = new Vector3(newHandlerPos.x * _v3.x, newHandlerPos.y * _v3.y, newHandlerPos.z * _v3.z);
             //------------------End------------------
+            //end
 
             m_HandlerRoot.localPosition = newHandlerPos;
         }

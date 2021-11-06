@@ -18,6 +18,8 @@ public class EditCameraRay : MonoBehaviour
     bool isMouseDown;
 
     RayPointerHandler hitpointhandler;
+
+    public bool canDrag = false;
     // Update is called once per frame
     void Update()
     {
@@ -72,18 +74,18 @@ public class EditCameraRay : MonoBehaviour
                 }
             }
 
-            //if (isMouseDown)
-            //{
-            //    if (!hitpointhandler.gameObject.activeInHierarchy)
-            //    {
-            //        isMouseDown = false;
-            //        hitpointhandler = null;
-            //    }
-            //    if (hitpointhandler)
-            //    {
-            //        hitpointhandler.OnDragging(ray.origin, ray.direction);
-            //    }
-            //}
+            if (canDrag && isMouseDown)
+            {
+                if (!hitpointhandler.gameObject.activeInHierarchy)
+                {
+                    isMouseDown = false;
+                    hitpointhandler = null;
+                }
+                if (hitpointhandler)
+                {
+                    hitpointhandler.OnDragging(ray.origin, ray.direction);
+                }
+            }
         }
         else
         {
