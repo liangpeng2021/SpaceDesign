@@ -181,7 +181,7 @@ public class UserManager : MonoBehaviour
         WWWForm wwwFrom = new WWWForm();
 		wwwFrom.AddField("username", username);
 		wwwFrom.AddField("password", password);
-        Debug.Log(EditorControl.Instance);
+
         EditorControl.Instance.ShowTipKeep("加载中...");
         Action<UserData> acstion = (ud) =>
          {

@@ -321,28 +321,34 @@ public class RoomControl : MonoBehaviour
         {
             if (index==curObjIndex)
                 return;
-            curObjIndex = index;
-            
+            //上一个关掉
             if (curObjIndex >= 0 && curObjIndex < objList.Count)
-                objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOn();
+                objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOff();
             else
             {
                 Debug.Log("MyLog::curindex:" + curObjIndex);
                 Debug.Log("MyLog::objList:" + objList.Count);
             }
+
+            curObjIndex = index;
+            //当前的打开
+            if (curObjIndex >= 0 && curObjIndex < objList.Count)
+                objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOn();
         }
     }
 
-    public string RemoveObj()
+    public void RemoveObj()
     {
-        string id = null;
         if (curObjIndex == -1)
         {
             //Debug.Log("缺少curprefabID");
-            return id;
+            return ;
         }
 
-        id = objList[curObjIndex].id;
+        string id = objList[curObjIndex].id;
+
+        EditorControl.Instance.prefabManager.ResetObjUI(id);
+
         Destroy(objList[curObjIndex].obj);
         objList[curObjIndex].id = null;
         objList[curObjIndex] = null;
@@ -350,8 +356,6 @@ public class RoomControl : MonoBehaviour
         curObjIndex = objList.Count - 1;
         if (curObjIndex!=-1)
             objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOn();
-        
-        return id;
     }
 
     public void ResetObjUI()

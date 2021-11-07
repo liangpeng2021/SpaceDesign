@@ -94,9 +94,7 @@ public class PrefabManager : MonoBehaviour
     #endregion
 
     public GameObject deletePrefab;
-
-    ButtonRayReceiver deleteObjBtn;
-
+    
     public ButtonRayReceiver backtoRoomBtn;
     #region 预设管理
 
@@ -223,16 +221,10 @@ public class PrefabManager : MonoBehaviour
     {
         EditorControl.Instance.ToEditRoom();
     }
-    //删除当前编辑的物体
-    public void DeleteObj()
-    {
-        if (deleteObjBtn != null)
-            deleteObjBtn.onPinchDown.RemoveAllListeners();
-        string id = EditorControl.Instance.roomManager.RemoveCurRoomObj();
-        ResetObjUI(id);
-        //deleteObjBtn.gameObject.SetActive(false);
-    }
-
+    /// <summary>
+    /// 删除物体时还原列表
+    /// </summary>
+    /// <param name="id"></param>
     public void ResetObjUI(string id)
     {
         if (id != null)
@@ -242,23 +234,19 @@ public class PrefabManager : MonoBehaviour
         }
     }
 
-    public void SetDeleteObjPos(Transform parent)
-    {
-        if (deleteObjBtn == null)
-        {
-            deleteObjBtn = Instantiate(deletePrefab).GetComponent<ButtonRayReceiver>();
-            deleteObjBtn.onPinchDown.AddListener(DeleteObj);
-        }
-        if (deleteObjBtn != null)
-        {
-            deleteObjBtn.transform.SetParent(parent);
-            deleteObjBtn.transform.localEulerAngles = Vector3.zero;
-            deleteObjBtn.transform.localPosition = new Vector3(0, -0.228f, -0.152f);
-            deleteObjBtn.transform.localScale = Vector3.one * 0.001f;
-        }
-
-        //deleteObjBtn.gameObject.SetActive(true);
-        //deleteObjBtn.transform.position = pos + new Vector3(0,-0.2f,0);
-        //deleteObjBtn.transform.forward = XR.XRCameraManager.Instance.stereoCamera.transform.forward;
-    }
+    //public void SetDeleteObjPos(Transform parent)
+    //{
+    //    if (deleteObjBtn == null)
+    //    {
+    //        deleteObjBtn = Instantiate(deletePrefab).GetComponent<ButtonRayReceiver>();
+    //        deleteObjBtn.onPinchDown.AddListener(DeleteObj);
+    //    }
+    //    if (deleteObjBtn != null)
+    //    {
+    //        deleteObjBtn.transform.SetParent(parent);
+    //        deleteObjBtn.transform.localEulerAngles = Vector3.zero;
+    //        deleteObjBtn.transform.localPosition = new Vector3(0, -0.228f, -0.152f);
+    //        deleteObjBtn.transform.localScale = Vector3.one * 0.001f;
+    //    }
+    //}
 }

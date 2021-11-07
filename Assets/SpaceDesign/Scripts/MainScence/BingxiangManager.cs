@@ -142,15 +142,16 @@ namespace SpaceDesign
                 //bingxiangTimeline.gameObject.SetActive(true);
                 //bingxiangTimeline.SetCurTimelineData("开冰箱");
 
-                SetTimelineData("开冰箱");
+                SetTimelineData("开冰箱",null);
             }
             else
             {
                 //bingxiangTimeline.gameObject.SetActive(true);
                 //bingxiangTimeline.SetCurTimelineData("提示到信息");
-
-                SetTimelineData("关门");
-
+                if (isBought)
+                    SetTimelineData("已购买门外信息", null);
+                else
+                    SetTimelineData("未购买门外信息", null);
             }
 
             //Debug.Log("MyLog::获取门禁状态:" + state);
@@ -224,6 +225,7 @@ namespace SpaceDesign
             }
             else if (lastPPS == PlayerPosState.Close)
             {
+                Debug.Log("curPlayerPosState:"+ curPlayerPosState);
                 if (curPlayerPosState == PlayerPosState.Middle)/// 近距离=>中距离
                     yield return IECloseToMiddle();
                 else if (curPlayerPosState == PlayerPosState.Far)/// 近距离=>远距离
@@ -303,13 +305,45 @@ namespace SpaceDesign
                 }
                 yield return 0;
             }
-            //bingxiangTimeline.gameObject.SetActive(true);
-            //bingxiangTimeline.SetCurTimelineData("提示到信息");
-
-            SetTimelineData("提示到信息");
+            
+            //出现提示
+            SetTimelineData("开头提示", null);
+            startTip = true;
+            //4秒后，出现信息
+            Invoke("TipToInfo",4.75f);
 
             //UI变化结束
             bUIChanging = false;
+        }
+        /// <summary>
+        /// 开始提示，提示到一半如果距离变化，关闭
+        /// </summary>
+        bool startTip;
+
+        /// <summary>
+        /// 是否购买来切换不同的信息
+        /// </summary>
+        void TipToInfo()
+        {
+            //退出执行
+            Debug.Log("TipToInfo:startTip:" + startTip);
+            if (!startTip)
+                return;
+            startTip = false;
+            
+            SetTimelineData("关闭开头提示",()=>
+            {
+                if (isBought)
+                {
+                    //出现已购买对应的门外信息
+                    SetTimelineData("已购买门外信息", null);
+                }
+                else
+                {
+                    //出现未购买对应的门外信息
+                    SetTimelineData("未购买门外信息", null);
+                }
+            });
         }
 
         /// <summary>
@@ -414,25 +448,26 @@ namespace SpaceDesign
         void OnClosePay()
         {
             //bingxiangTimeline.SetCurTimelineData("关闭购买");
-            SetTimelineData("关闭购买");
+            SetTimelineData("关闭购买",null);
         }
 
         void GoChoose()
         {
             //bingxiangTimeline.SetCurTimelineData("点击可乐");
-            SetTimelineData("点击可乐");
+            SetTimelineData("点击可乐", null);
         }
 
         void DirectPay()
         {
             //bingxiangTimeline.SetCurTimelineData("一键复购");
-            SetTimelineData("一键复购");
+            SetTimelineData("一键复购", null);
+            isBought = true;
         }
 
         void ChoosePay()
         {
             //bingxiangTimeline.SetCurTimelineData("点击购买");
-            SetTimelineData("点击购买");
+            SetTimelineData("点击购买", null);
             isBought = true;
         }
         #endregion
@@ -440,42 +475,29 @@ namespace SpaceDesign
         /// <summary>
         /// 关闭界面响应
         /// </summary>
-        public void OnQuit()
+        void OnQuit()
         {
+            //提示到一半如果距离变化，不继续执行
+            startTip = false;
+            Debug.Log("OnQuit:startTip:" + startTip);
+
             switch (curTimelineState)
             {
-                case "提示到信息":
-                    SetTimelineData("关闭提示信息");
+                case "开头提示":
+                    SetTimelineData("关闭开头提示",null);
                     break;
                 case "开冰箱":
-                    SetTimelineData("关闭开冰箱信息");
+                    SetTimelineData("关闭开冰箱信息",null);
                     break;
                 case "点击可乐":
-                    SetTimelineData("关闭点击可乐信息");
+                    SetTimelineData("关闭点击可乐信息",null);
                     break;
-                //case "点击购买":
-                //    SetTimelineData("关闭购买");
-                //    break;
-                //case "一键复购":
-                //    SetTimelineData("关闭购买");
-                //    break;
-                //case "关闭购买":
-                //    SetTimelineData("");
-                //    break;
-                case "关门":
-                    {
-                        SetTimelineData("关门消失");
-                        //if (isBought)
-                        //    SetTimelineData("关门消失");
-
-                        //else
-                        //    SetTimelineData("未购买关门");
-
-                    }
+                case "未购买门外信息":
+                    SetTimelineData("关闭未购买门外信息",null);
                     break;
-                //case "点击购买":
-                //    SetTimelineData("关闭购买");
-                //    break;
+                case "已购买门外信息":
+                    SetTimelineData("关闭已购买门外信息", null);
+                    break;
                 default:
                     break;
             }
@@ -486,12 +508,12 @@ namespace SpaceDesign
         /// </summary>
         public string curTimelineState;
 
-        void SetTimelineData(string state)
+        void SetTimelineData(string state,System.Action action)
         {
             //Debug.Log("-----------进入设置");
             curTimelineState = state;
             bingxiangTimeline.gameObject.SetActive(true);
-            bingxiangTimeline.SetCurTimelineData(curTimelineState);
+            bingxiangTimeline.SetCurTimelineData(curTimelineState,action);
         }
     }
 }

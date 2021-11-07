@@ -11,26 +11,37 @@ public class ChangeSate : MonoBehaviour
     
     [HideInInspector]
     public int index;
-    //bool isLightOn;
-    //GameObject lightObj;
+
+    bool isDisableEdgeObj=false;
+
+    GameObject deleteObj;
+    ButtonRayReceiver deleteBtn; 
     
     private void OnDestroy()
     {
-        //lightObj = null;
-
         boundingBox = null;
     }
 
-    //public void HightLightOff()
-    //{
-    //    //isLightOn = false;
-    //}
+    public void HightLightOff()
+    {
+        InitDeleteObj();
+        if (deleteObj)
+            deleteObj.SetActive(false);
+    }
 
-    //void Init()
-    //{
-    //    if (transform.Find("BoundingBox/BoundsVisualization"))
-    //        lightObj = transform.Find("BoundingBox/BoundsVisualization").gameObject;
-    //}
+    void InitDeleteObj()
+    {
+        if (deleteObj == null)
+        {
+            deleteObj = Instantiate(EditorControl.Instance.prefabManager.deletePrefab);
+            deleteBtn = deleteObj.transform.GetChild(0).GetComponent<ButtonRayReceiver>();
+
+            deleteObj.transform.SetParent(this.transform);
+            deleteObj.transform.localScale = Vector3.one;
+
+            deleteObj.SetActive(false);
+        }
+    }
 
     private void OnEnable()
     {
@@ -48,6 +59,11 @@ public class ChangeSate : MonoBehaviour
         {
             Debug.Log("MyLog::缺少BoundingBox");
         }
+
+        InitDeleteObj();
+
+        if (deleteBtn)
+            deleteBtn.onPinchDown.AddListener(DeleteThis);
     }
 
     private void OnDisable()
@@ -58,6 +74,9 @@ public class ChangeSate : MonoBehaviour
             boundingBox.onScaleStart.RemoveListener(HasChange);
             boundingBox.onRotateStart.RemoveListener(HasChange);
         }
+
+        if (deleteBtn)
+            deleteBtn.onPinchDown.RemoveAllListeners();
     }
 
     /// <summary>
@@ -67,25 +86,34 @@ public class ChangeSate : MonoBehaviour
     {
         EditorControl.Instance.roomManager.ShowRoomObj(index);
     }
+    /// <summary>
+    /// 删除
+    /// </summary>
+    void DeleteThis()
+    {
+        EditorControl.Instance.roomManager.RemoveCurRoomObj();
+    }
 
     public void HightLightOn()
     {
-        //isLightOn = true;
+        InitDeleteObj();
 
-        //if (lightObj == null)
-        //    Init();
-        //if (lightObj == null)
-        //    return;
-        EditorControl.Instance.prefabManager.SetDeleteObjPos(transform);
+        if (deleteObj)
+            deleteObj.SetActive(true);
     }
 
     private void Update()
     {
-        //if (lightObj == null)
-        //    Init();
-        //if (lightObj == null)
-        //    return;
-        //lightObj.SetActive(isLightOn);
+        //更新删除按钮的位置和方向
+        if (deleteObj && deleteObj.activeInHierarchy)
+        {
+            deleteObj.transform.forward = XR.XRCameraManager.Instance.stereoCamera.transform.forward;
+            deleteObj.transform.eulerAngles = new Vector3(0, deleteObj.transform.eulerAngles.y, 0);
+        }
+
+        //获取不到时，update里面继续获取
+        if (isDisableEdgeObj)
+            return;
         if (boundingBox == null)
         {
             boundingBox = GetComponent<BoundingBox>();
@@ -96,11 +124,12 @@ public class ChangeSate : MonoBehaviour
             return;
         for (int i = 0; i < boundingBox.edgeObjects.Length; i++)
         {
-            //x、z不旋转
+            //x、z不旋转，隐藏
             if (i < 4 || (i >= 8 && i < 12))
             {
                 boundingBox.edgeObjects[i].SetActive(false);
             }
+            isDisableEdgeObj = true;
         }
     }
 }

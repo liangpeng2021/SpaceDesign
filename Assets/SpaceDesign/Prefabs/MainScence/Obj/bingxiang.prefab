@@ -7973,11 +7973,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playableDirector: {fileID: 4849948089422088662}
   timelineDatas:
-  - fragmentName: "\u63D0\u793A\u5230\u4FE1\u606F"
+  - fragmentName: "\u5F00\u5934\u63D0\u793A"
     startTime: 0
-    endTime: 6.5
+    endTime: 0.75
   - fragmentName: "\u5F00\u51B0\u7BB1"
-    startTime: 7.5
+    startTime: 8.5
     endTime: 9.5
   - fragmentName: "\u70B9\u51FB\u53EF\u4E50"
     startTime: 10
@@ -7990,14 +7990,14 @@ MonoBehaviour:
     endTime: 31.5
   - fragmentName: "\u5173\u95ED\u8D2D\u4E70"
     startTime: 35
-    endTime: 38
-  - fragmentName: "\u5173\u95E8"
+    endTime: 37
+  - fragmentName: "\u5DF2\u8D2D\u4E70\u95E8\u5916\u4FE1\u606F"
     startTime: 38
     endTime: 38.8
-  - fragmentName: "\u5173\u95E8\u6D88\u5931"
+  - fragmentName: "\u5173\u95ED\u5DF2\u8D2D\u4E70\u95E8\u5916\u4FE1\u606F"
     startTime: 40
     endTime: 41
-  - fragmentName: "\u5173\u95ED\u63D0\u793A\u4FE1\u606F"
+  - fragmentName: "\u5173\u95ED\u672A\u8D2D\u4E70\u95E8\u5916\u4FE1\u606F"
     startTime: 7.5
     endTime: 8.4
   - fragmentName: "\u5173\u95ED\u5F00\u51B0\u7BB1\u4FE1\u606F"
@@ -8005,10 +8005,13 @@ MonoBehaviour:
     endTime: 10.4
   - fragmentName: "\u5173\u95ED\u70B9\u51FB\u53EF\u4E50\u4FE1\u606F"
     startTime: 13.5
-    endTime: 14.4
-  - fragmentName: "\u672A\u8D2D\u4E70\u5173\u95E8"
-    startTime: 5.25
+    endTime: 14.54
+  - fragmentName: "\u672A\u8D2D\u4E70\u95E8\u5916\u4FE1\u606F"
+    startTime: 5.5
     endTime: 7.45
+  - fragmentName: "\u5173\u95ED\u5F00\u5934\u63D0\u793A"
+    startTime: 4.75
+    endTime: 5.25
   curTimeData:
     fragmentName: 
     startTime: 0
@@ -8930,7 +8933,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4567133122494541336
 Transform:
   m_ObjectHideFlags: 0

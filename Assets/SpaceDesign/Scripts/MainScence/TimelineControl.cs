@@ -48,6 +48,11 @@ public class TimelineControl : MonoBehaviour
     /// </summary>
     System.Action endAction;
 
+    /// <summary>
+    /// 结束时候的回调
+    /// </summary>
+    System.Action endAction2;
+
     public BoxCollider[] boxColliders;
     
     public void StartPause()
@@ -82,6 +87,10 @@ public class TimelineControl : MonoBehaviour
                 SetCollidersEnable(true);
 
                 endAction?.Invoke();
+
+                endAction2?.Invoke();
+                endAction2 = null;
+
                 endAction = null;
             }
         }
@@ -131,6 +140,28 @@ public class TimelineControl : MonoBehaviour
 
             playableDirector.Play();
             endAction = action;
+            SetCollidersEnable(false);
+        }
+    }
+
+    /// <summary>
+    /// 根据时段名称播放,加结束回调
+    /// </summary>
+    /// <param name="name"></param>
+    public void SetCurTimelineData(string name, System.Action action, System.Action action2)
+    {
+        if (timeDataDic.ContainsKey(name))
+        {
+            startPlay = true;
+            curTimeData = timeDataDic[name];
+
+            playableDirector.time = curTimeData.startTime;
+
+            playableDirector.Play();
+            endAction = action;
+
+            endAction2 = action2;
+
             SetCollidersEnable(false);
         }
     }

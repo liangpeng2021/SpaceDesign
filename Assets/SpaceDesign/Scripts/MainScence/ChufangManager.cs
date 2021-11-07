@@ -81,14 +81,14 @@ namespace SpaceDesign
                     return;
                 curPlayerPosState = PlayerPosState.Far;
             }
-            else if (_dis <= 5f && _dis > 1.5f)
+            else if (_dis <= 5f && _dis > 2f)
             {
                 if (lastPPS == PlayerPosState.Middle)
                     return;
                 //从近距离到中距离，大于2m切换状态
                 if (lastPPS == PlayerPosState.Close)
                 {
-                    if (_dis > 2.5f)
+                    if (_dis > 3f)
                         curPlayerPosState = PlayerPosState.Middle;
                 }//否则1.5m就切换状态
                 else

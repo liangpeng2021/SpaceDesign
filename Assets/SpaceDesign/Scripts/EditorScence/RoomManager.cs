@@ -528,16 +528,16 @@ public class RoomManager : MonoBehaviour
     /// <summary>
     /// 删除当前操作的对象
     /// </summary>
-    public string RemoveCurRoomObj()
+    public void RemoveCurRoomObj()
     {
         int curRoomListId = (curPageRoomId * pageCount + curRoomBtnIndex);
         if (curRoomListId == -1)
         {
             Debug.Log("MyLog::缺少curRoomControl");
-            return null;
+            return;
         }
 
-        return room3DList[curRoomListId].RemoveObj();
+        room3DList[curRoomListId].RemoveObj();
     }
     #endregion
 

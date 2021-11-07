@@ -14,6 +14,9 @@ using XR;
 /// </summary>
 public class LoadMainScence : MonoBehaviour
 {
+    //版本号
+    public Text version;
+
     public ScenceData objectDatas;
 
     public GameObject roomPrefab;
@@ -132,6 +135,8 @@ public class LoadMainScence : MonoBehaviour
 
     private void Start()
     {
+        version.text = Application.version;
+
         Camera eventCamera = XRCameraManager.Instance.eventCamera;
         for (int i = 0; i < canvas.Length; i++)
         {
@@ -164,7 +169,6 @@ public class LoadMainScence : MonoBehaviour
         //BitConverter方式
         string path = EditorControl.GetPth();
         path = Path.Combine(path, "scence.scn");
-        Debug.Log("MyLog::path" + path);
         objectDatas = MyDeSerial(path);
 
         if (objectDatas == null)
