@@ -111,6 +111,9 @@ namespace SpaceDesign.Magazine
 
         private void SetModelVisible(bool isVisible)
         {
+            if (objTargetModel == null)
+                return;
+
             //objTargetModel.SetActive(isVisible);
             if (isVisible)
             {

@@ -573,10 +573,12 @@ namespace SpaceDesign.Video
 
             traVideoExpand.gameObject.SetActive(false);
 
-            if (bReminder)
-                SetReminder(false);
-            else if (bExpand)
-                SetExpand(false);
+            //if (bReminder)
+            //    SetReminder(false);
+            //else if (bExpand)
+            //    SetExpand(false);
+
+            StartCoroutine("IECloseToMiddle");
         }
 
         /// <summary>
@@ -752,8 +754,8 @@ namespace SpaceDesign.Video
             ads3D.gameObject.SetActive(!b2D);
 
             SetTotalPlayTime();
-            //sliderVideo.sliderValue = 0;
-            sliderVideo.sliderValueWithoutEvent = 0;
+            sliderVideo.sliderValue = 0;
+            //sliderVideo.sliderValueWithoutEvent = 0;
 
             SetTextCurPlayTime(true);
 
@@ -930,10 +932,10 @@ namespace SpaceDesign.Video
                 //print("计算帧率");
             }
 
-            //if (bSetSlider)
+            if (bSetSlider)
             {
-                //sliderVideo.sliderValue = fCurTime / fTotalPlayTime;
-                sliderVideo.sliderValueWithoutEvent = fCurTime / fTotalPlayTime;
+                sliderVideo.sliderValue = fCurTime / fTotalPlayTime;
+                //sliderVideo.sliderValueWithoutEvent = fCurTime / fTotalPlayTime;
             }
 
             float s = (fCurTime % 60);
@@ -1017,7 +1019,7 @@ namespace SpaceDesign.Video
             else if (f < 0)
                 f = 0;
 
-            sliderVideo.sliderValueWithoutEvent = f;
+            //sliderVideo.sliderValueWithoutEvent = f;
 
             ResetAutoHideUITime();
             //跳帧，要预备

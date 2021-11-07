@@ -473,14 +473,14 @@ namespace SpaceDesign.Video
 
             //这里回调之后，乐播其实还没推送完，所以，进度条的回调播放，还是要在CallBackPush里面的“播放成功”中
             bPushBackAutoPlay = true;
-            if (VideoManage.Inst.bTV)
-            {
-                VideoManage.Inst.SetSliderByTV(_fTime);
-                ////VideoManage.Inst.sliderVideo.sliderValue = _fTime;
-                //VideoManage.Inst.SliderVideoPointerUp(false);
-                //VideoManage.Inst.SetTextCurPlayTime(true);
-                ////VideoManage.Inst.PlayAR();
-            }
+            //if (VideoManage.Inst.bTV)
+            //{
+            //    VideoManage.Inst.SetSliderByTV(_fTime);
+            //    ////VideoManage.Inst.sliderVideo.sliderValue = _fTime;
+            //    //VideoManage.Inst.SliderVideoPointerUp(false);
+            //    //VideoManage.Inst.SetTextCurPlayTime(true);
+            //    ////VideoManage.Inst.PlayAR();
+            //}
         }
     }
 }

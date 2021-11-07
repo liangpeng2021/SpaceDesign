@@ -97,21 +97,21 @@ namespace OXRTK.ARHandTracking
         }
 
 
-        /// <summary>
-        /// Slider value. <br>
-        /// 滑条数值。
-        /// </summary>
-        public float sliderValueWithoutEvent
-        {
-            get { return m_SliderValue; }
-            set
-            {
-                float oldValue = m_SliderValue;
-                m_SliderValue = value;
-                UpdateHandlerPos();
-                //onValueChanged?.Invoke(m_SliderValue);
-            }
-        }
+        ///// <summary>
+        ///// Slider value. <br>
+        ///// 滑条数值。
+        ///// </summary>
+        //public float sliderValueWithoutEvent
+        //{
+        //    get { return m_SliderValue; }
+        //    set
+        //    {
+        //        float oldValue = m_SliderValue;
+        //        m_SliderValue = value;
+        //        UpdateHandlerPos();
+        //        //onValueChanged?.Invoke(m_SliderValue);
+        //    }
+        //}
 
         /// <summary>
         /// Slider handler root localPosition on slider axis when slider value equals to 0. <br>
