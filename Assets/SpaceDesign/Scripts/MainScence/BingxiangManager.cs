@@ -79,8 +79,8 @@ namespace SpaceDesign
         /// </summary>
         void AddTestEvent()
         {
-            opentBtn.onPinchDown.AddListener(()=> { JudgeOpen("Open"); });
-            closeBtn.onPinchDown.AddListener(() => { JudgeOpen("Closed"); });
+            opentBtn.onPinchDown.AddListener(() => { JudgeOpen("False"); });
+            closeBtn.onPinchDown.AddListener(() => { JudgeOpen("True"); });
         }
 
         void RemoveTestEvent()
@@ -88,17 +88,19 @@ namespace SpaceDesign
             opentBtn.onPinchDown.RemoveAllListeners();
             closeBtn.onPinchDown.RemoveAllListeners();
         }
-        
+
         #endregion
 
         private void Update()
         {
-            timeCount += Time.deltaTime;
-            if (timeCount > 0.5f)
+            if (curPlayerPosState == PlayerPosState.Close)
             {
-                timeCount = 0;
-
-                ClickGetDoorState();
+                timeCount += Time.deltaTime;
+                if (timeCount > 0.5f)
+                {
+                    timeCount = 0;
+                    ClickGetDoorState();
+                }
             }
         }
 
@@ -110,16 +112,18 @@ namespace SpaceDesign
         /// </summary>
         void ClickGetDoorState()
         {
+            //Debug.Log("GetDoorState:"+ YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/sensor/door?id=1");
             //开启新协程
             IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<DoorState>(/*wwwFrom, */YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/sensor/door?id=1",
                 //回调
                 (sd) =>
                 {
+                    Debug.Log("MyLog::DoorState:" + sd.Status);
                     JudgeOpen(sd.Status);
                 }
                 );
-
-            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+            StartCoroutine(enumerator);
+            //ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
         }
         /// <summary>
         /// 根据是否开门设置冰箱UI
@@ -127,7 +131,12 @@ namespace SpaceDesign
         /// <param name="state"></param>
         void JudgeOpen(string state)
         {
-            if (lastDoorState.Equals(state))
+            if (state == null)
+            {
+                //Debug.Log("MyLog::冰箱Status为空");
+                return;
+            }
+            if (state.Equals(lastDoorState))
                 return;
             ////近处才触发
             //if (curPlayerPosState != PlayerPosState.Close)
@@ -137,24 +146,19 @@ namespace SpaceDesign
             lastDoorState = state;
 
             //发生变化的瞬间触发一次
-            if (lastDoorState.Equals("Open"))
+            //true为门磁合上
+            if (lastDoorState.Equals("True"))
             {
-                //bingxiangTimeline.gameObject.SetActive(true);
-                //bingxiangTimeline.SetCurTimelineData("开冰箱");
-
-                SetTimelineData("开冰箱",null);
-            }
-            else
-            {
-                //bingxiangTimeline.gameObject.SetActive(true);
-                //bingxiangTimeline.SetCurTimelineData("提示到信息");
                 if (isBought)
                     SetTimelineData("已购买门外信息", null);
                 else
                     SetTimelineData("未购买门外信息", null);
             }
-
-            //Debug.Log("MyLog::获取门禁状态:" + state);
+            else
+            {
+                startTip = false;
+                SetTimelineData("开冰箱", null);
+            }
         }
 
         /// <summary>
@@ -225,7 +229,6 @@ namespace SpaceDesign
             }
             else if (lastPPS == PlayerPosState.Close)
             {
-                Debug.Log("curPlayerPosState:"+ curPlayerPosState);
                 if (curPlayerPosState == PlayerPosState.Middle)/// 近距离=>中距离
                     yield return IECloseToMiddle();
                 else if (curPlayerPosState == PlayerPosState.Far)/// 近距离=>远距离
@@ -305,12 +308,12 @@ namespace SpaceDesign
                 }
                 yield return 0;
             }
-            
+
             //出现提示
             SetTimelineData("开头提示", null);
             startTip = true;
             //4秒后，出现信息
-            Invoke("TipToInfo",4.75f);
+            Invoke("TipToInfo", 4.75f);
 
             //UI变化结束
             bUIChanging = false;
@@ -330,20 +333,20 @@ namespace SpaceDesign
             if (!startTip)
                 return;
             startTip = false;
-            
-            SetTimelineData("关闭开头提示",()=>
-            {
-                if (isBought)
-                {
+
+            SetTimelineData("关闭开头提示", () =>
+             {
+                 if (isBought)
+                 {
                     //出现已购买对应的门外信息
                     SetTimelineData("已购买门外信息", null);
-                }
-                else
-                {
+                 }
+                 else
+                 {
                     //出现未购买对应的门外信息
                     SetTimelineData("未购买门外信息", null);
-                }
-            });
+                 }
+             });
         }
 
         /// <summary>
@@ -448,7 +451,7 @@ namespace SpaceDesign
         void OnClosePay()
         {
             //bingxiangTimeline.SetCurTimelineData("关闭购买");
-            SetTimelineData("关闭购买",null);
+            SetTimelineData("关闭购买", null);
         }
 
         void GoChoose()
@@ -484,16 +487,16 @@ namespace SpaceDesign
             switch (curTimelineState)
             {
                 case "开头提示":
-                    SetTimelineData("关闭开头提示",null);
+                    SetTimelineData("关闭开头提示", null);
                     break;
                 case "开冰箱":
-                    SetTimelineData("关闭开冰箱信息",null);
+                    SetTimelineData("关闭开冰箱信息", null);
                     break;
                 case "点击可乐":
-                    SetTimelineData("关闭点击可乐信息",null);
+                    SetTimelineData("关闭点击可乐信息", null);
                     break;
                 case "未购买门外信息":
-                    SetTimelineData("关闭未购买门外信息",null);
+                    SetTimelineData("关闭未购买门外信息", null);
                     break;
                 case "已购买门外信息":
                     SetTimelineData("关闭已购买门外信息", null);
@@ -508,12 +511,12 @@ namespace SpaceDesign
         /// </summary>
         public string curTimelineState;
 
-        void SetTimelineData(string state,System.Action action)
+        void SetTimelineData(string state, System.Action action)
         {
             //Debug.Log("-----------进入设置");
             curTimelineState = state;
             bingxiangTimeline.gameObject.SetActive(true);
-            bingxiangTimeline.SetCurTimelineData(curTimelineState,action);
+            bingxiangTimeline.SetCurTimelineData(curTimelineState, action);
         }
     }
 }

@@ -81,12 +81,23 @@ public class TaidengController : MonoBehaviour
         taidengOriEur = transform.localEulerAngles;
         taidengOriSca = transform.localScale;
     }
+
+    //台灯摆放后，计时3秒隐藏UI
+    float _fTime;
     private void Update()
     {
         if (showBoundBox)
         {
             //Debug.Log("EnableBoundBox");
             EnableBoundBox();
+
+            _fTime += Time.deltaTime;
+            if (_fTime >= 3)
+            {
+                _fTime = 0;
+                showBoundBox = false;
+            }
+
         }
         else
             DisableBoundBox();

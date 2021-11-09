@@ -126,7 +126,7 @@ namespace SpaceDesign.Karting
             while (true)
             {
                 bool bTest = false;
-                if (bTest)
+                //if (bTest)
                 {
                     UnityWebRequest www = UnityWebRequest.Get("http://192.168.31.123:8020/iot/bike/deviceInfo");
                     //yield return www.SendWebRequest();

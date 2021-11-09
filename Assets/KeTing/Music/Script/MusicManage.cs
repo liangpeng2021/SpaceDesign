@@ -376,6 +376,9 @@ namespace SpaceDesign.Music
         {
             if (curPlayerPosState == PlayerPosState.Middle)
             {
+                if (bMinTiming)
+                    return;
+
                 StopCoroutine("IEFarToMiddle");
                 StartCoroutine("IEFarToMiddle");
             }

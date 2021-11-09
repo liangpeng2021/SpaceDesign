@@ -255,6 +255,9 @@ namespace SpaceDesign.Karting
             //UI开始变化
             bUIChanging = true;
 
+            KartingCPE.Inst.EndGame();
+            objKarting.SetActive(false);
+
             objHelp.SetActive(false);
 
             //近距离=>中距离
@@ -363,9 +366,6 @@ namespace SpaceDesign.Karting
 
         void OnEndGame()
         {
-            KartingCPE.Inst.EndGame();
-            objKarting.SetActive(false);
-            
             StopCoroutine("IECloseToMiddle");
             StartCoroutine("IECloseToMiddle");
         }
