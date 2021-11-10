@@ -261,7 +261,7 @@ namespace SpaceDesign.Music
                     //播完了，判断状态，操作下一步
                     if (audioSource.time >= fTotalPlayTime)
                     {
-                        //print($"播完了，切换:{musicPlayState}");
+                        print($"播完了，切换:{curMusicPlayState}");
 
                         switch (curMusicPlayState)
                         {
@@ -269,6 +269,8 @@ namespace SpaceDesign.Music
                                 OnRight();
                                 break;
                             case MusicPlayState.OneLoop:
+                                pinchSliderMusicMax.sliderValue = 0;
+                                SliderMusicMaxPointerUp();
                                 OnPlay(iCurMusicNum);
                                 break;
                             case MusicPlayState.Order:
@@ -276,7 +278,8 @@ namespace SpaceDesign.Music
                                     OnRight();
                                 else
                                 {
-                                    SetAudioTime(0);
+                                    pinchSliderMusicMax.sliderValue = 0;
+                                    SliderMusicMaxPointerUp();
                                     OnPause();
                                 }
                                 break;
