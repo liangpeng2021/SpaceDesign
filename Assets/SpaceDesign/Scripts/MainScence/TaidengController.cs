@@ -129,7 +129,7 @@ namespace SpaceDesign.Lamp
                         if (iShowUIState == 2)
                         {
                             _fNoOprTime += Time.deltaTime;
-                            if (_fNoOprTime > 5)
+                            if (_fNoOprTime > 3)
                             {
                                 _fNoOprTime = 0;
                                 showBoundBox = false;
