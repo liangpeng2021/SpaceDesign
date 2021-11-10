@@ -300,7 +300,7 @@ public class EditorControl : MonoBehaviour
                 path = Application.persistentDataPath.Substring(0, Application.persistentDataPath.IndexOf("Android", StringComparison.Ordinal));
 #else
         //path = Application.streamingAssetsPath.Substring(0, Application.streamingAssetsPath.IndexOf("opporoom", StringComparison.Ordinal));
-        path = Application.streamingAssetsPath.Substring(0, Application.streamingAssetsPath.IndexOf("OPPO", StringComparison.Ordinal));
+        path = Application.streamingAssetsPath.Substring(0, Application.streamingAssetsPath.IndexOf("opporoom", StringComparison.Ordinal));
 #endif
         path= Path.Combine(path, "LenQiy", "Scences");
         if (!Directory.Exists(path))

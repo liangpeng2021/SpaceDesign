@@ -356,10 +356,10 @@ namespace SpaceDesign
                 return;
             //Debug.Log(curCai);
             //先播放当前的菜流程消失，再显示开始菜谱
+            backBtn.gameObject.SetActive(false);
             timeline.SetCurTimelineData(curCai + "消失",
                 () =>
                 {
-                    backBtn.gameObject.SetActive(false);
                     timeline.SetCurTimelineData("显示菜谱");
                 });
 

@@ -98,9 +98,9 @@ public class RoomControl : MonoBehaviour
 
     public void CreatePoint()
     {
-        float startMax = 5f;
+        float startMax = 3f;
 #if UNITY_EDITOR
-        startMax = 5f;
+        startMax = 3f;
 #else
 
 #endif

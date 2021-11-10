@@ -20,7 +20,7 @@
     
     <meta-data android:name="XRAppMode" android:value="window" />
     <!--Application type-->
-    <meta-data android:name="XRAppType" android:value="normal" />
+    <meta-data android:name="XRAppType" android:value="launcher" />
 
     <!--Unity Activity is shown on phone screen if 'XRLegacyStartMode' is 'false', or on glasses vice versa.
     If 'XRActivityShowMode' is set to 'false', activity would be hidden by default on glasses.-->

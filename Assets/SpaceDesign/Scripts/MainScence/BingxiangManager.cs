@@ -93,14 +93,11 @@ namespace SpaceDesign
 
         private void Update()
         {
-            if (curPlayerPosState == PlayerPosState.Close)
+            timeCount += Time.deltaTime;
+            if (timeCount > 0.5f)
             {
-                timeCount += Time.deltaTime;
-                if (timeCount > 0.5f)
-                {
-                    timeCount = 0;
-                    ClickGetDoorState();
-                }
+                timeCount = 0;
+                ClickGetDoorState();
             }
         }
 
@@ -138,14 +135,21 @@ namespace SpaceDesign
             }
             if (state.Equals(lastDoorState))
                 return;
-            ////近处才触发
-            //if (curPlayerPosState != PlayerPosState.Close)
-            //    return;
-
             //保存之前的状态
             lastDoorState = state;
 
+            //近处才触发
+            if (curPlayerPosState != PlayerPosState.Close)
+                return;
+
             //发生变化的瞬间触发一次
+            SetOpenAnimation();
+        }
+        /// <summary>
+        /// 直接的变化，没有过渡
+        /// </summary>
+        void SetOpenAnimation()
+        {
             //true为门磁合上
             if (lastDoorState.Equals("True"))
             {
@@ -180,6 +184,7 @@ namespace SpaceDesign
             {
                 if (lastPPS == PlayerPosState.Far)
                     return;
+                bingxiangTimeline.gameObject.SetActive(false);
                 curPlayerPosState = PlayerPosState.Far;
             }
             else if (_dis <= 5f && _dis > 3f)
@@ -309,11 +314,22 @@ namespace SpaceDesign
                 yield return 0;
             }
 
-            //出现提示
-            SetTimelineData("开头提示", null);
-            startTip = true;
-            //4秒后，出现信息
-            Invoke("TipToInfo", 4.75f);
+            dangaoObj.SetActive(true);
+            niunaiObj.SetActive(true);
+            //true为门磁合上
+            if (lastDoorState.Equals("True") || lastDoorState.Equals(""))
+            {
+                //出现提示
+                SetTimelineData("开头提示", null);
+                startTip = true;
+                //4秒后，出现信息
+                Invoke("TipToInfo", 4.75f);
+            }
+            else
+            {
+                startTip = false;
+                SetTimelineData("开冰箱", null);
+            }
 
             //UI变化结束
             bUIChanging = false;
@@ -329,7 +345,7 @@ namespace SpaceDesign
         void TipToInfo()
         {
             //退出执行
-            Debug.Log("TipToInfo:startTip:" + startTip);
+            //Debug.Log("TipToInfo:startTip:" + startTip);
             if (!startTip)
                 return;
             startTip = false;
@@ -369,9 +385,7 @@ namespace SpaceDesign
                 }
                 yield return 0;
             }
-            bingxiangTimeline.gameObject.SetActive(false);
-            lastDoorState = "";
-
+            
             OnQuit();
 
             //UI变化结束
@@ -447,6 +461,11 @@ namespace SpaceDesign
         /// 进入选择界面
         /// </summary>
         public ButtonRayReceiver gochoose;
+        /// <summary>
+        /// 蛋糕和牛奶对象，退出时处理
+        /// </summary>
+        public GameObject dangaoObj;
+        public GameObject niunaiObj;
 
         void OnClosePay()
         {
@@ -482,7 +501,8 @@ namespace SpaceDesign
         {
             //提示到一半如果距离变化，不继续执行
             startTip = false;
-            Debug.Log("OnQuit:startTip:" + startTip);
+            dangaoObj.SetActive(false);
+            niunaiObj.SetActive(false);
 
             switch (curTimelineState)
             {
@@ -500,6 +520,10 @@ namespace SpaceDesign
                     break;
                 case "已购买门外信息":
                     SetTimelineData("关闭已购买门外信息", null);
+                    break;
+                case "一键复购":
+                case "点击购买":
+                    bingxiangTimeline.gameObject.SetActive(false);
                     break;
                 default:
                     break;

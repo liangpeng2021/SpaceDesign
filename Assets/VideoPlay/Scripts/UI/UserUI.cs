@@ -133,10 +133,20 @@ public class UserUI : MonoBehaviour
         //登陆面板关闭
         //dengluzhuceTran.gameObject.SetActive(true);
         //EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
+        //回到输入账户界面
         ClickBtn(0);
 
         backtolastPanelBtn.OnClickDwon.AddListener(BackToLastPanel);
+
+        logoutBtn.onPinchDown.AddListener(ClickLogoutLogin);
     }
+    ///// <summary>
+    ///// 去除事件
+    ///// </summary>
+    //void RemoveLogOutEvent()
+    //{
+    //    logoutBtn.onPinchDown.RemoveAllListeners();
+    //}
 
     void BackToLastPanel()
     {
@@ -262,7 +272,10 @@ public class UserUI : MonoBehaviour
             }
 			else
 			{
-				userManager.SendChangePasswordData(phoneText.text, yanzhengmaText.text, passwordText.text,
+                Debug.Log("userManager:"+ userManager);
+                Debug.Log("phoneText.text:" + phoneText);
+                
+                userManager.SendChangePasswordData(phoneText.text, yanzhengmaText.text, passwordText.text,
 					(ud,mg)=>
 					{
 						
@@ -626,5 +639,21 @@ public class UserUI : MonoBehaviour
         userManager.Logout();
         dengluzhuceTran.gameObject.SetActive(true);
         EditorControl.Instance.keyBoardManager.gameObject.SetActive(true);
+    }
+    /// <summary>
+    /// 注销按钮
+    /// </summary>
+    public ButtonRayReceiver logoutBtn;
+    /// <summary>
+    /// 点击注销按钮
+    /// </summary>
+    void ClickLogoutLogin()
+    {
+        //EditorControl.Instance.editorUIObj.SetActive(false);
+        //LogoutContinueLogin();
+        ////回到输入账户界面
+        //ClickBtn(0);
+        userManager.Logout();
+        UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("EditorScence");
     }
 }
