@@ -54,16 +54,25 @@ public class TimelineControl : MonoBehaviour
     System.Action endAction2;
 
     public BoxCollider[] boxColliders;
-    
+
+    bool isInit = false;
+    public void Init()
+    {
+        if (isInit)
+            return;
+        for (int i = 0; i < timelineDatas.Length; i++)
+        {
+            if (!timeDataDic.ContainsKey(timelineDatas[i].fragmentName))
+                timeDataDic.Add(timelineDatas[i].fragmentName, timelineDatas[i]);
+        }
+        isInit = true;
+    }
+
     public void StartPause()
     {
 		playableDirector.time = 0;
         playableDirector.Pause();
-
-        for (int i = 0; i < timelineDatas.Length; i++)
-        {
-            timeDataDic.Add(timelineDatas[i].fragmentName, timelineDatas[i]);
-        }
+        Init();
     }
 
     void SetCollidersEnable(bool isEnable)

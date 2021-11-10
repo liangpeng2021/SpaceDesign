@@ -43,6 +43,8 @@ namespace SpaceDesign
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
             AddButtonRayEvent();
+
+            Init();
         }
 
         void OnDisable()
@@ -51,12 +53,17 @@ namespace SpaceDesign
             RemoveButtonRayEvent();
         }
 
-        void Start()
+        private void Init()
         {
-            v3OriPos = this.transform.position;
             timeline.StartPause();
             timeline.gameObject.SetActive(false);
             backBtn.gameObject.SetActive(false);
+        }
+
+        void Start()
+        {
+            v3OriPos = this.transform.position;
+            Init();
         }
         void OnDestroy() { StopAllCoroutines(); }
 

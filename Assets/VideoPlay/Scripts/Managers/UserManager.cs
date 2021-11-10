@@ -67,7 +67,7 @@ public class UserManager : MonoBehaviour
     {
         if (userpath == null)
         {
-            userpath = EditorControl.GetPth();
+            userpath = SpaceDesign.PathConfig.GetPth();
             userpath = Path.Combine(userpath, "user.json");
         }
         
@@ -89,7 +89,7 @@ public class UserManager : MonoBehaviour
     {
         if (userpath == null)
         {
-            userpath = EditorControl.GetPth();
+            userpath = SpaceDesign.PathConfig.GetPth();
             userpath = Path.Combine(userpath, "user.json");
         }
         if (userLocalData == null)
@@ -124,7 +124,7 @@ public class UserManager : MonoBehaviour
     {
         if (userpath == null)
         {
-            userpath = EditorControl.GetPth();
+            userpath = SpaceDesign.PathConfig.GetPth();
             userpath = Path.Combine(userpath, "user.json");
         }
         if (userLocalData != null)

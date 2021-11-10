@@ -46,6 +46,9 @@ namespace SpaceDesign
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
             AddButtonRayEvent();
 
+            bingxiangTimeline.StartPause();
+            bingxiangTimeline.gameObject.SetActive(false);
+
             AddTestEvent();
         }
 
@@ -53,6 +56,8 @@ namespace SpaceDesign
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             RemoveButtonRayEvent();
+
+            bingxiangTimeline.gameObject.SetActive(false);
 
             RemoveTestEvent();
         }
@@ -153,6 +158,9 @@ namespace SpaceDesign
             //true为门磁合上
             if (lastDoorState.Equals("True"))
             {
+                dangaoObj.SetActive(false);
+                niunaiObj.SetActive(false);
+
                 if (isBought)
                     SetTimelineData("已购买门外信息", null);
                 else
@@ -160,6 +168,9 @@ namespace SpaceDesign
             }
             else
             {
+                dangaoObj.SetActive(true);
+                niunaiObj.SetActive(true);
+
                 startTip = false;
                 SetTimelineData("开冰箱", null);
             }

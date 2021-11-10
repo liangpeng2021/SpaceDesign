@@ -167,7 +167,7 @@ public class LoadMainScence : MonoBehaviour
         //===========================================================================
 
         //BitConverter方式
-        string path = EditorControl.GetPth();
+        string path = SpaceDesign.PathConfig.GetPth();
         path = Path.Combine(path, "scence.scn");
         objectDatas = MyDeSerial(path);
 

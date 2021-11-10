@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using OXRTK.ARHandTracking;
 using System.IO;
-using System;
+
 using UnityEngine.UI;
 using XR;
 using UnityEngine.SceneManagement;
@@ -286,28 +286,10 @@ public class EditorControl : MonoBehaviour
 
         ////格式化显示当前时间
         //string timestr= string.Format("{0:D2}-{1:D2}-{2:D2} " + "{3:D4}-{4:D2}-{5:D2}", hour, minute, second, year, month, day);
-        path = GetPth();
+        path = PathConfig.GetPth();
         path = Path.Combine(path,"scence.scn");
     }
-    
-    /// <summary>
-    /// 获取配置文件的路径
-    /// </summary>
-    public static string GetPth()
-    {
-        string path;
-#if UNITY_ANDROID && !UNITY_EDITOR
-                path = Application.persistentDataPath.Substring(0, Application.persistentDataPath.IndexOf("Android", StringComparison.Ordinal));
-#else
-        //path = Application.streamingAssetsPath.Substring(0, Application.streamingAssetsPath.IndexOf("opporoom", StringComparison.Ordinal));
-        path = Application.streamingAssetsPath.Substring(0, Application.streamingAssetsPath.IndexOf("opporoom", StringComparison.Ordinal));
-#endif
-        path= Path.Combine(path, "LenQiy", "Scences");
-        if (!Directory.Exists(path))
-            Directory.CreateDirectory(path);
 
-        return path;
-    }
     #endregion
 
     #region 提示
