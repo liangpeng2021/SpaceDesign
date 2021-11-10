@@ -422,20 +422,20 @@ namespace SpaceDesign
 
         void AddButtonRayEvent()
         {
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            closePayBtn.onPinchUp.AddListener(OnClosePay);
-            directPayBtn.onPinchUp.AddListener(DirectPay);
-            payBtn.onPinchUp.AddListener(ChoosePay);
-            gochoose.onPinchUp.AddListener(GoChoose);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            closePayBtn.onPinchDown.AddListener(OnClosePay);
+            directPayBtn.onPinchDown.AddListener(DirectPay);
+            payBtn.onPinchDown.AddListener(ChoosePay);
+            gochoose.onPinchDown.AddListener(GoChoose);
         }
 
         void RemoveButtonRayEvent()
         {
-            btnIcon.onPinchUp.RemoveAllListeners();
-            closePayBtn.onPinchUp.RemoveAllListeners();
-            directPayBtn.onPinchUp.RemoveAllListeners();
-            payBtn.onPinchUp.RemoveAllListeners();
-            gochoose.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            closePayBtn.onPinchDown.RemoveAllListeners();
+            directPayBtn.onPinchDown.RemoveAllListeners();
+            payBtn.onPinchDown.RemoveAllListeners();
+            gochoose.onPinchDown.RemoveAllListeners();
         }
 
         #endregion

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 修改灯的材质，/*create by 梁鹏 2021-9-3 */
 /// </summary>
-namespace SpaceDesign
+namespace SpaceDesign.Lamp
 {
     public class ChangeLightObjMat : MonoBehaviour
     {
@@ -32,7 +32,7 @@ namespace SpaceDesign
         private void Start()
         {
             mat1 = lightRender.materials[1];
-            mat2= lightRender.materials[4];
+            mat2 = lightRender.materials[4];
         }
 
         private void OnEnable()
@@ -49,22 +49,31 @@ namespace SpaceDesign
 
                     lightData[i].buttonRayReceiver.onPointerEnter.AddListener(() =>
                     {
-                        FocusOnOrOff(num,true);
+                        FocusOnOrOff(num, true);
                     });
 
                     lightData[i].buttonRayReceiver.onPointerExit.AddListener(() =>
                     {
-                        FocusOnOrOff(num, true);
+                        //------------ Modify by zh ------------
+                        //FocusOnOrOff(num, true);
+                        FocusOnOrOff(num, false);
+                        //------------------End------------------
                     });
                 }
             }
         }
 
-        void FocusOnOrOff(int num,bool isOn)
+        void FocusOnOrOff(int num, bool isOn)
         {
-            focusTran.gameObject.SetActive(isOn);
-            if (isOn)
-                focusTran.position= lightData[num].buttonRayReceiver.transform.position;
+            //------------ Modify by zh ------------
+            //focusTran.gameObject.SetActive(isOn);
+            //if (isOn)
+            //    focusTran.position = lightData[num].buttonRayReceiver.transform.position;
+
+            focusTran.gameObject.SetActive(true);
+            focusTran.position = lightData[num].buttonRayReceiver.transform.position;
+            TaidengManager.Inst.taidengController.SetTranslating(isOn);
+            //------------------End------------------
         }
 
         private void OnDisable()
@@ -72,9 +81,7 @@ namespace SpaceDesign
             for (int i = 0; i < lightData.Length; i++)
             {
                 lightData[i].buttonRayReceiver.onPinchDown.RemoveAllListeners();
-
                 lightData[i].buttonRayReceiver.onPointerEnter.RemoveAllListeners();
-
                 lightData[i].buttonRayReceiver.onPointerExit.RemoveAllListeners();
             }
         }

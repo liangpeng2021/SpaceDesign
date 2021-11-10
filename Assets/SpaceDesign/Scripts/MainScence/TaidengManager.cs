@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// 管理台灯效果，/*create by 梁鹏 2021-10-27 */
 /// </summary>
-namespace SpaceDesign
+namespace SpaceDesign.Lamp
 {
     public class TaidengManager : MonoBehaviour
     {
@@ -66,7 +66,8 @@ namespace SpaceDesign
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
             //Invoke("SetIconParent", 0.1f);
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-            traIconRoot.SetParent(null);
+            //traIconRoot.SetParent(null);
+            traIconRoot.SetParent(transform.parent);
         }
         void OnDestroy()
         {
@@ -107,13 +108,13 @@ namespace SpaceDesign
                     return;
                 curPlayerPosState = PlayerPosState.Far;
             }
-            else if (_dis <= 5f && _dis > 1.5f)
+            else if (_dis <= 5f && _dis > 2f)
             {
                 if (lastPPS == PlayerPosState.Middle)
                     return;
                 curPlayerPosState = PlayerPosState.Middle;
             }
-            else if (_dis <= 1.5f)
+            else if (_dis <= 2f)
             {
                 if (lastPPS == PlayerPosState.Close)
                     return;
@@ -312,16 +313,16 @@ namespace SpaceDesign
 
         void AddButtonRayEvent()
         {
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            closeBtn.onPinchUp.AddListener(OnClose);
-            placeBtn.onPinchUp.AddListener(OnCheckPlace);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            closeBtn.onPinchDown.AddListener(OnClose);
+            placeBtn.onPinchDown.AddListener(OnCheckPlace);
         }
 
         void RemoveButtonRayEvent()
         {
-            btnIcon.onPinchUp.RemoveAllListeners();
-            closeBtn.onPinchUp.RemoveAllListeners();
-            placeBtn.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            closeBtn.onPinchDown.RemoveAllListeners();
+            placeBtn.onPinchDown.RemoveAllListeners();
         }
 
         #endregion
@@ -368,7 +369,8 @@ namespace SpaceDesign
             image2DTrackingTaideng.enabled = false;
 
             taidengController.Init();
-            taidengController.gameObject.SetActive(false);
+            if (taidengController.gameObject.activeSelf == true)
+                taidengController.gameObject.SetActive(false);
         }
         #endregion
     }

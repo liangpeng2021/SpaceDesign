@@ -1,5 +1,107 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &440813523
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 440813524}
+  - component: {fileID: 440813526}
+  - component: {fileID: 440813525}
+  m_Layer: 0
+  m_Name: BuyUIBoxCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &440813524
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440813523}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0.6}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4131057074515949309}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &440813526
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440813523}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.5, y: 3, z: 2.6}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &440813525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440813523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c0df8b776f088b45a87a5dfe103e943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onPointerEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: set_showBoundBox
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: SetTranslating
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  onPointerExit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: SetTranslating
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onPinchDown:
+    m_PersistentCalls:
+      m_Calls: []
+  onPinchUp:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1085138112959792385
 GameObject:
   m_ObjectHideFlags: 0
@@ -113,6 +215,7 @@ Transform:
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children:
   - {fileID: 1953136228875550567}
+  - {fileID: 440813524}
   m_Father: {fileID: 1953136228875548825}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
@@ -683,11 +786,11 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953136228875546980}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: -1}
-  m_LocalPosition: {x: 0, y: 0.15, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -1.3333331, z: 0}
+  m_LocalScale: {x: 6.666666, y: 6.666666, z: 6.666666}
   m_Children: []
-  m_Father: {fileID: 1953136228875550569}
+  m_Father: {fileID: 1953136228875550568}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!23 &1953136228875543749
@@ -1876,7 +1979,7 @@ Transform:
   m_Children:
   - {fileID: 1953136228875548829}
   m_Father: {fileID: 1953136228875550569}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1953136228875547268
 GameObject:
@@ -2434,7 +2537,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1953136228875550567
 Transform:
   m_ObjectHideFlags: 0
@@ -2829,7 +2932,7 @@ GameObject:
   - component: {fileID: 1953136228875544900}
   - component: {fileID: 1953136228875542976}
   m_Layer: 5
-  m_Name: image (3)
+  m_Name: PeisongObj
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3211,7 +3314,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 150, y: 0}
+  m_AnchoredPosition: {x: -150, y: 0}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1953136228875543490
@@ -3444,6 +3547,17 @@ MonoBehaviour:
           m_StringArgument: Highlighted
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: SetTranslating
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   onPointerExit:
     m_PersistentCalls:
       m_Calls:
@@ -3456,6 +3570,17 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: Normal
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: SetTranslating
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
   onPinchDown:
@@ -3499,7 +3624,7 @@ GameObject:
   - component: {fileID: 1953136228875544897}
   - component: {fileID: 1953136228875542979}
   m_Layer: 5
-  m_Name: image
+  m_Name: FirstObj
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3979,7 +4104,7 @@ GameObject:
   - component: {fileID: 1953136228875544956}
   - component: {fileID: 1953136228875542991}
   m_Layer: 5
-  m_Name: image (2)
+  m_Name: PaySuccessObj
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4095,7 +4220,7 @@ Transform:
   - {fileID: 1953136228875545984}
   - {fileID: 4184610817867406795}
   m_Father: {fileID: 1953136228875550569}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1953136228875542623
 BoxCollider:
@@ -4106,7 +4231,7 @@ BoxCollider:
   m_GameObject: {fileID: 1953136228875547292}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 0.35, y: 0.35, z: 0.35}
   m_Center: {x: 0, y: 0, z: 0}
@@ -4126,9 +4251,9 @@ MonoBehaviour:
   startpayRayReceiver: {fileID: 1953136228875544951}
   firstObj: {fileID: 1953136228875547286}
   secondObj: {fileID: 1953136228875547294}
+  objBuyUIBoxCollider: {fileID: 440813523}
   pointLight: {fileID: 1953136228875547273}
   payObj: {fileID: 1953136228875547275}
-  showBoundBox: 0
   justpayRayReceiver: {fileID: 1953136228875544947}
   paySuccessObj: {fileID: 1953136228875547291}
   peisongObj: {fileID: 1953136228875547280}
@@ -4137,6 +4262,8 @@ MonoBehaviour:
   audioSource: {fileID: 7223383943898768954}
   successClip: {fileID: 8300000, guid: da948a206f203904a94c29e338b3c772, type: 3}
   zhixiangClip: {fileID: 8300000, guid: 87cf52a80b9a0374c9f41b0a37c9c6e7, type: 3}
+  iShowUIState: 0
+  bTranslating: 0
 --- !u!114 &1953136228875544953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4159,7 +4286,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953136228875547292}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 89f6ebfae3d0b4b4e968f3c67b2f84a5, type: 3}
   m_Name: 
@@ -4190,12 +4317,34 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: SetTranslating
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   onTranslateUpdate:
     m_PersistentCalls:
       m_Calls: []
   onTranslateEnd:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: SetTranslating
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onRotateStart:
     m_PersistentCalls:
       m_Calls:
@@ -4210,6 +4359,17 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: SetTranslating
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   onRotateUpdate:
     m_PersistentCalls:
       m_Calls: []
@@ -4219,6 +4379,17 @@ MonoBehaviour:
       - m_Target: {fileID: 1953136228875544955}
         m_MethodName: TarDengEndRot
         m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1953136228875544955}
+        m_MethodName: SetTranslating
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -4360,7 +4531,7 @@ GameObject:
   - component: {fileID: 1953136228875545990}
   - component: {fileID: 1953136228875542990}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: SecondObj
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4475,13 +4646,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightData:
   - buttonRayReceiver: {fileID: 1953136228875544898}
-    color: {r: 0.7176471, g: 0.7137255, b: 0.5254902, a: 1}
+    color: {r: 0.39215687, g: 0.50980395, b: 0.08235294, a: 1}
   - buttonRayReceiver: {fileID: 1953136228875544906}
     color: {r: 0.50980395, g: 0.21960784, b: 0.078431375, a: 1}
   - buttonRayReceiver: {fileID: 1953136228875544915}
     color: {r: 0.50980395, g: 0.3764706, b: 0.078431375, a: 1}
   - buttonRayReceiver: {fileID: 326971842425433617}
-    color: {r: 0.39215687, g: 0.50980395, b: 0.08235294, a: 1}
+    color: {r: 0.7176471, g: 0.7137255, b: 0.5254902, a: 1}
   selectTran: {fileID: 1953136228875545987}
   focusTran: {fileID: 1953136228875546002}
   lightRender: {fileID: 1671954017190146098}
@@ -4782,7 +4953,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -682.59546}
+  m_AnchoredPosition: {x: 600, y: -600}
   m_SizeDelta: {x: 120, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1953136228875543495
@@ -5724,9 +5895,10 @@ Transform:
   m_LocalPosition: {x: 0, y: 0.25, z: 0}
   m_LocalScale: {x: 0.075, y: 0.075, z: 0.075}
   m_Children:
+  - {fileID: 1953136228875550576}
   - {fileID: 1953136228875550571}
   m_Father: {fileID: 1953136228875550569}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1953136228875547315
 GameObject:
@@ -5840,7 +6012,7 @@ Transform:
   - {fileID: 1953136228875550479}
   - {fileID: 1953136228875549469}
   m_Father: {fileID: 1953136228875550568}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &1953136228875542983
 Animator:
@@ -5927,7 +6099,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1953136228875550576}
   - {fileID: 1953136228875550568}
   - {fileID: 1953136228875548825}
   - {fileID: 1953136228875548824}
@@ -5991,8 +6162,6 @@ MonoBehaviour:
   OnLossTargetEvent:
     m_PersistentCalls:
       m_Calls: []
-  objModel: {fileID: 1085138113022772462}
-  objUI: {fileID: 1953136228875547290}
   texture: {fileID: 2800000, guid: 2bc0a5391cb86ef409a5c51254b4a1a0, type: 3}
 --- !u!1 &1953136228875547318
 GameObject:

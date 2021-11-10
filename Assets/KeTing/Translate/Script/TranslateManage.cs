@@ -44,24 +44,25 @@ namespace SpaceDesign.Translate
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnCheckTranslate.onPinchUp.AddListener(OnCheckTranslate);
-            btnQuit.onPinchUp.AddListener(OnQuit);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnCheckTranslate.onPinchDown.AddListener(OnCheckTranslate);
+            btnQuit.onPinchDown.AddListener(OnQuit);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnCheckTranslate.onPinchUp.RemoveAllListeners();
-            btnQuit.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnCheckTranslate.onPinchDown.RemoveAllListeners();
+            btnQuit.onPinchDown.RemoveAllListeners();
         }
 
         void Start()
         {
             v3OriPos = this.transform.position;
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-            traIconRoot.SetParent(null);
+            //traIconRoot.SetParent(null);
+            traIconRoot.SetParent(transform.parent);
         }
         void OnDestroy()
         {
@@ -304,8 +305,7 @@ namespace SpaceDesign.Translate
         /// </summary>
         public void OnCheckTranslate()
         {
-            btnCheckTranslate.transform.localScale = Vector3.zero;
-            //btnCheckTranslate.gameObject.SetActive(false);
+            btnCheckTranslate.gameObject.SetActive(false);
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
             markTrackTranslate.StopTrack();

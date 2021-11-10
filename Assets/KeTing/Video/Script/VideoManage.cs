@@ -67,38 +67,34 @@ namespace SpaceDesign.Video
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnVideoClose.onPinchUp.AddListener(OnVideoClose);
-            btnVideoSize.onPinchUp.AddListener(OnVideoSize);
-            btnWatchNow.onPinchUp.AddListener(OnWatchNow);
-            //btnVideo2D.onPinchUp.AddListener(OnVideo2D);
-            //btnVideo3D.onPinchUp.AddListener(OnVideo3D);
-            btnVideo2D.onPinchUp.AddListener(() => { SetVideo(true); });
-            btnVideo3D.onPinchUp.AddListener(() => { SetVideo(false); });
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnVideoClose.onPinchDown.AddListener(OnVideoClose);
+            btnVideoSize.onPinchDown.AddListener(OnVideoSize);
+            btnWatchNow.onPinchDown.AddListener(OnWatchNow);
+            btnVideo2D.onPinchDown.AddListener(() => { SetVideo(true); });
+            btnVideo3D.onPinchDown.AddListener(() => { SetVideo(false); });
 
             btnARWindows.onPointerEnter.AddListener(() =>
             {
                 if (bSizeSmall == false)
                     SetExpand(true);
             });
-            btnARWindows.onPinchUp.AddListener(() =>
+            btnARWindows.onPinchDown.AddListener(() =>
             {
                 if (bSizeSmall == true)
                     OnVideoSize();
             });
-            btnPlay.onPinchUp.AddListener(() =>
+            btnPlay.onPinchDown.AddListener(() =>
             {
                 if (bPause)
                     OnUnPause();
                 else
                     OnPlay();
             });
-            btnPause.onPinchUp.AddListener(OnPause);
-            //btnAR.onPinchUp.AddListener(OnAR);
-            //btnTV.onPinchUp.AddListener(OnTV);
-            btnAR.onPinchUp.AddListener(() => { SetTV(false, false); });
-            btnTV.onPinchUp.AddListener(() => { SetTV(true, true); });
-            btnQuit.onPinchUp.AddListener(OnVideoClose);
+            btnPause.onPinchDown.AddListener(OnPause);
+            btnAR.onPinchDown.AddListener(() => { SetTV(false, false); });
+            btnTV.onPinchDown.AddListener(() => { SetTV(true, true); });
+            btnQuit.onPinchDown.AddListener(OnVideoClose);
             sliderVideo.onInteractionStart.AddListener(SliderVideoPointerDown);
             sliderVideo.onInteractionEnd.AddListener(() => { SliderVideoPointerUp(true); });
         }
@@ -106,21 +102,21 @@ namespace SpaceDesign.Video
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnVideoClose.onPinchUp.RemoveAllListeners();
-            btnVideoSize.onPinchUp.RemoveAllListeners();
-            btnWatchNow.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnVideoClose.onPinchDown.RemoveAllListeners();
+            btnVideoSize.onPinchDown.RemoveAllListeners();
+            btnWatchNow.onPinchDown.RemoveAllListeners();
             btnARWindows.onPointerEnter.RemoveAllListeners();
-            btnARWindows.onPinchUp.RemoveAllListeners();
-            btnVideo2D.onPinchUp.RemoveAllListeners();
-            btnVideo3D.onPinchUp.RemoveAllListeners();
-            btnPlay.onPinchUp.RemoveAllListeners();
-            btnPause.onPinchUp.RemoveAllListeners();
-            btnAR.onPinchUp.RemoveAllListeners();
-            btnTV.onPinchUp.RemoveAllListeners();
-            btnQuit.onPinchUp.RemoveAllListeners();
-            //sliderVideo.onInteractionStart.RemoveAllListeners();
-            //sliderVideo.onInteractionEnd.RemoveAllListeners();
+            btnARWindows.onPinchDown.RemoveAllListeners();
+            btnVideo2D.onPinchDown.RemoveAllListeners();
+            btnVideo3D.onPinchDown.RemoveAllListeners();
+            btnPlay.onPinchDown.RemoveAllListeners();
+            btnPause.onPinchDown.RemoveAllListeners();
+            btnAR.onPinchDown.RemoveAllListeners();
+            btnTV.onPinchDown.RemoveAllListeners();
+            btnQuit.onPinchDown.RemoveAllListeners();
+            sliderVideo.onInteractionStart.RemoveAllListeners();
+            sliderVideo.onInteractionEnd.RemoveAllListeners();
         }
 
         void Start()
@@ -256,10 +252,10 @@ namespace SpaceDesign.Video
             else if (lastPPS == PlayerPosState.Close)
             {
                 if (curPlayerPosState == PlayerPosState.Middle)/// 近距离=>中距离
-                    yield return IECloseToMiddle();
+                    yield return IECloseToMiddle(false);
                 else if (curPlayerPosState == PlayerPosState.Far)/// 近距离=>远距离
                 {
-                    yield return IECloseToMiddle();
+                    yield return IECloseToMiddle(false);
                     yield return IEMiddleToFar();
                 }
             }
@@ -354,7 +350,7 @@ namespace SpaceDesign.Video
         /// <summary>
         /// 近距离=>中距离
         /// </summary>
-        IEnumerator IECloseToMiddle()
+        IEnumerator IECloseToMiddle(bool bSetTV)
         {
             if (bTV == false)
                 yield break;
@@ -381,6 +377,19 @@ namespace SpaceDesign.Video
                     break;
                 }
                 yield return 0;
+            }
+
+            if (bSetTV)
+            {
+                yield return new WaitForSeconds(0.5f);
+                bTV = bTVTemp;
+
+                if (bTV)
+                    tvCtr.OnClose();
+                else
+                {
+                    SetTV(true, false);
+                }
             }
 
             //UI变化结束
@@ -556,6 +565,7 @@ namespace SpaceDesign.Video
             ads3D.mute = !bShow;
             btnARWindows.transform.localScale = bShow ? new Vector3(0.8f, 0.8f, 0.8f) : Vector3.zero;
         }
+        bool bTVTemp;
         /// <summary>
         /// 关闭视频
         /// </summary>
@@ -563,22 +573,23 @@ namespace SpaceDesign.Video
         {
             OnStop();
 
-            if (bTV)
-                tvCtr.OnClose();
-            else
-            {
-                SetTV(true, false);
-                //OnTV();
-            }
+            ////if (bTV)
+            ////    tvCtr.OnClose();
+            ////else
+            ////{
+            ////    SetTV(true, false);
+            ////}
 
-            traVideoExpand.gameObject.SetActive(false);
+            ////traVideoExpand.gameObject.SetActive(false);
 
-            //if (bReminder)
-            //    SetReminder(false);
-            //else if (bExpand)
-            //    SetExpand(false);
 
-            StartCoroutine("IECloseToMiddle");
+            //视频框直接隐藏先（缩放为0）
+            btnARWindows.transform.localScale = Vector3.zero;
+            //先把TV模式设置成true，否则IECloseToMiddle不进行
+            bTVTemp = bTV;
+            bTV = true;
+            StopCoroutine("IECloseToMiddle");
+            StartCoroutine("IECloseToMiddle", true);
         }
 
         /// <summary>
@@ -596,12 +607,16 @@ namespace SpaceDesign.Video
         {
             //加一个临时bool变量，普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
             bool bTempSizeSmall = bSizeSmall;
+
+            btnVideoClose.gameObject.SetActive(bTempSizeSmall);
+            btnVideoSize.gameObject.SetActive(bTempSizeSmall);
+
             if (bTempSizeSmall == false)
             {
                 //普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
                 bSizeSmall = true;
 
-                btnPause.onPinchUp.Invoke();
+                btnPause.onPinchDown.Invoke();
                 //Normal -> Small  先隐藏扩展界面，再缩小
                 if (bExpand == true)
                 {
@@ -613,7 +628,7 @@ namespace SpaceDesign.Video
             }
             else
             {
-                btnPlay.onPinchUp.Invoke();
+                btnPlay.onPinchDown.Invoke();
                 traVideoExpand.SetParent(traFollowNormalParent);
             }
 
@@ -658,6 +673,8 @@ namespace SpaceDesign.Video
         /// </summary>
         void OnWatchNow()
         {
+
+
             SetReminder(false);
             Invoke("_InvokeShowExpand", 1.2f);
         }
@@ -722,8 +739,10 @@ namespace SpaceDesign.Video
             btnVideoClose.gameObject.SetActive(!bTV);
             btnVideoSize.gameObject.SetActive(!bTV);
 
-            btnAR.transform.localScale = bTV ? (Vector3.one * 2) : Vector3.zero;
-            btnTV.transform.localScale = bTV ? Vector3.zero : (Vector3.one * 2);
+            btnAR.gameObject.SetActive(bTV);
+            btnTV.gameObject.SetActive(!bTV);
+            //btnAR.transform.localScale = bTV ? (Vector3.one * 2) : Vector3.zero;
+            //btnTV.transform.localScale = bTV ? Vector3.zero : (Vector3.one * 2);
             //btnAR.gameObject.SetActive(bTV);
             //btnTV.gameObject.SetActive(!bTV);
             if (bTV == false)
@@ -759,11 +778,13 @@ namespace SpaceDesign.Video
 
             SetTextCurPlayTime(true);
 
+
+            btnAR.transform.localScale = bTV ? (Vector3.one * 2) : Vector3.zero;
+            btnTV.transform.localScale = bTV ? Vector3.zero : (Vector3.one * 2);
             if (bTV)
             {
                 tvCtr.OnPush(b2D, true, false);
                 btnAR.GetComponentInChildren<TextMesh>().text = b2D ? "AR模式" : "3D全息模式";
-                btnAR.transform.localScale = (Vector3.one * 2);
                 //btnAR.gameObject.SetActive(true);
 #if UNITY_EDITOR
                 OnPlay();
@@ -771,7 +792,6 @@ namespace SpaceDesign.Video
             }
             else
             {
-                btnTV.transform.localScale = (Vector3.one * 2);
                 OnPlay();
             }
         }

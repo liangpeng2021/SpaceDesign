@@ -45,19 +45,19 @@ namespace SpaceDesign.Karting
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnStart.onPinchUp.AddListener(OnStartGame);
-            btnEnd.onPinchUp.AddListener(OnEndGame);
-            //btnQuit.onPinchUp.AddListener(Hide);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnStart.onPinchDown.AddListener(OnStartGame);
+            btnEnd.onPinchDown.AddListener(OnEndGame);
+            //btnQuit.onPinchDown.AddListener(Hide);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnStart.onPinchUp.RemoveAllListeners();
-            btnEnd.onPinchUp.RemoveAllListeners();
-            //btnQuit.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnStart.onPinchDown.RemoveAllListeners();
+            btnEnd.onPinchDown.RemoveAllListeners();
+            //btnQuit.onPinchDown.RemoveAllListeners();
         }
 
         void Start()

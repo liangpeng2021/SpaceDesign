@@ -44,10 +44,10 @@ namespace SpaceDesign.CPEShow
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnLightOn.onPinchUp.AddListener(LightOff);
-            btnLightOff.onPinchUp.AddListener(LightOn);
-            btnQuit.onPinchUp.AddListener(Hide);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnLightOn.onPinchDown.AddListener(LightOff);
+            btnLightOff.onPinchDown.AddListener(LightOn);
+            btnQuit.onPinchDown.AddListener(Hide);
             sliderLamp.onValueChanged.AddListener(LightSlider);
             sliderLamp.onInteractionEnd.AddListener(SetBrightness);
         }
@@ -55,10 +55,10 @@ namespace SpaceDesign.CPEShow
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnLightOn.onPinchUp.RemoveAllListeners();
-            btnLightOff.onPinchUp.RemoveAllListeners();
-            btnQuit.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnLightOn.onPinchDown.RemoveAllListeners();
+            btnLightOff.onPinchDown.RemoveAllListeners();
+            btnQuit.onPinchDown.RemoveAllListeners();
             sliderLamp.onValueChanged.RemoveAllListeners();
             sliderLamp.onInteractionEnd.RemoveAllListeners();
         }
@@ -277,7 +277,7 @@ namespace SpaceDesign.CPEShow
         {
             f = 0.4f + f * 0.6f;
             SetPropBlock(f);
-            if (f <= 0.41f)
+            if (f <= 0.4f)
             {
                 if (btnLightOn.gameObject.activeSelf == true)
                     btnLightOn.gameObject.SetActive(false);
@@ -319,7 +319,7 @@ namespace SpaceDesign.CPEShow
             //发送信息状态【0：亮度】【1：开】【2：关】
             int _iSendType = 0;
 
-            if (sliderLamp.sliderValue <= 0.1f)
+            if (sliderLamp.sliderValue <= 0)
             {
                 _iSendType = 2;
                 bLampOn = false;

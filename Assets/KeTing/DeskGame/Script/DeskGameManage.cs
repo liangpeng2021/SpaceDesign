@@ -49,19 +49,19 @@ namespace SpaceDesign.DeskGame
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnGame01.onPinchUp.AddListener(() => { CallApp("com.gabor.artowermotion"); });
-            btnGame02.onPinchUp.AddListener(() => { CallApp("com.baymax.omoba"); });
-            btnGame03.onPinchUp.AddListener(() => { CallApp("com.xyani.findanimals"); });
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnGame01.onPinchDown.AddListener(() => { CallApp("com.gabor.artowermotion"); });
+            btnGame02.onPinchDown.AddListener(() => { CallApp("com.baymax.omoba"); });
+            btnGame03.onPinchDown.AddListener(() => { CallApp("com.xyani.findanimals"); });
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnGame01.onPinchUp.RemoveAllListeners();
-            btnGame02.onPinchUp.RemoveAllListeners();
-            btnGame03.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnGame01.onPinchDown.RemoveAllListeners();
+            btnGame02.onPinchDown.RemoveAllListeners();
+            btnGame03.onPinchDown.RemoveAllListeners();
         }
 
         void OnDestroy() { StopAllCoroutines(); }

@@ -44,24 +44,25 @@ namespace SpaceDesign.Magazine
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnCheckDetail.onPinchUp.AddListener(OnCheckDetail);
-            btnQuit.onPinchUp.AddListener(OnQuit);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnCheckDetail.onPinchDown.AddListener(OnCheckDetail);
+            btnQuit.onPinchDown.AddListener(OnQuit);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnCheckDetail.onPinchUp.RemoveAllListeners();
-            btnQuit.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnCheckDetail.onPinchDown.RemoveAllListeners();
+            btnQuit.onPinchDown.RemoveAllListeners();
         }
 
         void Start()
         {
             v3OriPos = this.transform.position;
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-            traIconRoot.SetParent(null);
+            //traIconRoot.SetParent(null);
+            traIconRoot.SetParent(transform.parent);
         }
         void OnDestroy()
         {
@@ -304,8 +305,8 @@ namespace SpaceDesign.Magazine
         /// </summary>
         public void OnCheckDetail()
         {
-            btnCheckDetail.transform.localScale = Vector3.zero;
-            //btnCheckDetail.gameObject.SetActive(false);
+            //btnCheckDetail.transform.localScale = Vector3.zero;
+            btnCheckDetail.gameObject.SetActive(false);
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
             markTrackMagazine.StopTrack();

@@ -48,23 +48,23 @@ namespace SpaceDesign.Phone
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnRingOff.onPinchUp.AddListener(OnRingOff);
-            btnAnswer.onPinchUp.AddListener(OnAnswer);
-            btnReCall.onPinchUp.AddListener(OnReCall);
-            btnCallingOff.onPinchUp.AddListener(OnRingOff);
-            btnTalkingOff.onPinchUp.AddListener(OnTalkingOff);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnRingOff.onPinchDown.AddListener(OnRingOff);
+            btnAnswer.onPinchDown.AddListener(OnAnswer);
+            btnReCall.onPinchDown.AddListener(OnReCall);
+            btnCallingOff.onPinchDown.AddListener(OnRingOff);
+            btnTalkingOff.onPinchDown.AddListener(OnTalkingOff);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnRingOff.onPinchUp.RemoveAllListeners();
-            btnAnswer.onPinchUp.RemoveAllListeners();
-            btnReCall.onPinchUp.RemoveAllListeners();
-            btnCallingOff.onPinchUp.RemoveAllListeners();
-            btnTalkingOff.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnRingOff.onPinchDown.RemoveAllListeners();
+            btnAnswer.onPinchDown.RemoveAllListeners();
+            btnReCall.onPinchDown.RemoveAllListeners();
+            btnCallingOff.onPinchDown.RemoveAllListeners();
+            btnTalkingOff.onPinchDown.RemoveAllListeners();
         }
 
         void Start()
@@ -85,7 +85,7 @@ namespace SpaceDesign.Phone
                     fCallingTempTime = 0;
                     bCalling = false;
                     bMissing = true;
-                    btnRingOff.onPinchUp.Invoke();
+                    btnRingOff.onPinchDown.Invoke();
                     ////未接挂断跟
                     //StartCoroutine("_IERingOff", true);
                 }
@@ -110,7 +110,7 @@ namespace SpaceDesign.Phone
                 {
                     fTalkTempTime = 0;
                     bTalking = false;
-                    btnTalkingOff.onPinchUp.Invoke();
+                    btnTalkingOff.onPinchDown.Invoke();
                 }
             }
         }

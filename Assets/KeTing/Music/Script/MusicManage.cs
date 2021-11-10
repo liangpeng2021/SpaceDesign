@@ -94,29 +94,33 @@ namespace SpaceDesign.Music
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
 
-            btnEffect.onPinchUp.AddListener(ClickFarToMiddle);
-            btnIcon.onPinchUp.AddListener(ClickFarToMiddle);
-            btnMoreMusicMin.onPinchUp.AddListener(OnMoreMusicMin);
-            btnLeftMin.onPinchUp.AddListener(OnLeft);
-            btnLeftMax.onPinchUp.AddListener(OnLeft);
-            btnRightMin.onPinchUp.AddListener(OnRight);
-            btnRightMax.onPinchUp.AddListener(OnRight);
-            btnPlayMin.onPinchUp.AddListener(() => { OnPlay(); });
-            btnPlayMax.onPinchUp.AddListener(() => { OnPlay(); });
-            btnPauseMin.onPinchUp.AddListener(OnPause);
-            btnPauseMax.onPinchUp.AddListener(OnPause);
+            btnEffect.onPinchDown.AddListener(ClickFarToMiddle);
+            btnIcon.onPinchDown.AddListener(ClickFarToMiddle);
+            btnMoreMusicMin.onPinchDown.AddListener(OnMoreMusicMin);
+            btnLeftMin.onPinchDown.AddListener(OnLeft);
+            btnLeftMax.onPinchDown.AddListener(OnLeft);
+            btnRightMin.onPinchDown.AddListener(OnRight);
+            btnRightMax.onPinchDown.AddListener(OnRight);
+            btnPlayMin.onPinchDown.AddListener(() => { OnPlay(); });
+            btnPlayMax.onPinchDown.AddListener(() => { OnPlay(); });
+            btnPauseMin.onPinchDown.AddListener(OnPause);
+            btnPauseMax.onPinchDown.AddListener(OnPause);
 
-            btnStateAllloop.onPinchUp.AddListener(OnState);
-            btnStateOneloop.onPinchUp.AddListener(OnState);
-            btnStateOrder.onPinchUp.AddListener(OnState);
+            btnStateAllloop.onPinchDown.AddListener(OnState);
+            btnStateOneloop.onPinchDown.AddListener(OnState);
+            btnStateOrder.onPinchDown.AddListener(OnState);
 
             btnVolumeMax.onPointerEnter.AddListener(EnterBtnVolum);
             btnVolumeMax.onPointerExit.AddListener(ExitBtnVolum);
-            btnVolumeMax.onPinchUp.AddListener(OnBtnVolume);
+            btnVolumeMax.onPinchDown.AddListener(OnVolumeMute);
+            btnVolumeMuteMax.onPointerEnter.AddListener(EnterBtnVolum);
+            btnVolumeMuteMax.onPointerExit.AddListener(ExitBtnVolum);
+            btnVolumeMuteMax.onPinchDown.AddListener(OnVolumeOpen);
+
             btnExitSliderVolum.onPointerExit.AddListener(ExitObjVolum);
             btnSliderVolumMax.onPointerEnter.AddListener(EnterObjVolum);
             //因为要发送给CPE：不要实时变化，抬起才触发一次
-            //pinchSliderVolumMax.onValueChanged.AddListener(OnSliderVolume);
+            pinchSliderVolumMax.onValueChanged.AddListener(OnSliderVolumeChange);
             pinchSliderVolumMax.onInteractionEnd.AddListener(OnSliderVolume);
 
             pinchSliderMusicMax.onInteractionStart.AddListener(SliderMusicMaxPointerDown);
@@ -127,28 +131,32 @@ namespace SpaceDesign.Music
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnEffect.onPinchUp.RemoveAllListeners();
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnMoreMusicMin.onPinchUp.RemoveAllListeners();
-            btnLeftMin.onPinchUp.RemoveAllListeners();
-            btnLeftMax.onPinchUp.RemoveAllListeners();
-            btnRightMin.onPinchUp.RemoveAllListeners();
-            btnRightMax.onPinchUp.RemoveAllListeners();
-            btnPlayMin.onPinchUp.RemoveAllListeners();
-            btnPlayMax.onPinchUp.RemoveAllListeners();
-            btnPauseMin.onPinchUp.RemoveAllListeners();
-            btnPauseMax.onPinchUp.RemoveAllListeners();
+            btnEffect.onPinchDown.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnMoreMusicMin.onPinchDown.RemoveAllListeners();
+            btnLeftMin.onPinchDown.RemoveAllListeners();
+            btnLeftMax.onPinchDown.RemoveAllListeners();
+            btnRightMin.onPinchDown.RemoveAllListeners();
+            btnRightMax.onPinchDown.RemoveAllListeners();
+            btnPlayMin.onPinchDown.RemoveAllListeners();
+            btnPlayMax.onPinchDown.RemoveAllListeners();
+            btnPauseMin.onPinchDown.RemoveAllListeners();
+            btnPauseMax.onPinchDown.RemoveAllListeners();
 
-            btnStateAllloop.onPinchUp.RemoveAllListeners();
-            btnStateOneloop.onPinchUp.RemoveAllListeners();
-            btnStateOrder.onPinchUp.RemoveAllListeners();
+            btnStateAllloop.onPinchDown.RemoveAllListeners();
+            btnStateOneloop.onPinchDown.RemoveAllListeners();
+            btnStateOrder.onPinchDown.RemoveAllListeners();
 
             btnVolumeMax.onPointerEnter.RemoveAllListeners();
             btnVolumeMax.onPointerExit.RemoveAllListeners();
-            btnVolumeMax.onPinchUp.RemoveAllListeners();
+            btnVolumeMax.onPinchDown.RemoveAllListeners();
+            btnVolumeMuteMax.onPointerEnter.RemoveAllListeners();
+            btnVolumeMuteMax.onPointerExit.RemoveAllListeners();
+            btnVolumeMuteMax.onPinchDown.RemoveAllListeners();
             btnSliderVolumMax.onPointerEnter.RemoveAllListeners(); ;
             btnExitSliderVolum.onPointerExit.RemoveAllListeners();
             pinchSliderVolumMax.onValueChanged.RemoveAllListeners();
+            pinchSliderVolumMax.onInteractionEnd.RemoveAllListeners();
             pinchSliderMusicMax.onInteractionStart.RemoveAllListeners();
             pinchSliderMusicMax.onInteractionEnd.RemoveAllListeners();
         }
@@ -1156,6 +1164,8 @@ namespace SpaceDesign.Music
         public ButtonRayReceiver btnPauseMax;
         //音量按钮
         public ButtonRayReceiver btnVolumeMax;
+        //音量静音按钮
+        public ButtonRayReceiver btnVolumeMuteMax;
         //音量滑动条背景的按钮（碰触，显示音量设置条UI）
         public ButtonRayReceiver btnSliderVolumMax;
         //离开音量滑动调界面按钮
@@ -1192,27 +1202,67 @@ namespace SpaceDesign.Music
         //是否还碰触着音量控制对象
         public bool bTouchObjVolum = false;
 
-        public void OnBtnVolume()
+        //声音大小
+        public float fVolume = 1;
+        //声音是否静音
+        public bool bMute = false;
+
+        public void OnVolumeOpen()
         {
-            if (audioSource.volume > 0.01f)
-            {
-                //audioSource.volume = 0;
-                SetAudioVolume(0);
-                pinchSliderVolumMax.sliderValue = 0;
-                //slidVolumeMax.SetValueWithoutNotify(0);
-            }
-            else
-            {
-                //audioSource.volume = 1;
-                SetAudioVolume(1);
-                pinchSliderVolumMax.sliderValue = 1;
-                //slidVolumeMax.SetValueWithoutNotify(1);
-            }
+            if (fVolume <= 0)
+                fVolume = 1;
+            pinchSliderVolumMax.sliderValue = fVolume;
+            JudgeVolume();
+            //OnSliderVolume();
+
+            //if (audioSource.volume > 0.01f)
+            //{
+            //    //audioSource.volume = 0;
+            //    SetAudioVolume(0);
+            //    pinchSliderVolumMax.sliderValue = 0;
+            //    //slidVolumeMax.SetValueWithoutNotify(0);
+            //}
+            //else
+            //{
+            //    //audioSource.volume = 1;
+            //    SetAudioVolume(1);
+            //    pinchSliderVolumMax.sliderValue = 1;
+            //    //slidVolumeMax.SetValueWithoutNotify(1);
+            //}
+        }
+        public void OnVolumeMute()
+        {
+            pinchSliderVolumMax.sliderValue = 0;
+            JudgeVolume();
+            //OnSliderVolume();
+
+        }
+        public void OnSliderVolumeChange(float fValue)
+        {
+            RestartTimeMaxToMin();
+            //if (fVolume == fValue)
+            //    return;
+
+            //fVolume = fValue;
+            audioSource.volume = fValue;
+
+            bool _bMute = audioSource.volume <= 0.01f;
+            btnVolumeMuteMax.gameObject.SetActive(_bMute);
+            btnVolumeMax.gameObject.SetActive(!_bMute);
+
+            //这里滑动条数值改变，实时触发，所以不发送消息给IoT
+
         }
         public void OnSliderVolume()
         {
-            SetAudioVolume(pinchSliderVolumMax.sliderValue);
+            fVolume = pinchSliderVolumMax.sliderValue;
+            JudgeVolume();
+            //SetAudioVolume(pinchSliderVolumMax.sliderValue);
             //audioSource.volume = f;
+        }
+        void JudgeVolume()
+        {
+            SetAudioVolume(pinchSliderVolumMax.sliderValue);
         }
 
         public void EnterBtnVolum()
@@ -1351,6 +1401,10 @@ namespace SpaceDesign.Music
         {
             RestartTimeMaxToMin();
             audioSource.volume = fValue;
+
+            bool _bMute = audioSource.volume <= 0.01f;
+            btnVolumeMuteMax.gameObject.SetActive(_bMute);
+            btnVolumeMax.gameObject.SetActive(!_bMute);
 
             //音量CPE赋值：数值乘以100
             fValue *= 100;

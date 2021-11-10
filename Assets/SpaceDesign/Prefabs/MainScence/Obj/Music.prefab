@@ -324,6 +324,7 @@ GameObject:
   - component: {fileID: 2759654904702718234}
   - component: {fileID: 2759654904702720802}
   - component: {fileID: 2759654904702720803}
+  - component: {fileID: 1742229485}
   m_Layer: 0
   m_Name: PinchSliderMusic
   m_TagString: Untagged
@@ -502,6 +503,19 @@ MonoBehaviour:
   pressableHandler: {fileID: 2759654904702714705}
   highlightColor: {r: 0.94509804, g: 0.94509804, b: 0.94509804, a: 1}
   pressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+--- !u!65 &1742229485
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2759654904702714538}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 105, y: 5, z: 0.19999999}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2759654904702714539
 GameObject:
   m_ObjectHideFlags: 0
@@ -1703,6 +1717,7 @@ GameObject:
   - component: {fileID: 2759654904702721876}
   - component: {fileID: 2759654904702718243}
   - component: {fileID: 2759654904702720966}
+  - component: {fileID: 1162384420}
   m_Layer: 5
   m_Name: MinUI
   m_TagString: Untagged
@@ -1719,7 +1734,7 @@ RectTransform:
   m_GameObject: {fileID: 2759654904702714693}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2759654904702721869}
   - {fileID: 2759654904702721885}
@@ -1769,6 +1784,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 6
+--- !u!65 &1162384420
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2759654904702714693}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 700, y: 430, z: 1}
+  m_Center: {x: 90, y: 50, z: 0}
 --- !u!1 &2759654904702714694
 GameObject:
   m_ObjectHideFlags: 0
@@ -3934,7 +3962,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 180, y: 80}
-  m_SizeDelta: {x: 70, y: 70}
+  m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2759654904702718244
 CanvasRenderer:
@@ -3963,7 +3991,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6262cc228551dd24e93cb0170b894f21, type: 3}
+  m_Sprite: {fileID: 21300000, guid: da2a12b693ca3374ea7fcb7093a43762, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -4049,7 +4077,7 @@ MonoBehaviour:
         m_MethodName: set_sprite
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 21300000, guid: c9b06e011cfd39c4e826cfe438369e47,
+          m_ObjectArgument: {fileID: 21300000, guid: d4a396c928a2fca4d9e1b6efcde65cba,
             type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Sprite, UnityEngine
           m_IntArgument: 0
@@ -4064,7 +4092,7 @@ MonoBehaviour:
         m_MethodName: set_sprite
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 21300000, guid: 6262cc228551dd24e93cb0170b894f21,
+          m_ObjectArgument: {fileID: 21300000, guid: da2a12b693ca3374ea7fcb7093a43762,
             type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Sprite, UnityEngine
           m_IntArgument: 0
@@ -4079,7 +4107,7 @@ MonoBehaviour:
         m_MethodName: set_sprite
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 21300000, guid: 13370d87dfe9ef04fb631d9a468fda4f,
+          m_ObjectArgument: {fileID: 21300000, guid: 5de37b22a559830469a8383af982268a,
             type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Sprite, UnityEngine
           m_IntArgument: 0
@@ -4094,7 +4122,7 @@ MonoBehaviour:
         m_MethodName: set_sprite
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 21300000, guid: 6262cc228551dd24e93cb0170b894f21,
+          m_ObjectArgument: {fileID: 21300000, guid: da2a12b693ca3374ea7fcb7093a43762,
             type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Sprite, UnityEngine
           m_IntArgument: 0
@@ -5132,6 +5160,7 @@ MonoBehaviour:
   btnPlayMax: {fileID: 2759654904702720970}
   btnPauseMax: {fileID: 2759654904702720993}
   btnVolumeMax: {fileID: 2759654904702720800}
+  btnVolumeMuteMax: {fileID: 3580069249710621470}
   btnSliderVolumMax: {fileID: 2759654904702720973}
   btnExitSliderVolum: {fileID: 2759654904702721011}
   pinchSliderMusicMax: {fileID: 2759654904702720802}
@@ -5146,6 +5175,8 @@ MonoBehaviour:
   bGoAnim: 0
   bTouchBtnVolum: 0
   bTouchObjVolum: 0
+  fVolume: 1
+  bMute: 0
   btnEffect: {fileID: 2759654904702720925}
 --- !u!1 &2759654904702714732
 GameObject:
@@ -5706,7 +5737,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -20, y: 80}
-  m_SizeDelta: {x: 70, y: 70}
+  m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2759654904702718251
 CanvasRenderer:
@@ -5735,7 +5766,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6262cc228551dd24e93cb0170b894f21, type: 3}
+  m_Sprite: {fileID: 21300000, guid: da2a12b693ca3374ea7fcb7093a43762, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -5821,7 +5852,7 @@ MonoBehaviour:
         m_MethodName: set_sprite
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 21300000, guid: c9b06e011cfd39c4e826cfe438369e47,
+          m_ObjectArgument: {fileID: 21300000, guid: d4a396c928a2fca4d9e1b6efcde65cba,
             type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Sprite, UnityEngine
           m_IntArgument: 0
@@ -5836,7 +5867,7 @@ MonoBehaviour:
         m_MethodName: set_sprite
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 21300000, guid: 6262cc228551dd24e93cb0170b894f21,
+          m_ObjectArgument: {fileID: 21300000, guid: da2a12b693ca3374ea7fcb7093a43762,
             type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Sprite, UnityEngine
           m_IntArgument: 0
@@ -5851,7 +5882,7 @@ MonoBehaviour:
         m_MethodName: set_sprite
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 21300000, guid: 13370d87dfe9ef04fb631d9a468fda4f,
+          m_ObjectArgument: {fileID: 21300000, guid: 5de37b22a559830469a8383af982268a,
             type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Sprite, UnityEngine
           m_IntArgument: 0
@@ -5866,7 +5897,7 @@ MonoBehaviour:
         m_MethodName: set_sprite
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 21300000, guid: 6262cc228551dd24e93cb0170b894f21,
+          m_ObjectArgument: {fileID: 21300000, guid: da2a12b693ca3374ea7fcb7093a43762,
             type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Sprite, UnityEngine
           m_IntArgument: 0
@@ -6247,6 +6278,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2759654904702721856}
+  - component: {fileID: 854045953}
   m_Layer: 5
   m_Name: Ctr
   m_TagString: Untagged
@@ -6263,7 +6295,7 @@ RectTransform:
   m_GameObject: {fileID: 2759654904702714745}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 2759654904702721904}
   - {fileID: 2759654904702721707}
@@ -6277,6 +6309,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -80}
   m_SizeDelta: {x: 1130, y: 270}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!65 &854045953
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2759654904702714745}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1130, y: 350, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2759654904702714746
 GameObject:
   m_ObjectHideFlags: 0
@@ -18508,7 +18553,7 @@ GameObject:
   - component: {fileID: 7278447578051194038}
   - component: {fileID: 3580069249710621470}
   m_Layer: 5
-  m_Name: BtnMute
+  m_Name: BtnVolumeMute
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

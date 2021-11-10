@@ -44,13 +44,13 @@ namespace SpaceDesign.VirtualCoach
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
         }
 
         void Start() { v3OriPos = this.transform.position; }

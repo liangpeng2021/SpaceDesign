@@ -4,7 +4,7 @@ using UnityEngine;
 using XR;
 using UnityEngine.SceneManagement;
 
-namespace SpaceDesign
+namespace SpaceDesign.Lamp
 {
     public class Image2DTrackingTaideng : TrackableEventHandler
     {
@@ -22,10 +22,10 @@ namespace SpaceDesign
                 return objTarget;
             }
         }
-        //Mark识别后，显隐的对象
-        public GameObject objModel;
-        //Mark识别后，显隐的对象2号
-        public GameObject objUI;
+        ////Mark识别后，显隐的对象
+        //public GameObject objModel;
+        ////Mark识别后，显隐的对象2号
+        //public GameObject objUI;
         public Texture texture;
         bool bCallback = false;
         //原来的父节点
@@ -128,21 +128,22 @@ namespace SpaceDesign
                 TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
                 //TaidengManager.Inst.transform.localScale = new Vector3(1f, 1f, 1f);
 
-                TaidengManager.Inst.taidengController.ResetTaidengTra();
+                TaidengManager.Inst.taidengController.ShowMark(true);
 
-                //翻译按钮缩放，代替显隐
-                objModel.SetActive(true);
-                objUI.transform.localScale = new Vector3(0.00025f, 0.00025f, 0.00025f);
-                //objShow2.transform.localScale = Vector3.one;
+                ////翻译按钮缩放，代替显隐
+                //objModel.SetActive(true);
+                //objUI.transform.localScale = new Vector3(0.00025f, 0.00025f, 0.00025f);
+                ////objShow2.transform.localScale = Vector3.one;
             }
             else
             {
                 //Invoke("SetIconParent", 0.1f);
                 TaidengManager.Inst.transform.SetParent(oriParent);
 
-                //翻译按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
-                objModel.SetActive(false);
-                objUI.transform.localScale = Vector3.zero;
+                TaidengManager.Inst.taidengController.ShowMark(false);
+                ////翻译按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
+                //objModel.SetActive(false);
+                //objUI.transform.localScale = Vector3.zero;
             }
             //#if UNITY_EDITOR
             //            return;

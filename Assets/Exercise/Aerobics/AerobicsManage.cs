@@ -50,17 +50,17 @@ namespace SpaceDesign.Aerobics
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnStart.onPinchUp.AddListener(OnStartGame);
-            btnQuit.onPinchUp.AddListener(OnQuit);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnStart.onPinchDown.AddListener(OnStartGame);
+            btnQuit.onPinchDown.AddListener(OnQuit);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnStart.onPinchUp.RemoveAllListeners();
-            btnQuit.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnStart.onPinchDown.RemoveAllListeners();
+            btnQuit.onPinchDown.RemoveAllListeners();
         }
         void OnDestroy() { StopAllCoroutines(); }
 

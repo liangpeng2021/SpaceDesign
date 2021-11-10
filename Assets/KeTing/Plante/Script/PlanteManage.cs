@@ -44,15 +44,15 @@ namespace SpaceDesign.Plante
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-            btnIcon.onPinchUp.AddListener(ClickIcon);
-            btnQuit.onPinchUp.AddListener(Hide);
+            btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnQuit.onPinchDown.AddListener(Hide);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchUp.RemoveAllListeners();
-            btnQuit.onPinchUp.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveAllListeners();
+            btnQuit.onPinchDown.RemoveAllListeners();
         }
 
         void OnDestroy() { StopAllCoroutines(); }

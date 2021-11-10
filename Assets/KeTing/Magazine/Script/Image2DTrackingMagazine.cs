@@ -119,11 +119,13 @@ namespace SpaceDesign.Magazine
             {
                 MagazineManage.Inst.transform.SetParent(objTargetModel);
                 MagazineManage.Inst.transform.localPosition = new Vector3(0, 0.02f, -0.25f);
+                //MagazineManage.Inst.transform.localPosition = new Vector3(0, 0, -0.25f);
                 MagazineManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
 
 
                 //按钮缩放，代替显隐
-                objBtnShow.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f);
+                //objBtnShow.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f);
+                objBtnShow.SetActive(true);
                 //objBtnShow.transform.localScale = Vector3.one;
             }
             else
@@ -131,7 +133,8 @@ namespace SpaceDesign.Magazine
                 MagazineManage.Inst.transform.SetParent(oriParent);
 
                 //按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
-                objBtnShow.transform.localScale = Vector3.zero;
+                //objBtnShow.transform.localScale = Vector3.zero;
+                objBtnShow.SetActive(false);
             }
             //objBtnShow.SetActive(isVisible);
         }
