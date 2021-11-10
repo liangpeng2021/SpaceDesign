@@ -529,6 +529,7 @@ namespace SpaceDesign.Phone
             //fTalkTempTime音频时长赋值，必须在bTalking赋值之前，否则Update函数中，计时错误
             if (bShow)
             {
+                videoPlayer.targetTexture.Release();
                 textTalkTiming.text = "00:00";
                 videoPlayer.time = 0;
                 videoPlayer.Play();
@@ -698,7 +699,7 @@ namespace SpaceDesign.Phone
             ResetBoolState();
             StartCoroutine("IEReCallUI", true);
         }
-       
+
         public void OnTalkingOff()
         {
             videoPlayer.Stop();

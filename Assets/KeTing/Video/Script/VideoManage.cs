@@ -683,7 +683,7 @@ namespace SpaceDesign.Video
         /// </summary>
         void OnWatchNow()
         {
-
+            vdp2D.targetTexture.Release();
 
             SetReminder(false);
             Invoke("_InvokeShowExpand", 1.2f);
