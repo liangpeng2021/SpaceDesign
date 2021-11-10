@@ -68,6 +68,15 @@ namespace SpaceDesign
             bingxiangTimeline.StartPause();
             bingxiangTimeline.gameObject.SetActive(false);
 
+            for (int i = 0; i < payHideObjs.Length; i++)
+            {
+                payHideObjs[i].SetActive(true);
+            }
+            for (int i = 0; i < payShowObjs.Length; i++)
+            {
+                payShowObjs[i].SetActive(false);
+            }
+
             //  ------------CL----------------------
             isBought = false;
             //--------------------------------------
@@ -418,7 +427,7 @@ namespace SpaceDesign
         /// 控制Timeline
         /// </summary>
         public TimelineControl bingxiangTimeline;
-
+        
         /// <summary>
         /// 点击Icon
         /// </summary>
@@ -477,6 +486,14 @@ namespace SpaceDesign
         /// </summary>
         public GameObject dangaoObj;
         public GameObject niunaiObj;
+        /// <summary>
+        /// 购买后隐藏对象
+        /// </summary>
+        public GameObject[] payHideObjs;
+        /// <summary>
+        /// 购买后显示对象
+        /// </summary>
+        public GameObject[] payShowObjs;
 
         void OnClosePay()
         {
@@ -495,6 +512,15 @@ namespace SpaceDesign
             //bingxiangTimeline.SetCurTimelineData("一键复购");
             SetTimelineData("一键复购", null);
             isBought = true;
+
+            for (int i = 0; i < payHideObjs.Length; i++)
+            {
+                payHideObjs[i].SetActive(false);
+            }
+            for (int i = 0; i < payShowObjs.Length; i++)
+            {
+                payShowObjs[i].SetActive(true);
+            }
         }
 
         void ChoosePay()
@@ -502,6 +528,15 @@ namespace SpaceDesign
             //bingxiangTimeline.SetCurTimelineData("点击购买");
             SetTimelineData("点击购买", null);
             isBought = true;
+
+            for (int i = 0; i < payHideObjs.Length; i++)
+            {
+                payHideObjs[i].SetActive(false);
+            }
+            for (int i = 0; i < payShowObjs.Length; i++)
+            {
+                payShowObjs[i].SetActive(true);
+            }
         }
         #endregion
 
