@@ -382,6 +382,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7387626961499723531, guid: d2dab3c11f4b62f479eee9942ffbdb97,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8009096759600275726, guid: d2dab3c11f4b62f479eee9942ffbdb97,
         type: 3}
       propertyPath: m_IsActive
@@ -1253,6 +1258,7 @@ MonoBehaviour:
   canvas:
   - {fileID: 8246754434671984658}
   kaichangObj: {fileID: 8246754435765858367}
+  bTest: 1
 --- !u!1 &8246754435250124687
 GameObject:
   m_ObjectHideFlags: 0

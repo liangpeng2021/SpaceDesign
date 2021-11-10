@@ -97,6 +97,11 @@ namespace SpaceDesign.Video
             btnQuit.onPinchDown.AddListener(OnVideoClose);
             sliderVideo.onInteractionStart.AddListener(SliderVideoPointerDown);
             sliderVideo.onInteractionEnd.AddListener(() => { SliderVideoPointerUp(true); });
+            timelineExpandHide.SetActive(false);
+            timelineExpandShow.SetActive(false);
+            timelineReminderHide.SetActive(false);
+            timelineReminderShow.SetActive(false);
+
         }
 
         void OnDisable()
@@ -117,6 +122,11 @@ namespace SpaceDesign.Video
             btnQuit.onPinchDown.RemoveAllListeners();
             sliderVideo.onInteractionStart.RemoveAllListeners();
             sliderVideo.onInteractionEnd.RemoveAllListeners();
+            timelineExpandHide.SetActive(false);
+            timelineExpandShow.SetActive(false);
+            timelineReminderHide.SetActive(false);
+            timelineReminderShow.SetActive(false);
+
         }
 
         void Start()
@@ -778,9 +788,10 @@ namespace SpaceDesign.Video
 
             SetTextCurPlayTime(true);
 
-
-            btnAR.transform.localScale = bTV ? (Vector3.one * 2) : Vector3.zero;
-            btnTV.transform.localScale = bTV ? Vector3.zero : (Vector3.one * 2);
+            btnAR.gameObject.SetActive(bTV);
+            btnTV.gameObject.SetActive(!bTV);
+            //btnAR.transform.localScale = bTV ? (Vector3.one * 2) : Vector3.zero;
+            //btnTV.transform.localScale = bTV ? Vector3.zero : (Vector3.one * 2);
             if (bTV)
             {
                 tvCtr.OnPush(b2D, true, false);

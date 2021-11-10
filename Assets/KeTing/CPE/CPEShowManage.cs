@@ -50,6 +50,8 @@ namespace SpaceDesign.CPEShow
             btnQuit.onPinchDown.AddListener(Hide);
             sliderLamp.onValueChanged.AddListener(LightSlider);
             sliderLamp.onInteractionEnd.AddListener(SetBrightness);
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void OnDisable()
@@ -61,6 +63,8 @@ namespace SpaceDesign.CPEShow
             btnQuit.onPinchDown.RemoveAllListeners();
             sliderLamp.onValueChanged.RemoveAllListeners();
             sliderLamp.onInteractionEnd.RemoveAllListeners();
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void OnDestroy() { StopAllCoroutines(); }
@@ -143,7 +147,7 @@ namespace SpaceDesign.CPEShow
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, 10 * fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
@@ -169,6 +173,8 @@ namespace SpaceDesign.CPEShow
 
             timelineShow.SetActive(false);
             timelineHide.SetActive(true);
+
+            yield return new WaitForSeconds(1.4f);
 
             while (true)
             {

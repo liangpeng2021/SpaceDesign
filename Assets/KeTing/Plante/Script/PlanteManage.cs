@@ -46,6 +46,8 @@ namespace SpaceDesign.Plante
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
             btnIcon.onPinchDown.AddListener(ClickIcon);
             btnQuit.onPinchDown.AddListener(Hide);
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void OnDisable()
@@ -53,6 +55,8 @@ namespace SpaceDesign.Plante
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             btnIcon.onPinchDown.RemoveAllListeners();
             btnQuit.onPinchDown.RemoveAllListeners();
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void OnDestroy() { StopAllCoroutines(); }
@@ -155,11 +159,14 @@ namespace SpaceDesign.Plante
             //UI开始变化
             bUIChanging = true;
 
-            //中距离=>远距离
-            traIcon.gameObject.SetActive(true);
 
             timelineShow.SetActive(false);
             timelineHide.SetActive(true);
+            yield return new WaitForSeconds(1.2f);
+
+
+            //中距离=>远距离
+            traIcon.gameObject.SetActive(true);
 
             while (true)
             {
@@ -220,11 +227,15 @@ namespace SpaceDesign.Plante
 
         public void Hide()
         {
+            if (bUIChanging)
+                return;
             StopCoroutine("IEMiddleToFar");
             StartCoroutine("IEMiddleToFar");
         }
         public void Show()
         {
+            if (bUIChanging)
+                return;
             StopCoroutine("IEFarToMiddle");
             StartCoroutine("IEFarToMiddle");
         }

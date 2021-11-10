@@ -47,6 +47,8 @@ namespace SpaceDesign.Magazine
             btnIcon.onPinchDown.AddListener(ClickIcon);
             btnCheckDetail.onPinchDown.AddListener(OnCheckDetail);
             btnQuit.onPinchDown.AddListener(OnQuit);
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void OnDisable()
@@ -55,6 +57,8 @@ namespace SpaceDesign.Magazine
             btnIcon.onPinchDown.RemoveAllListeners();
             btnCheckDetail.onPinchDown.RemoveAllListeners();
             btnQuit.onPinchDown.RemoveAllListeners();
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void Start()

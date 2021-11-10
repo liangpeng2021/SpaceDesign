@@ -53,6 +53,8 @@ namespace SpaceDesign.DeskGame
             btnGame01.onPinchDown.AddListener(() => { CallApp("com.gabor.artowermotion"); });
             btnGame02.onPinchDown.AddListener(() => { CallApp("com.baymax.omoba"); });
             btnGame03.onPinchDown.AddListener(() => { CallApp("com.xyani.findanimals"); });
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void OnDisable()
@@ -62,6 +64,8 @@ namespace SpaceDesign.DeskGame
             btnGame01.onPinchDown.RemoveAllListeners();
             btnGame02.onPinchDown.RemoveAllListeners();
             btnGame03.onPinchDown.RemoveAllListeners();
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void OnDestroy() { StopAllCoroutines(); }

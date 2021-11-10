@@ -1933,7 +1933,7 @@ PlayableDirector:
   serializedVersion: 3
   m_PlayableAsset: {fileID: 11400000, guid: 5561802255cd39e4e89003c9087e3773, type: 2}
   m_InitialState: 1
-  m_WrapMode: 2
+  m_WrapMode: 0
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
   m_SceneBindings:
@@ -2011,7 +2011,7 @@ PlayableDirector:
   serializedVersion: 3
   m_PlayableAsset: {fileID: 11400000, guid: c1a5285c0c913ea40a03868212ae03c4, type: 2}
   m_InitialState: 1
-  m_WrapMode: 2
+  m_WrapMode: 0
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
   m_SceneBindings:
@@ -5486,6 +5486,7 @@ MonoBehaviour:
   - {fileID: 5514913234265178885}
   - {fileID: 5878848342436782004}
   fIconSpeed: 1
+  objMenuUI: {fileID: 3155182395970330198}
   fUISpeed: 5
   timelineShow: {fileID: 3016948019968070031}
   timelineHide: {fileID: 3016948019840610641}

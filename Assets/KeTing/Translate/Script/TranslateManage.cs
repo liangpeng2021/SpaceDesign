@@ -47,6 +47,8 @@ namespace SpaceDesign.Translate
             btnIcon.onPinchDown.AddListener(ClickIcon);
             btnCheckTranslate.onPinchDown.AddListener(OnCheckTranslate);
             btnQuit.onPinchDown.AddListener(OnQuit);
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void OnDisable()
@@ -55,6 +57,8 @@ namespace SpaceDesign.Translate
             btnIcon.onPinchDown.RemoveAllListeners();
             btnCheckTranslate.onPinchDown.RemoveAllListeners();
             btnQuit.onPinchDown.RemoveAllListeners();
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void Start()

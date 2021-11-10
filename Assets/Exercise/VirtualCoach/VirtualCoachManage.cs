@@ -51,6 +51,8 @@ namespace SpaceDesign.VirtualCoach
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             btnIcon.onPinchDown.RemoveAllListeners();
+            timelineHide.SetActive(false);
+            timelineShow.SetActive(false);
         }
 
         void Start() { v3OriPos = this.transform.position; }
@@ -226,6 +228,8 @@ namespace SpaceDesign.VirtualCoach
             //UI开始变化
             bUIChanging = true;
 
+            objMenuUI.SetActive(false);
+
             timelineShow.SetActive(false);
             timelineHide.SetActive(true);
 
@@ -244,7 +248,6 @@ namespace SpaceDesign.VirtualCoach
 
             //UI变化结束
             bUIChanging = false;
-
         }
 
         #region Icon变化，远距离
@@ -259,7 +262,8 @@ namespace SpaceDesign.VirtualCoach
         public Animator[] animIconMiddle;
         //Icon的移动速度
         public float fIconSpeed = 1;
-
+        //人物的说话框，人物隐藏的时候，对话框也要隐藏
+        public GameObject objMenuUI;
         /// <summary>
         /// 点击Icon
         /// </summary>

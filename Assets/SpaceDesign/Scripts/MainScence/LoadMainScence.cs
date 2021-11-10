@@ -209,8 +209,15 @@ public class LoadMainScence : MonoBehaviour
     //检测是否需要切换到编辑模式
     int clickNum;
     float timeCount;
+    public bool bTest = false;
     private void Update()
     {
+
+#if UNITY_EDITOR
+        if (bTest)
+            return;
+#endif
+
         timeCount += Time.deltaTime;
         if (timeCount < 1f)
         {
