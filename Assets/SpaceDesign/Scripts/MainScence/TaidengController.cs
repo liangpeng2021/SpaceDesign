@@ -183,7 +183,7 @@ namespace SpaceDesign.Lamp
                 //翻译按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
                 taidengModel.SetActive(false);
                 taiDengUI.gameObject.SetActive(false);
-                print("隐藏");
+                //print("隐藏");
 
             }
         }
@@ -298,7 +298,7 @@ namespace SpaceDesign.Lamp
                         boundingBox.cornerObjects[i].SetActive(false);
                     }
                     hideBoxScale = true;
-                    print("hideBoxScale = true");
+                    //print("hideBoxScale = true");
 
                 }
             }
@@ -354,7 +354,7 @@ namespace SpaceDesign.Lamp
             iShowUIState = 3;
             objBuyUIBoxCollider.SetActive(false);
             taidengModel.SetActive(false);
-            print("隐藏");
+            //print("隐藏");
 
             secondObj.SetActive(false);
             pointLight.SetActive(false);

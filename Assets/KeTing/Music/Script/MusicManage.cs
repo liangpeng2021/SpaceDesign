@@ -261,29 +261,9 @@ namespace SpaceDesign.Music
                     //播完了，判断状态，操作下一步
                     if (audioSource.time >= fTotalPlayTime)
                     {
-                        print($"播完了，切换:{curMusicPlayState}");
+                        //print($"播完了，切换:{curMusicPlayState}");
 
-                        switch (curMusicPlayState)
-                        {
-                            case MusicPlayState.AllLoop:
-                                OnRight();
-                                break;
-                            case MusicPlayState.OneLoop:
-                                pinchSliderMusicMax.sliderValue = 0;
-                                SliderMusicMaxPointerUp();
-                                OnPlay(iCurMusicNum);
-                                break;
-                            case MusicPlayState.Order:
-                                if (iCurMusicNum < iTotalMusicNum)
-                                    OnRight();
-                                else
-                                {
-                                    pinchSliderMusicMax.sliderValue = 0;
-                                    SliderMusicMaxPointerUp();
-                                    OnPause();
-                                }
-                                break;
-                        }
+                        AutoNext();
                     }
                 }
             }
@@ -340,6 +320,31 @@ namespace SpaceDesign.Music
             }
         }
 
+        void AutoNext()
+        {
+            switch (curMusicPlayState)
+            {
+                case MusicPlayState.AllLoop:
+                    OnRight();
+                    break;
+                case MusicPlayState.OneLoop:
+                    pinchSliderMusicMax.sliderValue = 0;
+                    SliderMusicMaxPointerUp();
+                    OnPlay(iCurMusicNum);
+                    break;
+                case MusicPlayState.Order:
+                    if (iCurMusicNum < iTotalMusicNum)
+                        OnRight();
+                    else
+                    {
+                        pinchSliderMusicMax.sliderValue = 0;
+                        SliderMusicMaxPointerUp();
+                        OnPause();
+                    }
+                    break;
+            }
+        }
+
         /// <summary>
         /// 七张音乐图的，中间图片对象
         /// </summary>
@@ -377,6 +382,7 @@ namespace SpaceDesign.Music
         public void SliderMusicMaxPointerUp()
         {
             bSlideDragging = false;
+            //print($"pinchSliderMusicMax.sliderValue:{pinchSliderMusicMax.sliderValue },fTotalPlayTime:{fTotalPlayTime}");
             SetAudioTime(pinchSliderMusicMax.sliderValue * fTotalPlayTime);
         }
 
@@ -617,7 +623,7 @@ namespace SpaceDesign.Music
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
-            print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
             //UI开始变化
             bUIChanging = true;
@@ -1419,6 +1425,12 @@ namespace SpaceDesign.Music
         public void SetAudioTime(float fTime)
         {
             RestartTimeMaxToMin();
+            if (fTime >= fTotalPlayTime)
+            {
+                AutoNext();
+                return;
+            }
+            //fTime = fTotalPlayTime - 2f;
             audioSource.time = fTime;
 
             //进度CPE赋值：数值即为当前秒数

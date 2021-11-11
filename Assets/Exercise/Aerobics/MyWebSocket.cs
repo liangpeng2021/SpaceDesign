@@ -90,7 +90,7 @@ namespace SpaceDesign.Aerobics
                 portType = 0;
 
             ipUrl += port;
-            print("连接：" + ipUrl);
+            //print("连接：" + ipUrl);
 
             webSocket = new WebSocket(new Uri(ipUrl));
             webSocket.OnOpen = OnOpen;

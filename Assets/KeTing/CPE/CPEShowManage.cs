@@ -50,8 +50,8 @@ namespace SpaceDesign.CPEShow
             btnQuit.onPinchDown.AddListener(Hide);
             sliderLamp.onValueChanged.AddListener(LightSlider);
             sliderLamp.onInteractionEnd.AddListener(SetBrightness);
-            timelineHide.SetActive(false);
             timelineShow.SetActive(false);
+            timelineHide.SetActive(false);
         }
 
         void OnDisable()
@@ -63,8 +63,8 @@ namespace SpaceDesign.CPEShow
             btnQuit.onPinchDown.RemoveAllListeners();
             sliderLamp.onValueChanged.RemoveAllListeners();
             sliderLamp.onInteractionEnd.RemoveAllListeners();
-            timelineHide.SetActive(false);
             timelineShow.SetActive(false);
+            timelineHide.SetActive(false);
         }
 
         void OnDestroy() { StopAllCoroutines(); }
@@ -110,7 +110,7 @@ namespace SpaceDesign.CPEShow
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
-            print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
             if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
             {
@@ -133,6 +133,7 @@ namespace SpaceDesign.CPEShow
         {
             //UI开始变化
             bUIChanging = true;
+            //bIconLarge = false;
 
             //远距离=>中距离
             //Icon从静态变成动态
@@ -142,13 +143,14 @@ namespace SpaceDesign.CPEShow
             //Icon自身上下浮动开启
             animIconFar.enabled = false;
 
-            timelineShow.SetActive(true);
             timelineHide.SetActive(false);
+            timelineShow.SetActive(true);
 
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, 10 * fUISpeed * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
+                //if ((bIconLarge == true) || (_fDis < fThreshold))
                 if (_fDis < fThreshold)
                 {
                     traIcon.localScale = Vector3.zero;
@@ -168,7 +170,7 @@ namespace SpaceDesign.CPEShow
         {
             //UI开始变化
             bUIChanging = true;
-
+            //bIconLarge = true;
             //中距离=>远距离
 
             timelineShow.SetActive(false);
@@ -180,6 +182,7 @@ namespace SpaceDesign.CPEShow
             {
                 traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+                //if ((bIconLarge == false) || (_fDis < fThreshold))
                 if (_fDis < fThreshold)
                 {
                     traIcon.localScale = Vector3.one;
@@ -208,15 +211,19 @@ namespace SpaceDesign.CPEShow
         public Transform traIcon;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
-
+        ////Icon放大
+        //bool bIconLarge;
         /// <summary>
         /// 点击Icon
         /// </summary>
         public void ClickIcon()
         {
+            if (bUIChanging)
+                return;
             if (curPlayerPosState != PlayerPosState.Far)
             {
-                Show();
+                StopCoroutine("IEFarToMiddle");
+                StartCoroutine("IEFarToMiddle");
             }
         }
 
@@ -226,6 +233,8 @@ namespace SpaceDesign.CPEShow
         [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
+
+        //不用Timelin的PlayableDirector的Play和Stop来控制，否则在近处关闭按钮后，远离还会触发一次（需要加更多逻辑来进行判断）
         //Timeline：显示
         public GameObject timelineShow;
         //Timeline：隐藏
@@ -252,14 +261,12 @@ namespace SpaceDesign.CPEShow
 
         public void Hide()
         {
+            if (bUIChanging)
+                return;
             StopCoroutine("IEMiddleToFar");
             StartCoroutine("IEMiddleToFar");
         }
-        public void Show()
-        {
-            StopCoroutine("IEFarToMiddle");
-            StartCoroutine("IEFarToMiddle");
-        }
+
         public void SetBrightness()
         {
             fBrightness = sliderLamp.sliderValue;
@@ -310,7 +317,7 @@ namespace SpaceDesign.CPEShow
 
         void ClickLight(string str)
         {
-            print("发送灯光：" + str);
+            //print("发送灯光：" + str);
             //开启新协程
             IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<LightData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/lamp/setting?" + str,
                 //回调

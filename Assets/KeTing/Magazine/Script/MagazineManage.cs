@@ -125,7 +125,7 @@ namespace SpaceDesign.Magazine
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
-            print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
             if (lastPPS == PlayerPosState.Far)
             {
@@ -283,6 +283,8 @@ namespace SpaceDesign.Magazine
         /// </summary>
         public void ClickIcon()
         {
+            if (bUIChanging)
+                return;
             if (curPlayerPosState == PlayerPosState.Close)
             {
                 StopCoroutine("IEMiddleToClose");

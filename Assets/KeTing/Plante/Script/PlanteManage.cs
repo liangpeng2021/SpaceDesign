@@ -99,7 +99,7 @@ namespace SpaceDesign.Plante
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
-            print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
             if (lastPPS == PlayerPosState.Far && curPlayerPosState == PlayerPosState.Middle)
             {
@@ -218,6 +218,7 @@ namespace SpaceDesign.Plante
         [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
+        //不用Timelin的PlayableDirector的Play和Stop来控制，否则在近处关闭按钮后，远离还会触发一次（需要加更多逻辑来进行判断）
         //Timeline：显示
         public GameObject timelineShow;
         //Timeline：隐藏
@@ -240,6 +241,5 @@ namespace SpaceDesign.Plante
             StartCoroutine("IEFarToMiddle");
         }
         #endregion
-
     }
 }

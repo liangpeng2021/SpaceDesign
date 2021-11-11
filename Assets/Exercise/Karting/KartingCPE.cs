@@ -110,7 +110,7 @@ namespace SpaceDesign.Karting
         public IEnumerator IEBike()
         {
             //yield break;
-            print("开始游戏");
+            //print("开始游戏");
 
 
             WaitForSeconds wfs05 = new WaitForSeconds(0.1f);

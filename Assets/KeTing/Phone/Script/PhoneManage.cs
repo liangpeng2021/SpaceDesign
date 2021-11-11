@@ -79,6 +79,8 @@ namespace SpaceDesign.Phone
         {
             if (bCalling)
             {
+                fCallEventDis = 1.5f;
+
                 fCallingTempTime += Time.deltaTime;
                 if (fCallingTempTime > fCallingTime)
                 {
@@ -92,6 +94,8 @@ namespace SpaceDesign.Phone
             }
             else if (bTalking)
             {
+                fCallEventDis = 4f;
+
                 int second = 0;
                 int min = 0;
                 second = (int)(fTalkTempTime % 60);
@@ -113,7 +117,15 @@ namespace SpaceDesign.Phone
                     btnTalkingOff.onPinchDown.Invoke();
                 }
             }
+            //else
+            //{
+            //    fCallEventDis = 2.5f;
+            //}
+
         }
+
+        //触发事件的距离
+        float fCallEventDis = 1.5f;
 
         /// <summary>
         /// 刷新位置消息
@@ -137,13 +149,13 @@ namespace SpaceDesign.Phone
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 2f)
+            else if (_dis <= 5f && _dis > fCallEventDis)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 2f)
+            else if (_dis <= fCallEventDis)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
@@ -159,7 +171,7 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
-            print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
             if (lastPPS == PlayerPosState.Far)
             {
@@ -304,19 +316,28 @@ namespace SpaceDesign.Phone
             if (audioSource.isPlaying)
                 audioSource.Stop();
 
-            //接听之后的话，不中断协程（让通话界面继续放大）
-            if (bTalking == false)
-                StopSomeCoroutine();
-
-            if (bTalkOver == false)
+            if (bRecalling)
             {
-                ////呼叫中、或者视频通话中，距离变远也不隐藏
-                //if (bCalling == true || bTalking == true)
-                //视频通话中，距离变远也不隐藏
-                if (bTalking == true)
-                    yield break;
+                OnRingOff();
             }
-            else
+            else if (bTalking)
+            {
+                OnTalkingOff();
+            }
+
+            ////接听之后的话，不中断协程（让通话界面继续放大）
+            //if (bTalking == false)
+            //    StopSomeCoroutine();
+
+            //if (bTalkOver == false)
+            //{
+            //    ////呼叫中、或者视频通话中，距离变远也不隐藏
+            //    //if (bCalling == true || bTalking == true)
+            //    //视频通话中，距离变远也不隐藏
+            //    if (bTalking == true)
+            //        yield break;
+            //}
+            //else
             {
                 //这里是视频通话中，主动挂断，或者通话时间结束
 
@@ -381,6 +402,8 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IECallingUI(bool bShow)
         {
+            bUIChanging = true;
+
             bCalling = bShow;
             traMissedUI.localScale = Vector3.zero;
             animAnswer.enabled = bShow;
@@ -425,12 +448,16 @@ namespace SpaceDesign.Phone
             }
 
             yield return 0;
+            bUIChanging = false;
+
         }
         /// <summary>
         /// 未接界面动画
         /// </summary>
         IEnumerator IEMissedUI(bool bShow)
         {
+            bUIChanging = true;
+
             bMissing = bShow;
 
             float _f = bShow ? 1 : 5;
@@ -466,13 +493,17 @@ namespace SpaceDesign.Phone
                 }
             }
 
+            bUIChanging = false;
             yield return 0;
+
         }
         /// <summary>
         /// 重新拨打等待动画
         /// </summary>
         IEnumerator IEReCallUI(bool bShow)
         {
+            bUIChanging = true;
+
             bRecalling = bShow;
 
             float _f = bShow ? 1 : 5;
@@ -519,6 +550,9 @@ namespace SpaceDesign.Phone
                 yield return IEReCallUI(false);
                 yield return IETalkingUI(true);
             }
+
+            bUIChanging = false;
+
         }
 
         /// <summary>
@@ -526,6 +560,8 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IETalkingUI(bool bShow)
         {
+            bUIChanging = true;
+
             //fTalkTempTime音频时长赋值，必须在bTalking赋值之前，否则Update函数中，计时错误
             if (bShow)
             {
@@ -568,6 +604,8 @@ namespace SpaceDesign.Phone
                     yield return 0;
                 }
             }
+            bUIChanging = false;
+
             yield return 0;
         }
 
@@ -587,6 +625,9 @@ namespace SpaceDesign.Phone
         /// </summary>
         public void ClickIcon()
         {
+            if (bUIChanging)
+                return;
+
             if (curPlayerPosState != PlayerPosState.Far)
             {
                 StopCoroutine("IEMiddleToClose");

@@ -119,7 +119,7 @@ namespace SpaceDesign.Karting
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
-            print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
             //WaitForSeconds _wfs = new WaitForSeconds(0.1f);
 
