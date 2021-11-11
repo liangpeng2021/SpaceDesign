@@ -21,7 +21,7 @@ public class LoadMainScence : MonoBehaviour
 
     public GameObject roomPrefab;
 
-    public Button backto;
+    //public Button backto;
 
     public Canvas[] canvas;
 
@@ -91,17 +91,17 @@ public class LoadMainScence : MonoBehaviour
 
     //#endregion
 
-    private void OnEnable()
-    {
-        backto.onClick.AddListener(QuitApp);
-        //AddLaqiEvent();
-    }
+    //private void OnEnable()
+    //{
+    //    backto.onClick.AddListener(QuitApp);
+    //    //AddLaqiEvent();
+    //}
 
-    private void OnDisable()
-    {
-        backto.onClick.RemoveListener(QuitApp);
-        //RemoveLaqiEvent();
-    }
+    //private void OnDisable()
+    //{
+    //    backto.onClick.RemoveListener(QuitApp);
+    //    //RemoveLaqiEvent();
+    //}
 
     void BackToLoginScence()
     {
@@ -120,7 +120,7 @@ public class LoadMainScence : MonoBehaviour
         if (objectDatas != null)
             objectDatas.Clear();
 
-        backto = null;
+        //backto = null;
 
         for (int i = 0; i < canvas.Length; i++)
         {
@@ -213,10 +213,10 @@ public class LoadMainScence : MonoBehaviour
     private void Update()
     {
 
-#if UNITY_EDITOR
-        if (bTest)
-            return;
-#endif
+//#if UNITY_EDITOR
+//        if (bTest)
+//            return;
+//#endif
 
         timeCount += Time.deltaTime;
         if (timeCount < 1f)
@@ -225,7 +225,7 @@ public class LoadMainScence : MonoBehaviour
             {
                 clickNum++;
             }
-
+            //Debug.Log(clickNum);
             //1秒内连续点击超过3次，进入编辑模式
             if (clickNum > 2)
             {

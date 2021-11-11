@@ -40,6 +40,7 @@ public class RoomControl : MonoBehaviour
     /// 保存生成的对象
     /// </summary>
     public Transform objParent;
+    
     /// <summary>
     /// 区间
     /// </summary>
@@ -48,7 +49,7 @@ public class RoomControl : MonoBehaviour
     
     int curObjIndex=-1;
 
-    public GameObject textMesh;
+    //public GameObject textMesh;
     /// <summary>
     /// 房间位置，用来实例化物体
     /// </summary>
@@ -84,7 +85,7 @@ public class RoomControl : MonoBehaviour
         }
         pointTranList.Clear();
         pointPrefab = null;
-        textMesh = null;
+        //textMesh = null;
     }
 
     // Start is called before the first frame update
@@ -106,7 +107,7 @@ public class RoomControl : MonoBehaviour
 #endif
         roomPos = XRCameraManager.Instance.stereoCamera.transform.position+new Vector3(0,-0.5f,0.5f);
         
-        textMesh.transform.position = roomPos;
+        //textMesh.transform.position = roomPos;
 
         for (int i = 0; i < 4; i++)
         {
@@ -127,7 +128,7 @@ public class RoomControl : MonoBehaviour
     
     void LoadPoint(List<SPoint> sPoints)
     {
-        textMesh.transform.position = Vector3.zero;
+        //textMesh.transform.position = Vector3.zero;
         
         //生成四周锚点
         for (int i = 0; i < sPoints.Count; i++)
@@ -141,10 +142,10 @@ public class RoomControl : MonoBehaviour
             
             pointTranList.Add(obj.transform);
             //计算提示文字的位置
-            textMesh.transform.position += obj.transform.position;
+            //textMesh.transform.position += obj.transform.position;
         }
         //放在中心位置
-        textMesh.transform.position /= sPoints.Count;
+        //textMesh.transform.position /= sPoints.Count;
     }
 
     // Update is called once per frame
@@ -185,7 +186,7 @@ public class RoomControl : MonoBehaviour
         {
             //预览模式下不画线
             line.gameObject.SetActive(false);
-            textMesh.SetActive(false);
+            //textMesh.SetActive(false);
         }
         else
         {
@@ -198,10 +199,10 @@ public class RoomControl : MonoBehaviour
             line.SetPosition(4, new Vector3(xmin, y, zmin));
 
             //是否物体在房间范围内，不在就提示一下
-            if (IsObjInRoom())
-                textMesh.SetActive(false);
-            else
-                textMesh.SetActive(true);
+            //if (IsObjInRoom())
+            //    textMesh.SetActive(false);
+            //else
+            //    textMesh.SetActive(true);
         }
         
     }
@@ -215,13 +216,24 @@ public class RoomControl : MonoBehaviour
         {
             if (!isPreview && !EditorControl.Instance.prefabManager.gameObject.activeInHierarchy)
             {
-                objParent.gameObject.SetActive(false);
+                //objParent.localScale = Vector3.zero;
+                //objParent.gameObject.SetActive(false);
+                objParent.localPosition = new Vector3(0, 1000, 0);
             }
             else
-                objParent.gameObject.SetActive(true);
+            {
+                //objParent.localScale = Vector3.one;
+                //objParent.gameObject.SetActive(true);
+                objParent.localPosition = Vector3.zero;
+            }
+
         }
         else
-            objParent.gameObject.SetActive(false);
+        {
+            objParent.localPosition = new Vector3(0, 1000, 0);
+            //objParent.localScale = Vector3.zero;
+            //objParent.gameObject.SetActive(false);
+        }
     }
 
     bool IsObjInRoom()
