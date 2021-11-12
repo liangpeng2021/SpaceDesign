@@ -475,6 +475,7 @@ namespace SpaceDesign.Music
         /// </summary>
         public void OnLeft()
         {
+            imgSliderMin.fillAmount = 0;
             _SetCurMusicNum(iCurMusicNum - 1);
             bClockWise = true;
             _InitEachMusicAnim();
@@ -484,6 +485,7 @@ namespace SpaceDesign.Music
         /// </summary>
         public void OnRight()
         {
+            imgSliderMin.fillAmount = 0;
             _SetCurMusicNum(iCurMusicNum + 1);
             bClockWise = false;
             _InitEachMusicAnim();

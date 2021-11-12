@@ -117,10 +117,10 @@ namespace SpaceDesign.Phone
                     btnTalkingOff.onPinchDown.Invoke();
                 }
             }
-            //else
-            //{
-            //    fCallEventDis = 2.5f;
-            //}
+            else
+            {
+                fCallEventDis = 2.5f;
+            }
 
         }
 
