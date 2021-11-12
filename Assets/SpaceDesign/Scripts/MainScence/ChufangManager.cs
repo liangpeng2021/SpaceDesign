@@ -222,7 +222,7 @@ namespace SpaceDesign
                 yield return 0;
             }
             timeline.gameObject.SetActive(true);
-            timeline.SetCurTimelineData("显示菜谱");
+            timeline.SetCurTimelineData("提示出现");
             backBtn.gameObject.SetActive(false);
 
             //UI变化结束
@@ -290,6 +290,7 @@ namespace SpaceDesign
             bocaiBtn.onPinchDown.AddListener(GotoBocai);
             backBtn.onPinchDown.AddListener(BackToCaipu);
 
+            showCaipuBtn.onPinchDown.AddListener(ShowCaipu);
             //waveInteractionGazeHandle.g_OnHandWave.AddListener(WaveHandle);
             //waveInteractionGazeHandle.g_OnHandVirtualPress.AddListener(()=> { ChangePressState(true); });
             //waveInteractionGazeHandle.g_OnHandVirtualRelease.AddListener(() => { ChangePressState(false); });
@@ -303,6 +304,7 @@ namespace SpaceDesign
             bocaiBtn.onPinchDown.RemoveAllListeners();
             backBtn.onPinchDown.RemoveAllListeners();
 
+            showCaipuBtn.onPinchDown.RemoveAllListeners();
             //waveInteractionGazeHandle.g_OnHandWave.RemoveAllListeners();
             //waveInteractionGazeHandle.g_OnHandVirtualPress.RemoveAllListeners();
             //waveInteractionGazeHandle.g_OnHandVirtualRelease.RemoveAllListeners();
@@ -312,7 +314,7 @@ namespace SpaceDesign
 
         void OnQuit()
         {
-
+            //timeline.SetCurTimelineData("菜谱消失");
         }
 
         #region 重交互，大UI，近距离
@@ -353,6 +355,20 @@ namespace SpaceDesign
         /// 菜谱第一条文字，手动修改enable
         /// </summary>
         public Text[] firstTexts;
+        /// <summary>
+        /// 显示菜谱按钮
+        /// </summary>
+        public ButtonRayReceiver showCaipuBtn;
+        /// <summary>
+        /// 显示菜谱
+        /// </summary>
+        void ShowCaipu()
+        {
+            timeline.SetCurTimelineData("提示消失",
+                ()=> {
+                    timeline.SetCurTimelineData("显示菜谱");
+                });
+        }
 
         /// <summary>
         /// 返回到菜单选择界面

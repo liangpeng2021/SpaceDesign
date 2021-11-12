@@ -216,23 +216,22 @@ public class RoomControl : MonoBehaviour
         {
             if (!isPreview && !EditorControl.Instance.prefabManager.gameObject.activeInHierarchy)
             {
-                //objParent.localScale = Vector3.zero;
-                //objParent.gameObject.SetActive(false);
-                objParent.localPosition = new Vector3(0, 1000, 0);
+                //objParent.localScale = Vector3.one*0.001f;
+                objParent.gameObject.SetActive(false);
+                //objParent.localPosition = new Vector3(0, 1000, 0);
             }
             else
             {
                 //objParent.localScale = Vector3.one;
-                //objParent.gameObject.SetActive(true);
-                objParent.localPosition = Vector3.zero;
+                objParent.gameObject.SetActive(true);
+                //objParent.localPosition = Vector3.zero;
             }
-
         }
         else
         {
-            objParent.localPosition = new Vector3(0, 1000, 0);
-            //objParent.localScale = Vector3.zero;
-            //objParent.gameObject.SetActive(false);
+            //objParent.localPosition = new Vector3(0, 1000, 0);
+            //objParent.localScale = Vector3.one * 0.001f;
+            objParent.gameObject.SetActive(false);
         }
     }
 
@@ -368,6 +367,18 @@ public class RoomControl : MonoBehaviour
         curObjIndex = objList.Count - 1;
         if (curObjIndex!=-1)
             objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOn();
+
+        ResetIndex();
+    }
+    /// <summary>
+    /// 重排后续的索引
+    /// </summary>
+    void ResetIndex()
+    {
+        for (int i = curObjIndex; i < objList.Count; i++)
+        {
+            objList[i].obj.GetComponent<ChangeSate>().index = i;
+        }
     }
 
     public void ResetObjUI()
