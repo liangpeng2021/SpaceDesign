@@ -14,6 +14,10 @@ using XR;
 /// </summary>
 public class LoadMainScence : MonoBehaviour
 {
+    public TextMesh ttt;
+    public TextMesh ttt2;
+
+
     //版本号
     public Text version;
 
@@ -213,10 +217,10 @@ public class LoadMainScence : MonoBehaviour
     private void Update()
     {
 
-//#if UNITY_EDITOR
-//        if (bTest)
-//            return;
-//#endif
+#if UNITY_EDITOR
+        if (bTest)
+            return;
+#endif
 
         timeCount += Time.deltaTime;
         if (timeCount < 1f)

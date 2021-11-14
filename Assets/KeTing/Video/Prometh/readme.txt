@@ -1,0 +1,1 @@
+色彩空间需要切换到gamma，运行SampleScene，MeshPlayerPRM组件下的UserApiKey要填入ApiKey

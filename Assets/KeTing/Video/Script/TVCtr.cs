@@ -323,7 +323,7 @@ namespace SpaceDesign.Video
                         if (iAutoPlay == 2 || iAutoPlay == 3)
                         {
                             VideoManage.Inst.sliderVideo.sliderValue = 0;
-                            VideoManage.Inst.PlayAR();
+                            VideoManage.Inst.PlayAR(false);
                         }
                     }
                     else

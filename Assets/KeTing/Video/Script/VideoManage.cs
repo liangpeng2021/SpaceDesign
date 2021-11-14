@@ -2,6 +2,14 @@
 
     视频，电视，AR总控制脚本
     PS:控制进度条，AR和电视同时播放
+
+    * 2D视频，VideoPlayer用Frame计算（换算秒数，要除以rate），最后一帧不播放
+    
+    * 3D声音，用秒数计算
+    * 3D视频，MeshPlayerPRM用Frame计算（换算秒数，要除以rate），最后一帧不播放
+    
+    * TV电视，传的是秒数（Int）
+
  */
 
 using OXRTK.ARHandTracking;
@@ -48,7 +56,11 @@ namespace SpaceDesign.Video
         //对象初始位置
         [SerializeField]
         private Vector3 v3OriPos;
-
+        //3D视频的名称（"Video3D.mp4"）
+        [SerializeField]
+        private string str3DVideoPth = "Video3D.mp4";
+        //3D视频的加载是否成功
+        public bool b3DOK;
         //===========================================================================
         //临时测距
         public TextMesh tt;
@@ -86,7 +98,8 @@ namespace SpaceDesign.Video
             });
             btnPlay.onPinchDown.AddListener(() =>
             {
-                if (bPause)
+                //if (bPause)
+                if (iPlayState == 1)
                     OnUnPause();
                 else
                     OnPlay();
@@ -132,15 +145,229 @@ namespace SpaceDesign.Video
         void Start()
         {
             tvCtr.OnInit();
-            fTotalPlayTime2D = (float)vdp2D.length;
-            vdp3D.PrepareVideo(() =>
-            {
-                vdp3D.OpenSource(vdp3D.sourceUrl, 0, false);
-                fTotalPlayTime3D = vdp3D.sourceFrameCount;
-                traVideoExpand.gameObject.SetActive(false);
-            });
+            //fTotalTime2D = (float)vdp2D.length;
+            //视频播放不播放最后一帧
+            fTotalFrame2D = (float)(vdp2D.frameCount - 1);
+            obj3DStage.SetActive(false);
+            //关闭视频上的碰撞盒，防止触碰显示宽展界面
+            btnARWindows.GetComponent<BoxCollider>().enabled = false;
+            //Open3DVideo(false);
+            //_Open3D(false);
         }
 
+        /// <summary>
+        /// 打开3D视频
+        /// </summary>
+        public void Open3DVideo(bool bAutoStart)
+        {
+            animator3DChar.gameObject.SetActive(true);
+            animator3DChar.Play("Take 001");
+
+            StopCoroutine("IEOpen3DVideo");
+            StartCoroutine("IEOpen3DVideo", bAutoStart);
+
+            //try
+            //{
+            //    if (vdp3D.isOpened)
+            //    {
+            //        vdp3D.OpenSource(str3DVideoPth);
+            //        fTotalFrame3D = vdp3D.frameCount - 1; //iVideoLen * vdp3D.frameRate;
+            //        fTotalTime3DMusic = ads3D.clip.length;
+            //        vdp3D.JumpFrame(0);
+            //        return;
+            //    }
+            //    vdp3D.isInStreamingAssets = true;
+            //    if (vdp3D.gameObject.activeSelf == true && vdp3D.enabled == true)
+            //    {
+            //        vdp3D.OpenSourceAsync(str3DVideoPth, bAutoStart, 0, () =>
+            //        {
+            //            fTotalFrame3D = vdp3D.frameCount - 1; //iVideoLen * vdp3D.frameRate;
+            //            fTotalTime3DMusic = ads3D.clip.length;
+            //        });
+            //    }
+            //}
+            //catch { }
+        }
+
+        IEnumerator IEOpen3DVideo(bool bAutoStart)
+        {
+            ///????????????????安卓直接死机??????????????????????
+            ///
+            string s = null;
+            TextMesh ttttt = FindObjectOfType<LoadMainScence>().ttt;
+            TextMesh ttttt2 = FindObjectOfType<LoadMainScence>().ttt2;
+
+            s += "1-";
+            yield return new WaitForSeconds(1);
+            s += "2-";
+            particle3D.gameObject.SetActive(true);
+            particle3D.Play();
+            s += "3-";
+            yield return new WaitForSeconds(0.3f);
+            s += "4-";
+            animator3DChar.gameObject.SetActive(false);
+            s += "5-";
+            particle3D.gameObject.SetActive(false);
+
+            s += "6-";
+            try
+            {
+                s += "7-";
+                vdp3D.OpenSource(str3DVideoPth);
+                s += "8-";
+                //s += "3-";
+                if (bAutoStart)
+                {
+                    s += "9-";
+                    if (vdp3D.isPlaying == false)
+                    {
+                        s += "10-";
+
+                        vdp3D.JumpFrame(0);
+                        s += "11-";
+                    }
+                    b3DOK = true;
+                    s += "12-";
+                }
+                //_Open3D(bAutoStart);
+                s += "13-";
+
+            }
+            catch (System.Exception exc)
+            {
+                ttttt2.text = "加载错误:" + exc.ToString();
+            }
+
+            ttttt.text = s;
+
+            ////try
+            ////{
+            //if (vdp3D.isOpened)
+            //{
+            //    vdp3D.OpenSource(str3DVideoPth);
+            //    fTotalFrame3D = vdp3D.frameCount - 1; //iVideoLen * vdp3D.frameRate;
+            //    fTotalTime3DMusic = ads3D.clip.length - 1;
+            //    if (bAutoStart)
+            //        vdp3D.JumpFrame(0);
+            //}
+            //else
+            //{
+            //    vdp3D.isInStreamingAssets = true;
+            //    if (vdp3D.gameObject.activeSelf == true && vdp3D.enabled == true)
+            //    {
+            //        vdp3D.OpenSourceAsync(str3DVideoPth, bAutoStart, 0, () =>
+            //        {
+            //            fTotalFrame3D = vdp3D.frameCount - 1; //iVideoLen * vdp3D.frameRate;
+            //            fTotalTime3DMusic = ads3D.clip.length - 1;
+            //        });
+            //    }
+            //    yield return 0;
+            //}
+            ////}
+            ////catch (System.Exception exc)
+            ////{
+            ////    LogManager.Instance.logText.text = "加载错误:" + exc.ToString();
+            ////}
+        }
+
+        //void _Open3D(bool bAutoStart)
+        //{
+        //    string s = null;
+        //    TextMesh ttttt = FindObjectOfType<LoadMainScence>().ttt;
+        //    TextMesh ttttt2 = FindObjectOfType<LoadMainScence>().ttt2;
+        //    try
+        //    {
+        //        s += "1-";
+
+        //        //if (vdp3D.isOpened)
+        //        //{
+        //        //    print(2);
+        //        //    if (vdp3D.GetComponent<MeshFilter>().mesh == null)
+        //        //    {
+        //        //        print(2.5f);
+        //        //        vdp3D.OpenSource(str3DVideoPth);
+        //        //    }
+        //        //    print(3);
+        //        //    //fTotalFrame3D = vdp3D.frameCount - 1; //iVideoLen * vdp3D.frameRate;
+        //        //    //fTotalTime3DMusic = ads3D.clip.length - 1;
+        //        //    if (bAutoStart)
+        //        //        vdp3D.JumpFrame(0);
+        //        //    print(4);
+        //        //}
+        //        //else
+        //        //{
+        //        //    print(5);
+        //        //    vdp3D.isInStreamingAssets = true;
+        //        //    if (vdp3D.gameObject.activeSelf == true && vdp3D.enabled == true)
+        //        //    {
+        //        //        print(6);
+        //        //        //vdp3D.OpenSource(str3DVideoPth);
+        //        //        //if (bAutoStart)
+        //        //        //    vdp3D.JumpFrame(0);
+        //        //        vdp3D.OpenSourceAsync(str3DVideoPth, bAutoStart, 0, () =>
+        //        //        {
+        //        //            print(7);
+
+        //        //            //fTotalFrame3D = vdp3D.frameCount - 1; //iVideoLen * vdp3D.frameRate;
+        //        //            //fTotalTime3DMusic = ads3D.clip.length - 1;
+        //        //        });
+        //        //        print(8);
+        //        //    }
+        //        //}
+        //        s += "2-";
+        //        vdp3D.OpenSource(str3DVideoPth);
+        //        s += "3-";
+        //        vdp3D.Play();
+        //        b3DOK = true;
+        //        s += "4-";
+
+        //        //if (vdp3D.isOpened && (vdp3D.GetComponent<MeshFilter>().mesh != null))
+        //        //{
+        //        //    s += "2-";
+        //        //    ////if (vdp3D.GetComponent<MeshFilter>().mesh == null)
+        //        //    ////{
+        //        //    ////    print(2.5f);
+        //        //    ////    vdp3D.OpenSource(str3DVideoPth);
+        //        //    ////}
+        //        //    //print(3);
+        //        //    //fTotalFrame3D = vdp3D.frameCount - 1; //iVideoLen * vdp3D.frameRate;
+        //        //    //fTotalTime3DMusic = ads3D.clip.length - 1;
+        //        //    //if (bAutoStart)
+        //        //    //vdp3D.JumpFrame(0);
+        //        //    vdp3D.OpenSource(str3DVideoPth);
+        //        //    s += "3-";
+        //        //    vdp3D.Play();
+        //        //    s += "4-";
+        //        //    b3DOK = true;
+        //        //}
+        //        //else
+        //        //{
+        //        //    s += "5-";
+        //        //    vdp3D.isInStreamingAssets = true;
+        //        //    if (vdp3D.gameObject.activeSelf == true && vdp3D.enabled == true)
+        //        //    {
+        //        //        s += "6-";
+        //        //        //vdp3D.OpenSource(str3DVideoPth);
+        //        //        //if (bAutoStart)
+        //        //        //    vdp3D.JumpFrame(0);
+        //        //        vdp3D.OpenSourceAsync(str3DVideoPth, false, 0, () =>
+        //        //        {
+        //        //            s += "7-";
+        //        //            //fTotalFrame3D = vdp3D.frameCount - 1; //iVideoLen * vdp3D.frameRate;
+        //        //            //fTotalTime3DMusic = ads3D.clip.length - 1;
+        //        //            b3DOK = true;
+        //        //        });
+        //        //        s += "8-";
+        //        //    }
+        //        //}
+        //    }
+        //    catch (System.Exception exc)
+        //    {
+        //        ttttt2.text = "加载错误: " + exc.ToString();
+        //    }
+
+        //    ttttt.text = s;
+        //}
         /// <summary>
         /// 重置隐藏UI计时
         /// </summary>
@@ -148,9 +375,11 @@ namespace SpaceDesign.Video
         {
             fAutoHideUITiming = fAutoHideUITime;
         }
-
         void Update()
         {
+            if (b2D == false && b3DOK == false)
+                return;
+
             if ((bTV == false) && (bExpand == true) && (bSizeSmall == false))
             {
                 if (fAutoHideUITiming >= 0)
@@ -166,28 +395,30 @@ namespace SpaceDesign.Video
 
             if (bSlideDragging == false)
             {
-                if (vdp2D.isPlaying || vdp3D.isPlaying || tvCtr.bPlaying)
+                //if (bPlaying)
+                if (iPlayState == 0)
                 {
                     //print("未拖拽，播放中");
+                    SetSliderVideo(-1);
+                    SetTextCurPlayTime(false);
+                }
 
-                    SetTextCurPlayTime(true);
-
-                    //电视的播放完成在回调
-                    //if (bTV == false)
+                //电视的播放完成在回调
+                //if (bTV == false)
+                {
+                    //if (sliderVideo.sliderValue >= 0.997f)
+                    if (sliderVideo.sliderValue >= 1f)
                     {
-                        if (sliderVideo.sliderValue >= 0.997f)
-                        {
-                            print("播放完成，结束:" + sliderVideo.sliderValue);
-                            //OnPause();
-                            OnStop();
-                        }
+                        //print("播放完成，结束:" + sliderVideo.sliderValue);
+                        //OnPause();
+                        OnStop();
                     }
                 }
             }
             else
             {
                 //print("拖拽中");
-                SetTextCurPlayTime(false);
+                SetTextCurPlayTime(true);
             }
         }
 
@@ -237,7 +468,7 @@ namespace SpaceDesign.Video
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
-            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
             //WaitForSeconds _wfs = new WaitForSeconds(0.1f);
 
@@ -507,29 +738,40 @@ namespace SpaceDesign.Video
         public TVCtr tvCtr;
         //3D视频播放控制脚本
         public MeshPlayerPRM vdp3D;
+        //3D视频的舞台模型和特效
+        public GameObject obj3DStage;
+        //3D特效的人物动画
+        public Animator animator3DChar;
+        //3D特效
+        public ParticleSystem particle3D;
         //3D视频是否开启过
         private bool b3DMeshOpen = false;
         //3D视频播放的音频
         public AudioSource ads3D;
         //3D视频的图片
         public Sprite spr3DVideo;
-        //3D视频的帧速率（每秒多少帧）
-        public float f3DVideoRate = 15;
         //拖拽进度条等，改变了Frame
-        public bool bChange3DFrame;
-        //当前播放对象的总时长
+        //public bool bChange3DFrame;
+        //当前播放对象的总时长（这里是秒）
         public float fTotalPlayTime = 0.1f;
-        //2D总长
-        public float fTotalPlayTime2D;
-        //3D总长
-        public float fTotalPlayTime3D;
+        //2D总长（这里是帧数，不是秒数，秒数乘以帧率）VideoPlayer的总帧数还要减1，因为最后一帧不播放
+        public float fTotalFrame2D;
+        //3D总长（这里是帧数，不是秒数，秒数乘以帧率）容积视频的总帧数还要减1，因为最后一帧不播放
+        float fTotalFrame3D = 2613;
+        //3D的音乐总长，（这里是秒数，跟容积视频的长度是不同的）
+        float fTotalTime3DMusic = 115.271f;
 
         //2D视频播放
         public VideoPlayer vdp2D;
         //2D视频的图片
         public Sprite spr2DVideo;
-        //播放中
-        public bool bPlaying;
+        /// <summary>
+        /// 播放的状态【0：Play】【1：Pause】【2：Stop】
+        /// </summary>
+        [SerializeField]
+        private int iPlayState = 2;
+        ////播放中
+        //public bool bPlaying;
         //预览界面
         public bool bReminder;
         //大界面
@@ -555,9 +797,11 @@ namespace SpaceDesign.Video
         public void SetExpand(bool bOpen)
         {
             bExpand = bOpen;
-            //开始默认隐藏该对象，所以这里需要打开
-            if (traVideoExpand.gameObject.activeSelf == false)
-                traVideoExpand.gameObject.SetActive(true);
+            if (bExpand == true)
+            {
+                //打开视频上的碰撞盒
+                btnARWindows.GetComponent<BoxCollider>().enabled = true;
+            }
 
             bReminder = false;
             timelineReminderShow.SetActive(false);
@@ -582,16 +826,6 @@ namespace SpaceDesign.Video
         void OnVideoClose()
         {
             OnStop();
-
-            ////if (bTV)
-            ////    tvCtr.OnClose();
-            ////else
-            ////{
-            ////    SetTV(true, false);
-            ////}
-
-            ////traVideoExpand.gameObject.SetActive(false);
-
 
             //视频框直接隐藏先（缩放为0）
             btnARWindows.transform.localScale = Vector3.zero;
@@ -683,15 +917,27 @@ namespace SpaceDesign.Video
         /// </summary>
         void OnWatchNow()
         {
-            vdp2D.targetTexture.Release();
+            b3DOK = false;
+            StopCoroutine("IEWatchNow");
+            StartCoroutine("IEWatchNow");
 
-            SetReminder(false);
-            Invoke("_InvokeShowExpand", 1.2f);
+            //Open3DVideo(false);
+            //vdp2D.targetTexture.Release();
+            //SetReminder(false);
+            //Invoke("_InvokeShowExpand", 1.2f);
         }
-        void _InvokeShowExpand()
+        IEnumerator IEWatchNow()
         {
+            SetReminder(false);
+            yield return new WaitForSeconds(1.2f);
+
+            //Open3DVideo(false);
+            //yield return new WaitForSeconds(1.5f);
+            yield return IEOpen3DVideo(false);
+
             bFromBtnWatchNow = true;
 
+            vdp2D.targetTexture.Release();
             SetExpand(true);
             //先设置是否TV
             bTV = false;
@@ -700,6 +946,18 @@ namespace SpaceDesign.Video
             b2D = true;
             SetVideo(false);
         }
+        //void _InvokeShowExpand()
+        //{
+        //    bFromBtnWatchNow = true;
+
+        //    SetExpand(true);
+        //    //先设置是否TV
+        //    bTV = false;
+        //    SetTV(true, true);
+        //    //再设置是否2D视频
+        //    b2D = true;
+        //    SetVideo(false);
+        //}
 
         //点击了立即观看按钮（从预览界面过来）
         bool bFromBtnWatchNow = false;
@@ -714,11 +972,18 @@ namespace SpaceDesign.Video
                 return;
 
             bTV = btv;
-            btnQuit.gameObject.SetActive(bTV);
+            if (bTV == false)
+            {
+                SetExpand(false);
+            }
 
+            btnQuit.gameObject.SetActive(bTV);
+            obj3DStage.SetActive(!bTV);
 
             if (bFromBtnWatchNow)
+            {
                 bFromBtnWatchNow = false;
+            }
             else
             {
                 if (bTV == true && bPush == true)
@@ -728,6 +993,10 @@ namespace SpaceDesign.Video
                     OnPause();
                     tvCtr.OnPush(b2D, false, true);
                 }
+                else
+                {
+                    tvCtr.OnClose();
+                }
             }
             //===========================================================================
             //Debug.LogError("AR和视频切换，播到一半的时候切换有问题");
@@ -735,16 +1004,14 @@ namespace SpaceDesign.Video
             //AR->TV:先推送（从零开始播放），AR端会同步恢复0的位置，切换前记录进度？切换后，播放后，再跳转？
             //===========================================================================
 
-            if (bTV == false)
-                tvCtr.OnClose();
+            //if (bTV == false)
+            //    tvCtr.OnClose();
             SetVideoWindow(!bTV);
 
             traVideoExpand.SetParent(bTV ? traTVParent : traFollowNormalParent);
             traVideoExpand.SetAsFirstSibling();
             traVideoExpand.localEulerAngles = traVideoExpand.localPosition = Vector3.zero;
             traVideoExpand.localScale = Vector3.one;
-            if (traVideoExpand.gameObject.activeSelf == false)
-                traVideoExpand.gameObject.SetActive(true);
 
             btnVideoClose.gameObject.SetActive(!bTV);
             btnVideoSize.gameObject.SetActive(!bTV);
@@ -769,10 +1036,12 @@ namespace SpaceDesign.Video
             if (b2D == b2d)
                 return;
 
-            //这里主要为了停止AR的控制，不给用TV停止（即不用多发送一次黑屏图片）
+            //这里主要为了停止AR的控制，不用给TV停止（即不用多发送一次黑屏图片）
             OnStop(false);
 
             b2D = b2d;
+            if (b2D == false)
+                b3DOK = false;
 
             traVideoChoose.SetParent(b2D ? btnVideo2D.transform : btnVideo3D.transform);
             traVideoChoose.localPosition = Vector3.zero;
@@ -780,12 +1049,14 @@ namespace SpaceDesign.Video
             imgDetailPic.sprite = b2D ? spr2DVideo : spr3DVideo;
             vdp2D.gameObject.SetActive(b2D);
             vdp3D.gameObject.SetActive(!b2D);
+            //if (b2D == false)
+            //    vdp3D.transform.localScale = new Vector3(400f, 400f, 400f);
+
             ads3D.gameObject.SetActive(!b2D);
 
             SetTotalPlayTime();
-            sliderVideo.sliderValue = 0;
             //sliderVideo.sliderValueWithoutEvent = 0;
-
+            SetSliderVideo(0);
             SetTextCurPlayTime(true);
 
             btnAR.gameObject.SetActive(bTV);
@@ -798,7 +1069,7 @@ namespace SpaceDesign.Video
                 btnAR.GetComponentInChildren<TextMesh>().text = b2D ? "AR模式" : "3D全息模式";
                 //btnAR.gameObject.SetActive(true);
 #if UNITY_EDITOR
-                OnPlay();
+                //OnPlay();
 #endif
             }
             else
@@ -807,10 +1078,51 @@ namespace SpaceDesign.Video
             }
         }
 
+        //public void OnPlay()
+        //{
+        //    switch (iPlayState)
+        //    {
+        //        default:
+        //        case 0:
+        //            //if (bTV)
+        //            //{
+        //            //    tvCtr.OnPlay(b2D);
+        //            //}
+        //            //else
+        //            //{
+
+        //            //}
+        //            break;
+        //        case 1:
+        //            //恢复播放（取消暂停）【判断TV，然后播放AR】
+        //            if (bTV)
+        //            {
+        //                tvCtr.OnResume();
+        //            }
+        //            else
+        //            {
+
+        //            }
+        //            break;
+        //        case 2:
+        //            //TV：播放（重新开始播放）【判断TV，然后播放AR】
+        //            if (bTV)
+        //            {
+        //                tvCtr.OnPlay(b2D);
+        //            }
+        //            else
+        //            {
+
+        //            }
+        //            break;
+        //    }
+        //    iPlayState = 0;
+        //}
+
         //恢复播放（取消暂停）【判断TV，然后播放AR】
         public void OnUnPause()
         {
-            PlayAR();
+            PlayAR(true);
             if (bTV)
             {
                 tvCtr.OnResume();
@@ -826,17 +1138,17 @@ namespace SpaceDesign.Video
             {
                 tvCtr.OnPlay(b2D);
             }
-            PlayAR();
+            PlayAR(false);
         }
 
         /// <summary>
         /// 仅播放AR内容
         /// </summary>
-        public void PlayAR()
+        public void PlayAR(bool bResume)
         {
             ResetAutoHideUITime();
 
-            bPlaying = true;
+            //bPlaying = true;
             btnPlay.gameObject.SetActive(false);
             btnPause.gameObject.SetActive(true);
 
@@ -850,34 +1162,28 @@ namespace SpaceDesign.Video
                 if (ads3D.isPlaying == false)
                 {
                     //3D音频
-                    if (bPause)
-                        ads3D.UnPause();
-                    else
-                        ads3D.Play();
+                    //if (bPause)
+                    //    ads3D.UnPause();
+                    //else
+                    ads3D.Play();
                 }
 
                 //print($"ads3D.time:{ads3D.time}-----_fCur:{_fCur}");
-                if (vdp3D.videoPlayer.isPlaying == false)
+                if (vdp3D.isPlaying == false)
                 {
-                    if (bChange3DFrame)
-                    {
-                        bChange3DFrame = false;
-                        //int _iCurFrame = (int)sliderVideo.value;
-                        int _iCurFrame = (int)(sliderVideo.sliderValue * fTotalPlayTime);
-                        print("跳转帧数：" + _iCurFrame);
-                        vdp3D.OpenSource(vdp3D.sourceUrl, _iCurFrame, true);
-                    }
+                    if (iPlayState == 1)
+                        vdp3D.PlayOrPause();
                     else
-                    {
-                        vdp3D.Play();
-                    }
+                        Open3DVideo(true);
                 }
+                b3DOK = true;
             }
-            bPause = false;
+            //bPause = false;
+            iPlayState = 0;
         }
 
-        //是否暂停过
-        public bool bPause = false;
+        ////是否暂停过
+        //public bool bPause = false;
         /// <summary>
         /// 暂停
         /// </summary>
@@ -885,11 +1191,12 @@ namespace SpaceDesign.Video
         {
             ResetAutoHideUITime();
 
-            bPause = true;
+            iPlayState = 1;
+            //bPause = true;
 
             Debug.Log("暂停");
 
-            bPlaying = false;
+            //bPlaying = false;
             btnPause.gameObject.SetActive(false);
             btnPlay.gameObject.SetActive(true);
 
@@ -908,18 +1215,21 @@ namespace SpaceDesign.Video
             }
         }
 
+        ////是否停止过
+        //public bool bStop = false;
         /// <summary>
         /// 停止
         /// </summary>
         public void OnStop(bool bSetTV = true)
         {
-            //sliderVideo.sliderValue = 0;
             ResetAutoHideUITime();
             btnPause.gameObject.SetActive(false);
             btnPlay.gameObject.SetActive(true);
 
-            bPlaying = false;
-            bPause = false;
+            iPlayState = 2;
+            //bPlaying = false;
+            //bPause = false;
+            //bStop = true;
             if (bSetTV)
             {
                 if (bTV)
@@ -929,46 +1239,57 @@ namespace SpaceDesign.Video
             }
             if (b2D)
             {
+                vdp2D.frame = 0;
+                //vdp2D.time = 0;
                 vdp2D.Stop();
+                //vdp2D.Play();
             }
             else
             {
+                //这里暂停不住，所以播完之后循环播放
+                ads3D.time = 0;
                 ads3D.Stop();
-                vdp3D.PreparePreviewFrame(0);
-                vdp3D.OpenSource(vdp3D.sourceUrl, 0, false, vdp3D.Pause);
+                //ads3D.Play();
+                //vdp3D.Initialize();
+                //vdp3D.Pause();
+                vdp3D.frameIndex = 0;
+                vdp3D.Stop();
+                //print("3D结束了");
+                animator3DChar.gameObject.SetActive(true);
             }
 
+            SetSliderVideo(0);
             SetTextCurPlayTime(true);
+        }
+
+        /// <summary>
+        /// 设置进度条进度【0-1】
+        /// </summary>
+        public void SetSliderVideo(float f)
+        {
+            if (f < 0)
+            {
+                f = b2D ? ((float)vdp2D.frame / fTotalFrame2D) : ((float)vdp3D.frameIndex / fTotalFrame3D);
+            }
+            else if (f > 1)
+            {
+                f = 1;
+            }
+
+            sliderVideo.sliderValue = f;
+            //print("设置进度条了");
         }
 
         /// <summary>
         /// 当前播放时间
         /// </summary>
-        public void SetTextCurPlayTime(bool bSetSlider)
+        public void SetTextCurPlayTime(bool bBySlider /*bool bSetSlider*/)
         {
-            float fCurTime = 0;
-            if (b2D)
-                fCurTime = (float)(vdp2D.time);//2D用.time，获取的是当前播放秒数
+            float fCurTime;//= b2D ? ((float)vdp2D.frame / vdp2D.frameRate) : ((float)vdp3D.frameIndex / vdp3D.frameRate);
+            if (bBySlider)
+                fCurTime = sliderVideo.sliderValue * fTotalPlayTime;
             else
-                fCurTime = vdp3D.videoPlayer.frame;//3D用.frame获取的是当前帧数，值大于1
-
-            //print($"vp3D.frame:{vp3D.frame};vp3D.time:{vp3D.time}");
-            //print($"fCurTime:{fCurTime};bSetSlider:{bSetSlider}");
-
-            //3D视频需要除以帧速率
-            if (b2D == false)
-            {
-                f3DVideoRate = (f3DVideoRate <= 0) ? 1 : f3DVideoRate;
-                fCurTime /= f3DVideoRate;
-                //print("计算帧率");
-            }
-
-            if (bSetSlider)
-            {
-                sliderVideo.sliderValue = fCurTime / fTotalPlayTime;
-                //sliderVideo.sliderValueWithoutEvent = fCurTime / fTotalPlayTime;
-            }
-
+                fCurTime = b2D ? ((float)vdp2D.frame / vdp2D.frameRate) : ((float)vdp3D.frameIndex / vdp3D.frameRate);
             float s = (fCurTime % 60);
             float m = (((fCurTime - s) / 60) % 60);
             float h = ((fCurTime - s) / 3600);
@@ -981,15 +1302,9 @@ namespace SpaceDesign.Video
         /// <param name="fTotalTime"></param>
         void SetTotalPlayTime()
         {
-            fTotalPlayTime = b2D ? fTotalPlayTime2D : fTotalPlayTime3D;
-
-            //3D视频需要除以帧速率
-            if (b2D == false)
-            {
-                f3DVideoRate = (f3DVideoRate <= 0) ? 1 : f3DVideoRate;
-                fTotalPlayTime /= f3DVideoRate;
-            }
-
+            //这里从帧数换算成秒数
+            fTotalPlayTime = b2D ? (fTotalFrame2D / vdp2D.frameRate) : (fTotalFrame3D / vdp3D.frameRate);
+            //print($"fTotalPlayTime :{fTotalPlayTime},fTotalFrame2D:{fTotalFrame2D},vdp2D.frameRate:{vdp2D.frameRate},fTotalFrame3D :{fTotalFrame3D },vdp3D.frameRate:{vdp3D.frameRate}");
             float s = (fTotalPlayTime % 60);
             float m = (((fTotalPlayTime - s) / 60) % 60);
             float h = ((fTotalPlayTime - s) / 3600);
@@ -1013,61 +1328,70 @@ namespace SpaceDesign.Video
         {
             ResetAutoHideUITime();
             bSlideDragging = false;
-            //跳帧，要预备
-            int _iCurFrame = (int)(sliderVideo.sliderValue * fTotalPlayTime);
-
             if (b2D)
             {
-                vdp2D.time = _iCurFrame;
+                //跳帧，2D视频，按照帧数控制
+                vdp2D.frame = Mathf.FloorToInt(sliderVideo.sliderValue * fTotalFrame2D);
             }
             else
             {
-                //跳3D的音频
-                ads3D.time = _iCurFrame;
-                bChange3DFrame = true;
-                //跳帧，要预备
-                vdp3D.PreparePreviewFrame(_iCurFrame);
+                //声音用秒数计算（计算方法和视频的不同）
+                ads3D.time = sliderVideo.sliderValue * fTotalTime3DMusic;
+
+                //跳帧，3D视频，按照帧数控制
+                //JumpFrame调用后会直接运行,所以如果是TV的3D模式，后面需要再暂停一下
+                vdp3D.JumpFrame(Mathf.FloorToInt(sliderVideo.sliderValue * fTotalFrame3D));
             }
 
             if (bTV)
             {
+                //TV的3D模式，拖拽进度条后，这里先暂停了
+                if (b2D == false)
+                    vdp3D.Pause();
+
                 if (bSetTV)
-                    tvCtr.OnSetSlider((int)(fTotalPlayTime), _iCurFrame);
+                {
+                    //电视传的，总时长和当前位置，都是秒数（Int）
+                    int _iCurTime = Mathf.FloorToInt(b2D ? (vdp2D.frame / vdp2D.frameRate) : (vdp3D.frameIndex / vdp3D.frameRate));
+                    tvCtr.OnSetSlider((int)(fTotalPlayTime), _iCurTime);
+                }
                 //电视的拖拽播放，在乐播回调之后调用 CallbackSlider()
             }
             else
             {
                 //AR的拖拽播放，用恢复暂停
-                PlayAR();
+                PlayAR(true);
             }
+            print("跳转进度条了");
+
         }
         #endregion
 
-        public void SetSliderByTV(float f)
-        {
-            if (f > 1)
-                f = 1;
-            else if (f < 0)
-                f = 0;
+        //public void SetSliderByTV(float f)
+        //{
+        //    if (f > 1)
+        //        f = 1;
+        //    else if (f < 0)
+        //        f = 0;
 
-            //sliderVideo.sliderValueWithoutEvent = f;
+        //    //sliderVideo.sliderValueWithoutEvent = f;
 
-            ResetAutoHideUITime();
-            //跳帧，要预备
-            int _iCurFrame = (int)(sliderVideo.sliderValue * fTotalPlayTime);
+        //    ResetAutoHideUITime();
+        //    //跳帧，要预备
+        //    int _iCurFrame = (int)(sliderVideo.sliderValue * fTotalPlayTime);
 
-            if (b2D)
-            {
-                vdp2D.time = _iCurFrame;
-            }
-            else
-            {
-                //跳3D的音频
-                ads3D.time = _iCurFrame;
-                bChange3DFrame = true;
-                //跳帧，要预备
-                vdp3D.PreparePreviewFrame(_iCurFrame);
-            }
-        }
+        //    if (b2D)
+        //    {
+        //        vdp2D.time = _iCurFrame;
+        //    }
+        //    else
+        //    {
+        //        //跳3D的音频
+        //        ads3D.time = _iCurFrame;
+        //        bChange3DFrame = true;
+        //        ////跳帧，要预备
+        //        //vdp3D.PreparePreviewFrame(_iCurFrame);
+        //    }
+        //}
     }
 }

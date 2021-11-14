@@ -103,13 +103,13 @@ namespace SpaceDesign.Magazine
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 1.5f)
+            else if (_dis <= 5f && _dis > 2.5f)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 1.5f)
+            else if (_dis <= 2.5f)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
@@ -259,6 +259,9 @@ namespace SpaceDesign.Magazine
                 yield return 0;
             }
 
+            markTrackMagazine.StopTrack();
+            markTrackMagazine.enabled = false;
+
             OnQuit();
 
             //UI变化结束
@@ -303,6 +306,8 @@ namespace SpaceDesign.Magazine
         public GameObject timelineHide;
         //查看翻译按钮
         public ButtonRayReceiver btnCheckDetail;
+        //查看翻译按钮的父节点
+        public GameObject objCheckDetailParent;
         //退出翻译按钮
         public ButtonRayReceiver btnQuit;
 
@@ -312,11 +317,12 @@ namespace SpaceDesign.Magazine
         public void OnCheckDetail()
         {
             //btnCheckDetail.transform.localScale = Vector3.zero;
-            btnCheckDetail.gameObject.SetActive(false);
+            objCheckDetailParent.SetActive(false);
+            //btnCheckDetail.gameObject.SetActive(false);
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
-            markTrackMagazine.StopTrack();
-            markTrackMagazine.enabled = false;
+            //markTrackMagazine.StopTrack();
+            //markTrackMagazine.enabled = false;
         }
 
         /// <summary>
@@ -324,10 +330,13 @@ namespace SpaceDesign.Magazine
         /// </summary>
         public void OnQuit()
         {
-            timelineHide.SetActive(true);
+            objCheckDetailParent.SetActive(true);
+            btnCheckDetail.gameObject.SetActive(false);
+            if (timelineShow.activeSelf == true)
+                timelineHide.SetActive(true);
             timelineShow.SetActive(false);
-            markTrackMagazine.StopTrack();
-            markTrackMagazine.enabled = false;
+            //markTrackMagazine.StopTrack();
+            //markTrackMagazine.enabled = false;
         }
         #endregion
     }
