@@ -214,7 +214,7 @@ namespace SpaceDesign.VirtualCoach
             //UI变化结束
             bUIChanging = false;
 
-            yield return new WaitForSeconds(20f);
+            yield return new WaitForSeconds(18f);
             //等待讲话16秒之后，关闭动画
 
             yield return IECloseToMiddle();
