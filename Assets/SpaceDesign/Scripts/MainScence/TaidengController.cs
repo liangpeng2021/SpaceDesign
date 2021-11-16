@@ -19,6 +19,7 @@ namespace SpaceDesign.Lamp
         /// 开启购买流程
         /// </summary>
         public ButtonRayReceiver startpayRayReceiver;
+        ButtonTouchableReceiver startPayTouch;
 
         /// <summary>
         /// 默认显示的对象
@@ -60,6 +61,8 @@ namespace SpaceDesign.Lamp
         /// 立即购买按钮
         /// </summary>
         public ButtonRayReceiver justpayRayReceiver;
+        ButtonTouchableReceiver justPayTouch;
+
         /// <summary>
         /// 购买成功对象
         /// </summary>
@@ -212,6 +215,13 @@ namespace SpaceDesign.Lamp
         private void OnEnable()
         {
             startpayRayReceiver.onPinchDown.AddListener(StartPay);
+            //if (startPayTouch == null)
+            //{
+            //    startPayTouch = startpayRayReceiver.gameObject.AddComponent<ButtonTouchableReceiver>();
+            //    startPayTouch.pressableHandler= startpayRayReceiver.
+            //}
+            //startPayTouch.
+
             justpayRayReceiver.onPinchDown.AddListener(PaySuccess);
 
             if (boundingBox == null)

@@ -83,12 +83,16 @@ namespace OXRTK.ARHandTracking
             {
                 if (m_GazeOn)
                 {
+                    
                     CheckHandActive();
+                    Debug.Log("MyLog::m_ActiveHand:" + m_ActiveHand);
                     if (m_ActiveHand != null)
                     {
                         CheckHandArea();
+                        Debug.Log("MyLog::m_HandInInteractionArea:" + m_HandInInteractionArea);
                         if (m_HandInInteractionArea)
                         {
+                            
                             CheckHandVirtualPress();
                             WaveMainLogic();
                         }

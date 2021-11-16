@@ -37,7 +37,6 @@ namespace SpaceDesign
         void Awake()
         {
             animIconFar = traIcon.GetComponent<Animator>();
-            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
         }
         void OnEnable()
         {
@@ -58,6 +57,9 @@ namespace SpaceDesign
             timeline.StartPause();
             timeline.gameObject.SetActive(false);
             backBtn.gameObject.SetActive(false);
+
+            //挥手碰撞框消失
+            waveInteractionGazeHandle.gameObject.SetActive(false);
         }
 
         void Start()
@@ -103,7 +105,7 @@ namespace SpaceDesign
                     curPlayerPosState = PlayerPosState.Middle;
                 }
             }
-            else if (_dis <= 1.5f)
+            else if (_dis <= 2f)
             {
                 //Debug.Log(lastPPS);
                 if (lastPPS == PlayerPosState.Close)
@@ -263,51 +265,80 @@ namespace SpaceDesign
         public Transform traIcon;
         //吸引态，上下移动动画
         private Animator animIconFar;
-        /// <summary>
-        /// 触点按钮
-        /// </summary>
-        private ButtonRayReceiver btnIcon;
+        
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
 
         //Icon的移动速度
         public float fIconSpeed = 1;
-
-        /// <summary>
-        /// 点击Icon
-        /// </summary>
-        void ClickIcon()
-        {
-            if (curPlayerPosState == PlayerPosState.Close)
-                StartCoroutine(IEMiddleToClose());
-        }
-
+        
         void AddButtonRayEvent()
         {
-            btnIcon.onPinchDown.AddListener(ClickIcon);
             qiukuiBtn.onPinchDown.AddListener(GotoQiukui);
+            //触摸
+            if (qiukuiTouch == null)
+            {
+                qiukuiTouch = qiukuiBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
+                qiukuiTouch.pressableHandler = qiukuiBtn.transform;
+            }
+            qiukuiTouch.onPressDown.AddListener(GotoQiukui);
+
             fanqieBtn.onPinchDown.AddListener(GotoFanqie);
+            if (fanqieTouch == null)
+            {
+                fanqieTouch = fanqieBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
+                fanqieTouch.pressableHandler = fanqieBtn.transform;
+            }
+            fanqieTouch.onPressDown.AddListener(GotoFanqie);
+
             bocaiBtn.onPinchDown.AddListener(GotoBocai);
+            if (bocaiTouch == null)
+            {
+                bocaiTouch = bocaiBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
+                bocaiTouch.pressableHandler = bocaiBtn.transform;
+            }
+            bocaiTouch.onPressDown.AddListener(GotoBocai);
+
             backBtn.onPinchDown.AddListener(BackToCaipu);
+            if (backTouchBtn == null)
+            {
+                backTouchBtn = backBtn.GetComponent<ButtonTouchableReceiver>();
+            }
+            backTouchBtn.onPressDown.AddListener(BackToCaipu);
 
             showCaipuBtn.onPinchDown.AddListener(ShowCaipu);
-            //waveInteractionGazeHandle.g_OnHandWave.AddListener(WaveHandle);
-            //waveInteractionGazeHandle.g_OnHandVirtualPress.AddListener(()=> { ChangePressState(true); });
-            //waveInteractionGazeHandle.g_OnHandVirtualRelease.AddListener(() => { ChangePressState(false); });
+            if (showTouchCaipuBtn == null)
+            {
+                showTouchCaipuBtn = showCaipuBtn.GetComponent<ButtonTouchableReceiver>();
+            }
+            showTouchCaipuBtn.onPressDown.AddListener(ShowCaipu);
+
+            //挥手,射线
+            waveInteractionGazeHandle.g_OnHandWave.AddListener(WaveHandle);
+            
         }
 
         void RemoveButtonRayEvent()
         {
-            btnIcon.onPinchDown.RemoveAllListeners();
             qiukuiBtn.onPinchDown.RemoveAllListeners();
+            qiukuiTouch.onPressDown.RemoveAllListeners();
+
             fanqieBtn.onPinchDown.RemoveAllListeners();
+            fanqieTouch.onPressDown.RemoveAllListeners();
+
             bocaiBtn.onPinchDown.RemoveAllListeners();
+            bocaiTouch.onPressDown.RemoveAllListeners();
+
             backBtn.onPinchDown.RemoveAllListeners();
+            backTouchBtn.onPressDown.RemoveAllListeners();
 
             showCaipuBtn.onPinchDown.RemoveAllListeners();
-            //waveInteractionGazeHandle.g_OnHandWave.RemoveAllListeners();
-            //waveInteractionGazeHandle.g_OnHandVirtualPress.RemoveAllListeners();
-            //waveInteractionGazeHandle.g_OnHandVirtualRelease.RemoveAllListeners();
+            showTouchCaipuBtn.onPressDown.RemoveAllListeners();
+
+            //挥手
+            //射线
+            waveInteractionGazeHandle.g_OnHandWave.RemoveAllListeners();
+            
         }
 
         #endregion
@@ -330,18 +361,26 @@ namespace SpaceDesign
         /// 秋葵按钮
         /// </summary>
         public ButtonRayReceiver qiukuiBtn;
+        ButtonTouchableReceiver qiukuiTouch;
+
         /// <summary>
         /// 番茄
         /// </summary>
         public ButtonRayReceiver fanqieBtn;
+        ButtonTouchableReceiver fanqieTouch;
+
         /// <summary>
         /// 菠菜
         /// </summary>
         public ButtonRayReceiver bocaiBtn;
+        ButtonTouchableReceiver bocaiTouch;
+
         /// <summary>
         /// 返回
         /// </summary>
         public ButtonRayReceiver backBtn;
+        ButtonTouchableReceiver backTouchBtn;
+
         /// <summary>
         /// 当前点击的菜谱流程
         /// </summary>
@@ -359,6 +398,7 @@ namespace SpaceDesign
         /// 显示菜谱按钮
         /// </summary>
         public ButtonRayReceiver showCaipuBtn;
+        ButtonTouchableReceiver showTouchCaipuBtn;
         /// <summary>
         /// 显示菜谱
         /// </summary>
@@ -386,6 +426,8 @@ namespace SpaceDesign
                     timeline.SetCurTimelineData("显示菜谱");
                 });
 
+            //挥手碰撞框消失
+            waveInteractionGazeHandle.gameObject.SetActive(false);
         }
         /// <summary>
         /// 秋葵
@@ -406,6 +448,9 @@ namespace SpaceDesign
                 {
                     backBtn.gameObject.SetActive(true);
                     timeline.SetCurTimelineData(curCai + "出现");
+
+                    //挥手碰撞框出现
+                    waveInteractionGazeHandle.gameObject.SetActive(true);
                 });
 
             lastIndex = curIndex = 1;
@@ -457,24 +502,20 @@ namespace SpaceDesign
             lastIndex = curIndex;
         }
 
-        //#region 挥手,不稳定
-        //public WaveInteractionGazeHandle waveInteractionGazeHandle;
-        //bool isPressed;
-        //void WaveHandle(Vector2Int dir)
-        //{
-        //    //if (isPressed)
-        //    {
-        //        Debug.Log("MyLog::WaveHandle:" + dir.ToString());
-        //    }
-        //}
-
-        //void ChangePressState(bool press)
-        //{
-        //    isPressed = press;
-        //}
-
-        //#endregion
+        #region 挥手,不稳定
+        public WaveInteractionGazeHandle waveInteractionGazeHandle;
         
+        void WaveHandle(Vector2Int dir)
+        {
+            if (dir.x < 0)
+                ChangeLiuChengLastAnimation(true);
+            else if (dir.x > 0)
+            {
+                ChangeLiuChengLastAnimation(false);
+            }
+        }
+        #endregion
+
         /// <summary>
         /// 番茄
         /// </summary>

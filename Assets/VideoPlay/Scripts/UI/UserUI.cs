@@ -624,7 +624,7 @@ public class UserUI : MonoBehaviour
             },
             (s)=>
             {
-                Debug.Log("MyLog::自动登录失败：" + s);
+                //Debug.Log("MyLog::自动登录失败：" + s);
                 LogoutContinueLogin();
             });
         }

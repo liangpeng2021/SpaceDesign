@@ -320,29 +320,5 @@ public class EditorControl : MonoBehaviour
     {
         tipObj.SetActive(false);
     }
-
-    void TestInput()
-    {
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            Debug.Log("MyLog::KeyCode.A");
-            ShowTipTime("A", 2f);
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            Debug.Log("MyLog::KeyCode.S");
-            ShowTipTime("S", 2f);
-        }
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            Debug.Log("MyLog::KeyCode.W");
-            ShowTipTime("W", 2f);
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            Debug.Log("MyLog::KeyCode.D");
-            ShowTipTime("D", 2f);
-        } 
-    }
     #endregion
 }

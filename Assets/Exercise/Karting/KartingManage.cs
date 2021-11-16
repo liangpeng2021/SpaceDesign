@@ -5,6 +5,7 @@
  */
 
 using OXRTK.ARHandTracking;
+using SpaceDesign.Video;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -61,7 +62,6 @@ namespace SpaceDesign.Karting
             btnStart.onPinchDown.RemoveAllListeners();
             btnEnd.onPinchDown.RemoveAllListeners();
             //btnQuit.onPinchDown.RemoveAllListeners();
-            //add by lp
             RemoveWindowEvent();
         }
 
@@ -190,6 +190,7 @@ namespace SpaceDesign.Karting
         {
             //UI开始变化
             bUIChanging = true;
+            OutSwap();
 
             //中距离=>远距离
             //Icon从动态变成静态
@@ -201,6 +202,7 @@ namespace SpaceDesign.Karting
             traIcon.gameObject.SetActive(true);
 
             yield return 0;
+
             //UI变化结束
             bUIChanging = false;
         }
@@ -211,7 +213,7 @@ namespace SpaceDesign.Karting
         {
             //UI开始变化
             bUIChanging = true;
-            
+
             //中距离=>近距离
             Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
             while (true)
@@ -261,6 +263,8 @@ namespace SpaceDesign.Karting
         /// </summary>
         IEnumerator IECloseToMiddle()
         {
+            //add by lp
+            OutSwap();
             //UI开始变化
             bUIChanging = true;
 
@@ -286,12 +290,8 @@ namespace SpaceDesign.Karting
                 yield return 0;
             }
 
-            //add by lp
-            OutSwap();
-
             //UI变化结束
             bUIChanging = false;
-            
         }
 
         #region Icon变化，远距离（大于5米，静态）（小于5米，大于1.5米，动态）
@@ -312,6 +312,8 @@ namespace SpaceDesign.Karting
         /// </summary>
         public void ClickIcon()
         {
+            if (bUIChanging == true)
+                return;
             if (curPlayerPosState != PlayerPosState.Far)
             {
                 StopAllCoroutines();
@@ -400,7 +402,7 @@ namespace SpaceDesign.Karting
         /// </summary>
         void InitWindow()
         {
-            swapTimeline.StartPause();
+            OutSwap();
         }
         /// <summary>
         /// 添加事件
@@ -419,10 +421,25 @@ namespace SpaceDesign.Karting
         /// </summary>
         void SwapWindow()
         {
+            if (bUIChanging == true)
+                return;
+
+            if (VideoManage.Inst == null)
+                return;
+            if (VideoManage.Inst.bTV == true)
+                return;
+
+
             isSwap = !isSwap;
+
+            swapBtn.GetComponent<BoxCollider>().enabled = false;
+
             if (isSwap)
             {
-                swapTimeline.SetCurTimelineData("大到小");
+                swapTimeline.SetCurTimelineData("大到小", () =>
+                 {
+                     swapBtn.GetComponent<BoxCollider>().enabled = true;
+                 });
                 objHelp.SetActive(false);
                 btnEnd.gameObject.SetActive(false);
                 btnStart.gameObject.SetActive(false);
@@ -430,14 +447,18 @@ namespace SpaceDesign.Karting
             else
             {
                 swapTimeline.SetCurTimelineData("小到大",
-                ()=>
+                () =>
                 {
                     btnEnd.gameObject.SetActive(true);
                     traReadyUI.gameObject.SetActive(true);
                     objHelp.SetActive(true);
                     btnStart.gameObject.SetActive(true);
+
+                    swapBtn.GetComponent<BoxCollider>().enabled = true;
                 });
-            } 
+            }
+            SetVideo(true);
+
         }
         /// <summary>
         /// 退出时调用
@@ -445,7 +466,25 @@ namespace SpaceDesign.Karting
         void OutSwap()
         {
             isInArea = false;
+            //复原
+            if (isSwap)
+            {
+                swapTimeline.SetCurTimelineData("小到大",
+                () =>
+                {
+                    btnEnd.gameObject.SetActive(true);
+                    traReadyUI.gameObject.SetActive(true);
+                    objHelp.SetActive(true);
+                    btnStart.gameObject.SetActive(true);
+
+                    isSwap = false;
+                    swapTimeline.StartPause();
+                });
+            }
+            else
+                swapTimeline.StartPause();
             //TODO,修改视频节点
+            SetVideo(false);
 
         }
         /// <summary>
@@ -454,11 +493,59 @@ namespace SpaceDesign.Karting
         void InSwap()
         {
             //判断当前是视频跟随状态
-            if (Video.VideoManage.Inst && Video.VideoManage.Inst.videoAutoRotate.enabled)
-                isInArea = true;
+            if (VideoManage.Inst == null)
+                return;
+            if (VideoManage.Inst.bTV == true)
+                return;
+            isInArea = true;
             //TODO,修改视频节点
+            if (VideoManage.Inst.bSizeSmall)
+                traVideoOriParent = VideoManage.Inst.traFollowSmallParent;
+            else
+                traVideoOriParent = VideoManage.Inst.traFollowNormalParent;
+
+            SetVideo(true);
 
         }
+
+
+        //------------ Modify by zh ------------
+        public Transform traVideoBig;
+        public Transform traVideoSmall;
+        //视频的原父节点
+        Transform traVideoOriParent;
+        void SetVideo(bool bKarting)
+        {
+            if (VideoManage.Inst == null)
+                return;
+
+            Transform _tra = VideoManage.Inst.traVideoExpand;
+            if (_tra == null)
+                return;
+
+            Transform _traTarget;
+            if (bKarting)
+            {
+                if (isSwap)
+                {
+                    //卡丁小框，视频大框
+                    _traTarget = traVideoBig;
+                }
+                else
+                {
+                    //卡丁大框，视频小框
+                    _traTarget = traVideoSmall;
+                }
+            }
+            else
+                _traTarget = traVideoOriParent;
+
+            _tra.SetParent(_traTarget);
+            _tra.localScale = Vector3.one;
+            _tra.localPosition = Vector3.zero;
+            _tra.localRotation = Quaternion.identity;
+        }
+        //------------------End------------------
         #endregion
     }
 }

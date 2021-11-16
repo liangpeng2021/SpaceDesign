@@ -57,7 +57,7 @@ public class ChangeSate : MonoBehaviour
         }
         else
         {
-            Debug.Log("MyLog::缺少BoundingBox");
+            //Debug.Log("MyLog::缺少BoundingBox");
         }
 
         InitDeleteObj();

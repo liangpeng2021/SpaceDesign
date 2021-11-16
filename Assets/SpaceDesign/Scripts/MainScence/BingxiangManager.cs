@@ -129,7 +129,7 @@ namespace SpaceDesign
                 //回调
                 (sd) =>
                 {
-                    Debug.Log("MyLog::DoorState:" + sd.Status);
+                    //Debug.Log("MyLog::DoorState:" + sd.Status);
                     JudgeOpen(sd.Status);
                 }
                 );

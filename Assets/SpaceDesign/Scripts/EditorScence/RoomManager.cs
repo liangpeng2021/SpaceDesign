@@ -504,7 +504,7 @@ public class RoomManager : MonoBehaviour
         int curRoomListId = (curPageRoomId * pageCount + curRoomBtnIndex);
         if (curRoomListId == -1)
         {
-            Debug.Log("MyLog::缺少curRoomControl");
+            //Debug.Log("MyLog::缺少curRoomControl");
             return;
         }
         //Debug.Log("MyLog::id:"+id);
@@ -519,7 +519,7 @@ public class RoomManager : MonoBehaviour
 
         if (curRoomListId == -1)
         {
-            Debug.Log("MyLog::缺少curRoomControl");
+            //Debug.Log("MyLog::缺少curRoomControl");
             return;
         }
 
@@ -533,7 +533,7 @@ public class RoomManager : MonoBehaviour
         int curRoomListId = (curPageRoomId * pageCount + curRoomBtnIndex);
         if (curRoomListId == -1)
         {
-            Debug.Log("MyLog::缺少curRoomControl");
+            //Debug.Log("MyLog::缺少curRoomControl");
             return;
         }
 

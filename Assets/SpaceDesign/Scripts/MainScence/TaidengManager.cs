@@ -44,7 +44,6 @@ namespace SpaceDesign.Lamp
         void Awake()
         {
             animIconFar = traIcon.GetComponent<Animator>();
-            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
         }
         void OnEnable()
         {
@@ -280,6 +279,8 @@ namespace SpaceDesign.Lamp
         public Transform traIcon;
         //Icon对象的AR手势Button按钮
         private ButtonRayReceiver btnIcon;
+        ButtonTouchableReceiver btnIconTouch;
+
         //吸引态，上下移动动画
         private Animator animIconFar;
         //轻交互，半球动画+音符动画
@@ -289,10 +290,14 @@ namespace SpaceDesign.Lamp
         /// 关闭按钮
         /// </summary>
         public ButtonRayReceiver closeBtn;
+        ButtonTouchableReceiver closeBtnTouch;
+
         /// <summary>
         /// 空间放置按钮
         /// </summary>
         public ButtonRayReceiver placeBtn;
+        ButtonTouchableReceiver placeBtnTouch;
+
         /// <summary>
         /// mark放置后控制脚本
         /// </summary>
@@ -314,13 +319,35 @@ namespace SpaceDesign.Lamp
         void AddButtonRayEvent()
         {
             btnIcon.onPinchDown.AddListener(ClickIcon);
+            if (btnIconTouch == null)
+            {
+                btnIconTouch = btnIcon.gameObject.GetComponent<ButtonTouchableReceiver>();
+                btnIconTouch.pressableHandler = btnIcon.transform;
+            }
+            btnIconTouch.onPressDown.AddListener(ClickIcon);
+
             closeBtn.onPinchDown.AddListener(OnClose);
+            if (closeBtnTouch == null)
+            {
+                closeBtnTouch = closeBtn.gameObject.GetComponent<ButtonTouchableReceiver>();
+                closeBtnTouch.pressableHandler = closeBtn.transform;
+            }
+            closeBtnTouch.onPressDown.AddListener(OnClose);
+
             placeBtn.onPinchDown.AddListener(OnCheckPlace);
+            if (placeBtnTouch == null)
+            {
+                placeBtnTouch = placeBtn.gameObject.GetComponent<ButtonTouchableReceiver>();
+                placeBtnTouch.pressableHandler = placeBtn.transform;
+            }
+            placeBtnTouch.onPressDown.AddListener(OnCheckPlace);
         }
 
         void RemoveButtonRayEvent()
         {
             btnIcon.onPinchDown.RemoveAllListeners();
+            btnIconTouch.onPressDown.RemoveAllListeners();
+
             closeBtn.onPinchDown.RemoveAllListeners();
             placeBtn.onPinchDown.RemoveAllListeners();
         }

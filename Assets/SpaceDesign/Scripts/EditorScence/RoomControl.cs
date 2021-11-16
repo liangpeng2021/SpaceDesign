@@ -281,7 +281,7 @@ public class RoomControl : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("MyLog::实例化3D预设："+e);
+            //Debug.Log("MyLog::实例化3D预设："+e);
         }
     }
 
@@ -318,7 +318,7 @@ public class RoomControl : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("MyLog::实例化3D预设：" + e);
+            //Debug.Log("MyLog::实例化3D预设：" + e);
         }
     }
 
@@ -335,11 +335,11 @@ public class RoomControl : MonoBehaviour
             //上一个关掉
             if (curObjIndex >= 0 && curObjIndex < objList.Count)
                 objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOff();
-            else
-            {
-                Debug.Log("MyLog::curindex:" + curObjIndex);
-                Debug.Log("MyLog::objList:" + objList.Count);
-            }
+            //else
+            //{
+            //    Debug.Log("MyLog::curindex:" + curObjIndex);
+            //    Debug.Log("MyLog::objList:" + objList.Count);
+            //}
 
             curObjIndex = index;
             //当前的打开
@@ -375,6 +375,8 @@ public class RoomControl : MonoBehaviour
     /// </summary>
     void ResetIndex()
     {
+        if (curObjIndex ==-1)
+            return;
         for (int i = curObjIndex; i < objList.Count; i++)
         {
             objList[i].obj.GetComponent<ChangeSate>().index = i;
