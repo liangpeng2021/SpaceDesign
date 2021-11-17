@@ -14,10 +14,6 @@ using XR;
 /// </summary>
 public class LoadMainScence : MonoBehaviour
 {
-    public TextMesh ttt;
-    public TextMesh ttt2;
-
-
     //版本号
     public Text version;
 

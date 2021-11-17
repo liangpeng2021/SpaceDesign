@@ -24,7 +24,7 @@ public class Demo : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.A))
         {
-            meshPlayerPRM.JumpFrame(118);
+            meshPlayerPRM.JumpFrame(118, true);
         }
     }
     public void PlayAni()

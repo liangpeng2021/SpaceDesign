@@ -260,8 +260,6 @@ namespace SpaceDesign.VirtualCoach
         private ButtonRayReceiver btnIcon;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
-        //Icon的移动速度
-        public float fIconSpeed = 1;
         //人物的说话框，人物隐藏的时候，对话框也要隐藏
         public GameObject objMenuUI;
         /// <summary>

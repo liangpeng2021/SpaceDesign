@@ -75,6 +75,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnInit()
         {
+            return;
             try
             {
                 AJO.Call("Init", this.transform.name);
@@ -90,6 +91,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void CallbackLocal(string s)
         {
+            return;
             textLocal.text = s + "\n自动搜索";
 
             if (s.Contains("InitSuc"))
@@ -109,6 +111,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnStartSearch()
         {
+            return;
             try
             {
                 AJO.Call("StartBrowse");
@@ -123,6 +126,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnStopSearch()
         {
+            return;
             //foreach (var v in textAryToggleConnect)
             //{
             //    v.text = null;
@@ -144,6 +148,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void CallbackSearch(string s)
         {
+            return;
             //textSearch.text = s + "\n停止搜索，自动连接";
 
             string[] strs = s.Split('-');
@@ -174,6 +179,7 @@ namespace SpaceDesign.Video
         public int iConnectIndex = 0;
         public void ToggleConnect(int index)
         {
+            return;
             iConnectIndex = index;
 
             try
@@ -191,6 +197,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnStartConnect()
         {
+            return;
             try
             {
                 AJO.Call("Connect");
@@ -205,6 +212,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnStopConnect()
         {
+            return;
             try
             {
                 AJO.Call("DisConnect");
@@ -221,6 +229,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void CallbackConnect(string s)
         {
+            return;
             textConnect.text = s;
 
             if (s.Contains("ConnectSuc"))
@@ -251,6 +260,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnClose()
         {
+            return;
             bPushBackAutoPlay = false;
             print("关闭（推送一个黑色的图片）");
 
@@ -280,6 +290,7 @@ namespace SpaceDesign.Video
         /// <param name="bCallbackSetSlider">回调后设置进度条（AR模式切TV模式）</param>
         public void OnPush(bool b2D, bool bCallbackAutoPlay, bool bCallbackSetSlider)
         {
+            return;
             bPushBackAutoPlay = bCallbackAutoPlay;
             bCallBackSetSlider = bCallbackSetSlider;
             TempLog("开始推送视频2D：" + b2D);
@@ -309,6 +320,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void CallbackPush(string s)
         {
+            return;
             textPush.text = "推送回调：" + s;
 
             //推送的不是黑色关闭图，才触发回调
@@ -348,6 +360,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnPlay(bool b2D)
         {
+            return;
             TempLog("开始Play播放视频2D：" + b2D);
 
             //if (bPushed == false)
@@ -370,6 +383,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnResume()
         {
+            return;
             TempLog("开始恢复暂停");
 
             //if (bPushed == false)
@@ -392,6 +406,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void OnPause()
         {
+            return;
             TempLog("开始暂停视频");
 
             //if (bPushed == false)
@@ -416,6 +431,7 @@ namespace SpaceDesign.Video
         public void OnStopPlay()
         {
 
+            return;
             OnClose();
 
             //if (bPushed == false)
@@ -440,6 +456,7 @@ namespace SpaceDesign.Video
         public void OnSetSlider(int duration, int position)
         {
 
+            return;
             //if (bPushed == false)
             //{
             //    OnInit();
@@ -460,6 +477,7 @@ namespace SpaceDesign.Video
         /// </summary>
         public void CallbackSlider(string strTime)
         {
+            return;
             string[] ss = strTime.Split('-');
             int duration = int.Parse(ss[0]);
             int position = int.Parse(ss[1]);

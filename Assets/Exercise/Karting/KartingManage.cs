@@ -218,7 +218,7 @@ namespace SpaceDesign.Karting
             Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fIconSpeed * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 traReadyUI.localScale = Vector3.Lerp(traReadyUI.localScale, _v3, fUISpeed * Time.deltaTime);
 
                 float _fDis = Vector3.Distance(traReadyUI.localScale, _v3);
@@ -276,7 +276,7 @@ namespace SpaceDesign.Karting
             //近距离=>中距离
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
                 traPlayUI.localScale = Vector3.Lerp(traPlayUI.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 traReadyUI.localScale = Vector3.Lerp(traReadyUI.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
@@ -304,8 +304,6 @@ namespace SpaceDesign.Karting
         public ButtonRayReceiver btnIcon;
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
-        //Icon的移动速度
-        public float fIconSpeed = 1;
 
         /// <summary>
         /// 点击Icon
@@ -520,6 +518,7 @@ namespace SpaceDesign.Karting
                 return;
 
             Transform _tra = VideoManage.Inst.traVideoExpand;
+            BoxCollider _bc = VideoManage.Inst.colliderBtnARWindows;
             if (_tra == null)
                 return;
 
@@ -528,17 +527,24 @@ namespace SpaceDesign.Karting
             {
                 if (isSwap)
                 {
+                    _bc.enabled = true;
                     //卡丁小框，视频大框
                     _traTarget = traVideoBig;
                 }
                 else
                 {
+                    _bc.enabled = false;
+                    VideoManage.Inst.SetExpand(false);
+
                     //卡丁大框，视频小框
                     _traTarget = traVideoSmall;
                 }
             }
             else
+            {
+                _bc.enabled = true;
                 _traTarget = traVideoOriParent;
+            }
 
             _tra.SetParent(_traTarget);
             _tra.localScale = Vector3.one;

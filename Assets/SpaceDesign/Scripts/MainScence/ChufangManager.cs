@@ -265,13 +265,9 @@ namespace SpaceDesign
         public Transform traIcon;
         //吸引态，上下移动动画
         private Animator animIconFar;
-        
         //轻交互，半球动画+音符动画
         public Animator[] animIconMiddle;
 
-        //Icon的移动速度
-        public float fIconSpeed = 1;
-        
         void AddButtonRayEvent()
         {
             qiukuiBtn.onPinchDown.AddListener(GotoQiukui);

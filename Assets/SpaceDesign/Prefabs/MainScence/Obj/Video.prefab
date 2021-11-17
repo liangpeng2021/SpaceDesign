@@ -106,6 +106,7 @@ MonoBehaviour:
   frameIndex: 0
   ptsSec: 0
   isInStreamingAssets: 1
+  isLoop: 0
   realTimer: 0
   frameRate: 0
   yuvFormat: 0
@@ -13035,7 +13036,7 @@ AudioSource:
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -13630,7 +13631,7 @@ VideoPlayer:
   m_ControlledAudioTrackCount: 1
   m_PlayOnAwake: 0
   m_SkipOnDrop: 1
-  m_Looping: 0
+  m_Looping: 1
   m_WaitForFirstFrame: 1
   m_FrameReadyEventEnabled: 0
 --- !u!222 &642532018251716809
@@ -14265,7 +14266,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5726267910493303835
 Transform:
   m_ObjectHideFlags: 0
@@ -15189,6 +15190,7 @@ MonoBehaviour:
   traModel: {fileID: 4711338418965629583}
   v3OriPos: {x: 0, y: 0, z: 0}
   str3DVideoPth: Video3D.mp4
+  b3DOK: 0
   tt: {fileID: 1988630086453531295}
   fAutoHideUITime: 20
   traIcon: {fileID: 4255677475235998161}
@@ -15205,6 +15207,7 @@ MonoBehaviour:
   btnVideo2D: {fileID: 2055633729358964612}
   btnVideo3D: {fileID: 2055633728655227360}
   btnARWindows: {fileID: 723662709262007947}
+  colliderBtnARWindows: {fileID: 723662709262007940}
   traVideoChoose: {fileID: 1988630087223408537}
   imgDetailPic: {fileID: 2055633729506386700}
   textCurPlayTime: {fileID: 2232145504747591168}
@@ -15226,6 +15229,8 @@ MonoBehaviour:
   bTV: 1
   tvCtr: {fileID: 1988630088291103156}
   vdp3D: {fileID: 24620345951375902}
+  b3DStop: 1
+  mrVdp3D: {fileID: 24620345951375903}
   obj3DStage: {fileID: 7558125228260807597}
   animator3DChar: {fileID: 5608138347127735828}
   particle3D: {fileID: 7558125227871815447}
@@ -15233,8 +15238,6 @@ MonoBehaviour:
   spr3DVideo: {fileID: 21300000, guid: cdd19bbf3edf21746855b4d8843d5c89, type: 3}
   fTotalPlayTime: 0.1
   fTotalFrame2D: 0
-  fTotalFrame3D: 0
-  fTotalTime3DMusic: 0
   vdp2D: {fileID: 7980945223163964291}
   spr2DVideo: {fileID: 21300000, guid: 532af6f99f1a29f42accc34e669c863a, type: 3}
   iPlayState: 2
