@@ -408,6 +408,7 @@ namespace SpaceDesign.Music
         {
             StopCoroutine("IEMinToMax");
             StartCoroutine("IEMinToMax");
+            btnSliderVolumMax.gameObject.SetActive(false);
         }
 
         /// <summary>

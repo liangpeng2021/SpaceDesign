@@ -215,14 +215,20 @@ namespace SpaceDesign.Lamp
         private void OnEnable()
         {
             startpayRayReceiver.onPinchDown.AddListener(StartPay);
-            //if (startPayTouch == null)
-            //{
-            //    startPayTouch = startpayRayReceiver.gameObject.AddComponent<ButtonTouchableReceiver>();
-            //    startPayTouch.pressableHandler= startpayRayReceiver.
-            //}
-            //startPayTouch.
+            if (startPayTouch == null)
+            {
+                startPayTouch = startpayRayReceiver.gameObject.AddComponent<ButtonTouchableReceiver>();
+                startPayTouch.pressableHandler = startpayRayReceiver.transform;
+            }
+            startPayTouch.onPressDown.AddListener(StartPay);
 
             justpayRayReceiver.onPinchDown.AddListener(PaySuccess);
+            if (justPayTouch == null)
+            {
+                justPayTouch = justpayRayReceiver.gameObject.AddComponent<ButtonTouchableReceiver>();
+                justPayTouch.pressableHandler = justpayRayReceiver.transform;
+            }
+            justPayTouch.onPressDown.AddListener(PaySuccess);
 
             if (boundingBox == null)
                 boundingBox = GetComponent<BoundingBox>();

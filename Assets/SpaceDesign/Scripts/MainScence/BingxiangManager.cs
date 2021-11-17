@@ -293,7 +293,10 @@ namespace SpaceDesign
         {
             //UI开始变化
             bUIChanging = true;
-
+            OnQuit();
+            //if (OnQuit())
+            //    yield return new WaitForSeconds(0.5f);
+            
             //中距离=>远距离
             //Icon从动态变成静态
             //Icon的自旋转动画关闭
@@ -306,8 +309,6 @@ namespace SpaceDesign
             //Icon自身上下浮动关闭
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
-
-            OnQuit();
 
             yield return 0;
             //UI变化结束
@@ -334,8 +335,6 @@ namespace SpaceDesign
                 yield return 0;
             }
 
-            dangaoObj.SetActive(true);
-            niunaiObj.SetActive(true);
             //true为门磁合上
             if (lastDoorState.Equals("True") || lastDoorState.Equals(""))
             {
@@ -349,6 +348,8 @@ namespace SpaceDesign
             {
                 startTip = false;
                 SetTimelineData("开冰箱", null);
+                dangaoObj.SetActive(true);
+                niunaiObj.SetActive(true);
             }
 
             //UI变化结束
@@ -392,6 +393,9 @@ namespace SpaceDesign
         {
             //UI开始变化
             bUIChanging = true;
+            OnQuit();
+            //if (OnQuit())
+            //    yield return new WaitForSeconds(0.5f);
             //近距离=>中距离
 
             while (true)
@@ -405,9 +409,6 @@ namespace SpaceDesign
                 }
                 yield return 0;
             }
-            
-            OnQuit();
-
             //UI变化结束
             bUIChanging = false;
         }
@@ -543,7 +544,7 @@ namespace SpaceDesign
         /// <summary>
         /// 关闭界面响应
         /// </summary>
-        void OnQuit()
+        bool OnQuit()
         {
             //提示到一半如果距离变化，不继续执行
             startTip = false;
@@ -554,19 +555,19 @@ namespace SpaceDesign
             {
                 case "开头提示":
                     SetTimelineData("关闭开头提示", null);
-                    break;
+                    return true;
                 case "开冰箱":
                     SetTimelineData("关闭开冰箱信息", null);
-                    break;
+                    return true;
                 case "点击可乐":
                     SetTimelineData("关闭点击可乐信息", null);
-                    break;
+                    return true;
                 case "未购买门外信息":
                     SetTimelineData("关闭未购买门外信息", null);
-                    break;
+                    return true;
                 case "已购买门外信息":
                     SetTimelineData("关闭已购买门外信息", null);
-                    break;
+                    return true;
                 case "一键复购":
                 case "点击购买":
                     bingxiangTimeline.gameObject.SetActive(false);
@@ -574,6 +575,8 @@ namespace SpaceDesign
                 default:
                     break;
             }
+
+            return false;
         }
 
         /// <summary>
