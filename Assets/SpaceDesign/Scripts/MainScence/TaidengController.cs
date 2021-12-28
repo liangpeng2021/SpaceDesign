@@ -112,6 +112,34 @@ namespace SpaceDesign.Lamp
         //台灯摆放后，计时3秒隐藏UI
         float _fNoOprTime;
 
+        void LateUpdate()
+        {
+            if (iShowUIState == 0)
+                return;
+
+            if (bFirstInit)
+            {
+                if (boundingChild)
+                {
+                    boundingChild.transform.localScale = Vector3.one;
+
+                    boundingChild.SetActive(true);
+                }
+            }
+            else
+            {
+                bFirstInit = true;
+                if (boundingChild)
+                {
+                    boundingChild.transform.localScale = Vector3.zero;
+                    boundingChild.SetActive(true);
+                }
+            }
+
+            ////永远保持向上
+            //TaidengManager.Inst.transform.up = Vector3.up;
+        }
+
         private void Update()
         {
             if (iShowUIState == 0)
@@ -120,7 +148,7 @@ namespace SpaceDesign.Lamp
                 return;
             }
 
-            if (iShowUIState == 1 || iShowUIState == 2)
+            if (iShowUIState == 2)
             {
                 if (showBoundBox)
                 {
@@ -129,16 +157,13 @@ namespace SpaceDesign.Lamp
 
                     if (bTranslating == false)
                     {
-                        if (iShowUIState == 2)
+                        _fNoOprTime += Time.deltaTime;
+                        if (_fNoOprTime > 3)
                         {
-                            _fNoOprTime += Time.deltaTime;
-                            if (_fNoOprTime > 3)
-                            {
-                                _fNoOprTime = 0;
-                                showBoundBox = false;
-                                secondObj.SetActive(false);
-                                objBuyUIBoxCollider.SetActive(true);
-                            }
+                            _fNoOprTime = 0;
+                            showBoundBox = false;
+                            secondObj.SetActive(false);
+                            objBuyUIBoxCollider.SetActive(true);
                         }
                     }
                 }
@@ -189,12 +214,16 @@ namespace SpaceDesign.Lamp
                 //print("隐藏");
 
             }
+
+
+            //永远保持向上
+            TaidengManager.Inst.transform.up = Vector3.up;
         }
 
         public void Init()
         {
             showBoundBox = false;
-
+            DisableBoundBox();
             SetTranslating(false);
             iShowUIState = 0;
             firstObj.SetActive(true);
@@ -210,6 +239,15 @@ namespace SpaceDesign.Lamp
             taiDengUI.SetParent(tdUIParent);
             taiDengUI.localPosition = taidengUIOriPos;
             taiDengUI.localEulerAngles = Vector3.zero;
+
+            taidengModel.SetActive(false);
+            taiDengUI.gameObject.SetActive(false);
+
+            //Debug.LogError("重新识别到，会闪现编辑框");
+            //视频的TV旁边的两个按钮没有隐藏
+
+            //永远保持向上
+            TaidengManager.Inst.transform.up = Vector3.up;
         }
 
         private void OnEnable()
@@ -220,7 +258,12 @@ namespace SpaceDesign.Lamp
                 startPayTouch = startpayRayReceiver.gameObject.AddComponent<ButtonTouchableReceiver>();
                 startPayTouch.pressableHandler = startpayRayReceiver.transform;
             }
-            startPayTouch.onPressDown.AddListener(StartPay);
+            if (startPayTouch != null)
+            {
+                if (startPayTouch.onPressDown == null)
+                    startPayTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+                startPayTouch.onPressDown.AddListener(StartPay);
+            }
 
             justpayRayReceiver.onPinchDown.AddListener(PaySuccess);
             if (justPayTouch == null)
@@ -228,7 +271,12 @@ namespace SpaceDesign.Lamp
                 justPayTouch = justpayRayReceiver.gameObject.AddComponent<ButtonTouchableReceiver>();
                 justPayTouch.pressableHandler = justpayRayReceiver.transform;
             }
-            justPayTouch.onPressDown.AddListener(PaySuccess);
+            if (justPayTouch != null)
+            {
+                if (justPayTouch.onPressDown == null)
+                    justPayTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+                justPayTouch.onPressDown.AddListener(PaySuccess);
+            }
 
             if (boundingBox == null)
                 boundingBox = GetComponent<BoundingBox>();
@@ -247,7 +295,12 @@ namespace SpaceDesign.Lamp
         private void OnDisable()
         {
             justpayRayReceiver.onPinchDown.RemoveListener(PaySuccess);
+            if (startPayTouch != null && startPayTouch.onPressDown != null)
+                startPayTouch.onPressDown.RemoveAllListeners();
+
             startpayRayReceiver.onPinchDown.RemoveListener(StartPay);
+            if (justPayTouch != null && justPayTouch.onPressDown != null)
+                justPayTouch.onPressDown.RemoveAllListeners();
 
             if (boundingBox)
             {
@@ -284,11 +337,24 @@ namespace SpaceDesign.Lamp
             if (boxCollider && boxCollider.enabled)
                 boxCollider.enabled = false;
         }
+        //首次打开，等0.5秒再显示
+        bool bFirstInit = false;
+        float fTimeFirst;
         /// <summary>
         /// 打开台灯移动旋转功能
         /// </summary>
         void EnableBoundBox()
         {
+            //if (bFirstInit == false)
+            //{
+            //    fTimeFirst += Time.deltaTime;
+            //    if (fTimeFirst > 0.5f)
+            //    {
+            //        fTimeFirst = 0;
+            //        bFirstInit = true;
+            //    }
+            //    return;
+            //}
             if (boxCollider == null)
                 boxCollider = GetComponent<BoxCollider>();
 
@@ -303,21 +369,31 @@ namespace SpaceDesign.Lamp
                 boundingBox.enabled = true;
             if (boxCollider)
                 boxCollider.enabled = true;
-            if (boundingChild)
-                boundingChild.SetActive(true);
-            if (!hideBoxScale && boundingBox)
-            {
-                if (boundingBox.cornerObjects != null)
-                {
-                    for (int i = 0; i < boundingBox.cornerObjects.Length; i++)
-                    {
-                        boundingBox.cornerObjects[i].SetActive(false);
-                    }
-                    hideBoxScale = true;
-                    //print("hideBoxScale = true");
+            //if (bFirstInit)
+            //{
+            //    if (boundingChild)
+            //        boundingChild.SetActive(true);
+            //}
+            //else
+            //{
+            //    bFirstInit = true;
+            //    if (boundingChild)
+            //        boundingChild.SetActive(false);
+            //}
 
-                }
-            }
+            //if (!hideBoxScale && boundingBox)
+            //{
+            //    if (boundingBox.cornerObjects != null)
+            //    {
+            //        for (int i = 0; i < boundingBox.cornerObjects.Length; i++)
+            //        {
+            //            boundingBox.cornerObjects[i].SetActive(false);
+            //        }
+            //        hideBoxScale = true;
+            //        //print("hideBoxScale = true");
+
+            //    }
+            //}
             if (iShowUIState == 2)
             {
                 if (objBuyUIBoxCollider.activeSelf == true)
@@ -357,7 +433,7 @@ namespace SpaceDesign.Lamp
             startpayRayReceiver.gameObject.SetActive(true);
             secondObj.SetActive(true);
             pointLight.SetActive(true);
-            showBoundBox = true;
+            //showBoundBox = true;
 
             TaidengManager.Inst.noOperationTime = 0;
         }
@@ -423,6 +499,10 @@ namespace SpaceDesign.Lamp
             //---CL  ----------------------------------
             audioSource.Stop();
             //-----------------------------------------
+
+            Init();
+            //配送完毕，重新开启mark
+            TaidengManager.Inst.SetMark(true);
         }
 
         //------------ Modify by zh ------------

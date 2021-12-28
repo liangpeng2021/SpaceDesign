@@ -16,7 +16,7 @@ namespace SpaceDesign.Translate
             {
                 if (objTarget == null)
                 {
-                    objTarget = Image2DTrackingManager.Instance.transform.Find("root/child");
+                    objTarget = Image2DTrackingManager.Instance?.transform.Find("root/child");
                 }
                 return objTarget;
             }
@@ -42,9 +42,11 @@ namespace SpaceDesign.Translate
 #if UNITY_EDITOR
             return;
 #endif
+            if (Image2DTrackingManager.Instance == null)
+                return;
+
             StopTrack();
             bCallback = true;
-
             //Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
             //Image2DTrackingManager.Instance.m_feamName = "c2dd24647f17a05fdc273e7aa95bc674_21102021003932";
             Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
@@ -58,6 +60,8 @@ namespace SpaceDesign.Translate
 #if UNITY_EDITOR
             return;
 #endif
+            if (Image2DTrackingManager.Instance == null)
+                return;
             Image2DTrackingManager.Instance.TrackStop();
         }
 
@@ -112,6 +116,8 @@ namespace SpaceDesign.Translate
         private void SetModelVisible(bool isVisible)
         {
             if (objTargetModel == null)
+                return;
+            if (TranslateManage.Inst == null)
                 return;
 
             //objTargetModel.SetActive(isVisible);

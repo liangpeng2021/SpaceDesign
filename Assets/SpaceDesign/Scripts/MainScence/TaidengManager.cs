@@ -44,6 +44,7 @@ namespace SpaceDesign.Lamp
         void Awake()
         {
             animIconFar = traIcon.GetComponent<Animator>();
+            btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
         }
         void OnEnable()
         {
@@ -59,7 +60,7 @@ namespace SpaceDesign.Lamp
 
         void Start()
         {
-            taidengController.gameObject.SetActive(false);
+            //taidengController.gameObject.SetActive(false);
             v3OriPos = this.transform.position;
             //timelineShow.SetActive(false);
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
@@ -76,6 +77,14 @@ namespace SpaceDesign.Lamp
                 GameObject obj = traIconRoot.gameObject;
                 if (obj != null)
                     DestroyImmediate(obj);
+            }
+        }
+        void LateUpdate()
+        {
+            if (taidengController.iShowUIState == 1 || taidengController.iShowUIState == 2)
+            {
+                //永远保持向上
+                transform.up = Vector3.up;
             }
         }
         //void SetIconParent()
@@ -101,23 +110,26 @@ namespace SpaceDesign.Lamp
 
             PlayerPosState lastPPS = curPlayerPosState;
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.TaiDengFar;
+            float _fMid = LoadPrefab.IconDisData.TaiDengMiddle;
+
+            if (_dis > _fFar)
             {
+                curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
-                curPlayerPosState = PlayerPosState.Far;
             }
-            else if (_dis <= 5f && _dis > 2f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
+                curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
-                curPlayerPosState = PlayerPosState.Middle;
             }
-            else if (_dis <= 2f)
+            else if (_dis <= _fMid)
             {
+                curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
                     return;
-                curPlayerPosState = PlayerPosState.Close;
             }
 
             StopCoroutine("IERefreshPos");
@@ -236,8 +248,8 @@ namespace SpaceDesign.Lamp
             taidengController.Init();
 
             //启动Mark
-            image2DTrackingTaideng.enabled = true;
-            image2DTrackingTaideng.StartTrack();
+            SetMark(true);
+
             //UI变化结束
             bUIChanging = false;
 
@@ -279,7 +291,6 @@ namespace SpaceDesign.Lamp
         public Transform traIcon;
         //Icon对象的AR手势Button按钮
         private ButtonRayReceiver btnIcon;
-        ButtonTouchableReceiver btnIconTouch;
 
         //吸引态，上下移动动画
         private Animator animIconFar;
@@ -308,6 +319,9 @@ namespace SpaceDesign.Lamp
         /// </summary>
         void ClickIcon()
         {
+            if (bUIChanging)
+                return;
+
             noOperationTime = 0;
             if (curPlayerPosState == PlayerPosState.Close)
             {
@@ -319,37 +333,46 @@ namespace SpaceDesign.Lamp
         void AddButtonRayEvent()
         {
             btnIcon.onPinchDown.AddListener(ClickIcon);
-            if (btnIconTouch == null)
-            {
-                btnIconTouch = btnIcon.gameObject.GetComponent<ButtonTouchableReceiver>();
-                btnIconTouch.pressableHandler = btnIcon.transform;
-            }
-            btnIconTouch.onPressDown.AddListener(ClickIcon);
 
             closeBtn.onPinchDown.AddListener(OnClose);
             if (closeBtnTouch == null)
             {
-                closeBtnTouch = closeBtn.gameObject.GetComponent<ButtonTouchableReceiver>();
+                closeBtnTouch = closeBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
                 closeBtnTouch.pressableHandler = closeBtn.transform;
             }
-            closeBtnTouch.onPressDown.AddListener(OnClose);
+            if (closeBtnTouch != null)
+            {
+                if (closeBtnTouch.onPressDown == null)
+                    closeBtnTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+                closeBtnTouch.onPressDown.AddListener(OnClose);
+            }
 
             placeBtn.onPinchDown.AddListener(OnCheckPlace);
             if (placeBtnTouch == null)
             {
-                placeBtnTouch = placeBtn.gameObject.GetComponent<ButtonTouchableReceiver>();
+                placeBtnTouch = placeBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
                 placeBtnTouch.pressableHandler = placeBtn.transform;
             }
-            placeBtnTouch.onPressDown.AddListener(OnCheckPlace);
+            if (placeBtnTouch == null)
+            {
+                if (placeBtnTouch.onPressDown == null)
+                    placeBtnTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+                placeBtnTouch.onPressDown.AddListener(OnCheckPlace);
+            }
         }
 
         void RemoveButtonRayEvent()
         {
             btnIcon.onPinchDown.RemoveAllListeners();
-            btnIconTouch.onPressDown.RemoveAllListeners();
 
             closeBtn.onPinchDown.RemoveAllListeners();
+            if (closeBtnTouch != null && closeBtnTouch.onPressDown != null)
+                closeBtnTouch.onPressDown.RemoveAllListeners();
+
+
             placeBtn.onPinchDown.RemoveAllListeners();
+            if (placeBtnTouch != null && placeBtnTouch.onPressDown != null)
+                placeBtnTouch.onPressDown.RemoveAllListeners();
         }
 
         #endregion
@@ -370,18 +393,22 @@ namespace SpaceDesign.Lamp
             noOperationTime = 0;
 
             //timelineShow.SetActive(false);
-
-            image2DTrackingTaideng.StopTrack();
-            image2DTrackingTaideng.enabled = false;
+            SetMark(false);
 
             taidengController.PlaceTaideng();
         }
 
         void OnClose()
         {
-            OnQuit();
-            StopCoroutine("IECloseToMiddle");
-            StartCoroutine("IECloseToMiddle");
+            //OnQuit();
+            //StopCoroutine("IECloseToMiddle");
+            //StartCoroutine("IECloseToMiddle");
+
+            taidengController.Init();
+            //if (taidengController.gameObject.activeSelf == true)
+            //    taidengController.gameObject.SetActive(false);
+
+            SetMark(true);
         }
 
         /// <summary>
@@ -392,13 +419,28 @@ namespace SpaceDesign.Lamp
             noOperationTime = 0;
 
             //timelineShow.SetActive(false);
-            image2DTrackingTaideng.StopTrack();
-            image2DTrackingTaideng.enabled = false;
+            SetMark(false);
 
             taidengController.Init();
-            if (taidengController.gameObject.activeSelf == true)
-                taidengController.gameObject.SetActive(false);
+            //if (taidengController.gameObject.activeSelf == true)
+            //    taidengController.gameObject.SetActive(false);
         }
+
+
+        public void SetMark(bool bOpen)
+        {
+            if (bOpen)
+            {
+                image2DTrackingTaideng.enabled = true;
+                image2DTrackingTaideng.StartTrack();
+            }
+            else
+            {
+                image2DTrackingTaideng.StopTrack();
+                image2DTrackingTaideng.enabled = false;
+            }
+        }
+
         #endregion
     }
 }

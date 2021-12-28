@@ -113,43 +113,46 @@ namespace SpaceDesign.Lamp
             SetModelVisible(false);
         }
 
+        //是否开始计时（隐藏前先计时，确定没看到就隐藏）
+        bool bTiming;
+        float fTiming;
+        void Update()
+        {
+            if (bTiming)
+            {
+                fTiming += Time.deltaTime;
+                if (fTiming > 3)
+                {
+                    fTiming = 0;
+                    bTiming = false;
+                    TaidengManager.Inst.transform.SetParent(oriParent);
+                    TaidengManager.Inst.taidengController.ShowMark(false);
+                }
+            }
+        }
 
         private void SetModelVisible(bool isVisible)
         {
             if (objTargetModel == null)
                 return;
 
+            fTiming = 0;
             //objTargetModel.SetActive(isVisible);
             if (isVisible)
             {
-                //Debug.Log("MyLog::objTargetModel:" + objTargetModel);
+                bTiming = false;
                 TaidengManager.Inst.transform.SetParent(objTargetModel);
                 TaidengManager.Inst.transform.localPosition = new Vector3(0, -0.15f, 0);
                 TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
-                //TaidengManager.Inst.transform.localScale = new Vector3(1f, 1f, 1f);
-
                 TaidengManager.Inst.taidengController.ShowMark(true);
-
-                ////翻译按钮缩放，代替显隐
-                //objModel.SetActive(true);
-                //objUI.transform.localScale = new Vector3(0.00025f, 0.00025f, 0.00025f);
-                ////objShow2.transform.localScale = Vector3.one;
             }
             else
             {
-                //Invoke("SetIconParent", 0.1f);
-                TaidengManager.Inst.transform.SetParent(oriParent);
-
-                TaidengManager.Inst.taidengController.ShowMark(false);
-                ////翻译按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
-                //objModel.SetActive(false);
-                //objUI.transform.localScale = Vector3.zero;
+                bTiming = true;
+                //不直接隐藏，计时3秒，还没看到，直接隐藏
+                //TaidengManager.Inst.transform.SetParent(oriParent);
+                //TaidengManager.Inst.taidengController.ShowMark(false);
             }
-            //#if UNITY_EDITOR
-            //            return;
-            //#endif
-            //            objBtnShow.SetActive(isVisible);
-            //            objShow2.SetActive(isVisible);
         }
 
         //void SetIconParent()

@@ -89,25 +89,27 @@ namespace SpaceDesign.Aerobics
             PlayerPosState lastPPS = curPlayerPosState;
             //print($"目标的距离:{_dis}--lastPPS:{lastPPS}--curPPS:{curPlayerPosState}");
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.AerobicsFar;
+            float _fMid = LoadPrefab.IconDisData.AerobicsMiddle;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 2f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 2f)
+            else if (_dis <= _fMid)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
                     return;
             }
-
             StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }

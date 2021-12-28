@@ -98,19 +98,22 @@ namespace SpaceDesign.Karting
             PlayerPosState lastPPS = curPlayerPosState;
             //print($"目标的距离:{_dis}--lastPPS:{lastPPS}--curPPS:{curPlayerPosState}");
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.KartingFar;
+            float _fMid = LoadPrefab.IconDisData.KartingMiddle;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 2f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 2f)
+            else if (_dis <= _fMid)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
@@ -190,7 +193,7 @@ namespace SpaceDesign.Karting
         {
             //UI开始变化
             bUIChanging = true;
-            OutSwap();
+            OutSwap(true);
 
             //中距离=>远距离
             //Icon从动态变成静态
@@ -264,7 +267,7 @@ namespace SpaceDesign.Karting
         IEnumerator IECloseToMiddle()
         {
             //add by lp
-            OutSwap();
+            OutSwap(true);
             //UI开始变化
             bUIChanging = true;
 
@@ -400,7 +403,7 @@ namespace SpaceDesign.Karting
         /// </summary>
         void InitWindow()
         {
-            OutSwap();
+            OutSwap(false);
         }
         /// <summary>
         /// 添加事件
@@ -461,7 +464,7 @@ namespace SpaceDesign.Karting
         /// <summary>
         /// 退出时调用
         /// </summary>
-        void OutSwap()
+        void OutSwap(bool bSetVideo)
         {
             isInArea = false;
             //复原
@@ -482,7 +485,8 @@ namespace SpaceDesign.Karting
             else
                 swapTimeline.StartPause();
             //TODO,修改视频节点
-            SetVideo(false);
+            if (bSetVideo)
+                SetVideo(false);
 
         }
         /// <summary>
@@ -497,10 +501,10 @@ namespace SpaceDesign.Karting
                 return;
             isInArea = true;
             //TODO,修改视频节点
-            if (VideoManage.Inst.bSizeSmall)
-                traVideoOriParent = VideoManage.Inst.traFollowSmallParent;
-            else
-                traVideoOriParent = VideoManage.Inst.traFollowNormalParent;
+            //if (VideoManage.Inst.bSizeSmall)
+            //    traVideoOriParent = VideoManage.Inst.traFollowSmallParent;
+            //else
+            //    traVideoOriParent = VideoManage.Inst.traFollowNormalParent;
 
             SetVideo(true);
 
@@ -511,45 +515,64 @@ namespace SpaceDesign.Karting
         public Transform traVideoBig;
         public Transform traVideoSmall;
         //视频的原父节点
-        Transform traVideoOriParent;
+        //Transform traVideoOriParent;
         void SetVideo(bool bKarting)
         {
-            if (VideoManage.Inst == null)
+            VideoManage _vm = VideoManage.Inst;
+
+            if (_vm == null)
                 return;
 
-            Transform _tra = VideoManage.Inst.traVideoExpand;
-            BoxCollider _bc = VideoManage.Inst.colliderBtnARWindows;
-            if (_tra == null)
+            if (_vm.traVideoExpand == null)
                 return;
+
+            _vm.bKarting = bKarting;
 
             Transform _traTarget;
+
             if (bKarting)
             {
                 if (isSwap)
                 {
-                    _bc.enabled = true;
+                    _vm.colliderBtnARWindows.enabled = true;
                     //卡丁小框，视频大框
                     _traTarget = traVideoBig;
+                    _vm.btnPlay.onPinchDown.Invoke();
                 }
                 else
                 {
-                    _bc.enabled = false;
-                    VideoManage.Inst.SetExpand(false);
+                    _vm.colliderBtnARWindows.enabled = false;
+                    _vm.SetExpand(false);
 
                     //卡丁大框，视频小框
                     _traTarget = traVideoSmall;
+                    _vm.btnPause.onPinchDown.Invoke();
                 }
             }
             else
             {
-                _bc.enabled = true;
+                _vm.colliderBtnARWindows.enabled = true;
+
+                Transform traVideoOriParent;
+
+                if (_vm.bSizeSmall)
+                    traVideoOriParent = _vm.traFollowSmallParent;
+                else
+                    traVideoOriParent = _vm.traFollowNormalParent;
+
                 _traTarget = traVideoOriParent;
             }
 
-            _tra.SetParent(_traTarget);
-            _tra.localScale = Vector3.one;
-            _tra.localPosition = Vector3.zero;
-            _tra.localRotation = Quaternion.identity;
+            _vm.btnTV.transform.parent.gameObject.SetActive(!bKarting);
+
+            //卡丁车状态不显示视频的关闭和缩放按钮
+            _vm.btnVideoClose.gameObject.SetActive(!bKarting);
+            _vm.btnVideoSize.gameObject.SetActive(!bKarting);
+
+            _vm.traVideoExpand.SetParent(_traTarget);
+            _vm.traVideoExpand.localScale = Vector3.one;
+            _vm.traVideoExpand.localPosition = Vector3.zero;
+            _vm.traVideoExpand.localRotation = Quaternion.identity;
         }
         //------------------End------------------
         #endregion

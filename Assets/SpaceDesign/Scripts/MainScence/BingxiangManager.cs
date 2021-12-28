@@ -200,20 +200,23 @@ namespace SpaceDesign
 
             PlayerPosState lastPPS = curPlayerPosState;
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.BingXiangFar;
+            float _fMid = LoadPrefab.IconDisData.BingXiangMiddle;
+
+            if (_dis > _fFar)
             {
                 if (lastPPS == PlayerPosState.Far)
                     return;
                 bingxiangTimeline.gameObject.SetActive(false);
                 curPlayerPosState = PlayerPosState.Far;
             }
-            else if (_dis <= 5f && _dis > 3f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
                 if (lastPPS == PlayerPosState.Middle)
                     return;
                 curPlayerPosState = PlayerPosState.Middle;
             }
-            else if (_dis <= 3f)
+            else if (_dis <= _fMid)
             {
                 //Debug.Log(lastPPS);
                 if (lastPPS == PlayerPosState.Close)

@@ -5,7 +5,6 @@
  */
 
 using OXRTK.ARHandTracking;
-using System.Collections;
 using UnityEngine;
 
 namespace SpaceDesign.Translate
@@ -25,7 +24,7 @@ namespace SpaceDesign.Translate
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
         //Icon、UI等正在切换中
-        bool bUIChanging = false;
+        public bool bUIChanging = false;
         //运动阈值
         float fThreshold = 0.1f;
         //对象初始位置
@@ -43,6 +42,7 @@ namespace SpaceDesign.Translate
         }
         void OnEnable()
         {
+            bUIChanging = true;
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
             btnIcon.onPinchDown.AddListener(ClickIcon);
             btnCheckTranslate.onPinchDown.AddListener(OnCheckTranslate);
@@ -53,6 +53,7 @@ namespace SpaceDesign.Translate
 
         void OnDisable()
         {
+            bUIChanging = false;
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             btnIcon.onPinchDown.RemoveAllListeners();
             btnCheckTranslate.onPinchDown.RemoveAllListeners();
@@ -65,17 +66,99 @@ namespace SpaceDesign.Translate
         {
             v3OriPos = this.transform.position;
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-            //traIconRoot.SetParent(null);
             traIconRoot.SetParent(transform.parent);
         }
         void OnDestroy()
         {
-            StopAllCoroutines();
             if (traIconRoot != null)
             {
-                GameObject obj = traIconRoot.gameObject;
-                if (obj != null)
-                    DestroyImmediate(obj);
+                traIconRoot.SetParent(transform.parent);
+            }
+        }
+
+        void Update()
+        {
+            if (bUIChanging)
+            {
+                switch (curPlayerPosState)
+                {
+                    case PlayerPosState.Far:
+                        //Icon从动态变成静态
+                        //Icon的自旋转动画关闭
+                        foreach (var v in animIconMiddle)
+                        {
+                            v.Play(0, -1, 0f);
+                            v.Update(0);
+                            v.enabled = false;
+                        }
+                        //Icon自身上下浮动关闭
+                        animIconFar.enabled = false;
+                        traIcon.localScale = Vector3.one;
+                        traIcon.gameObject.SetActive(true);
+
+                        OnQuit();
+
+                        bUIChanging = false;
+
+                        break;
+                    case PlayerPosState.Middle:
+                        //Icon从静态变成动态
+                        //Icon的自旋转动画开启
+                        foreach (var v in animIconMiddle)
+                            v.enabled = true;
+
+                        animIconFar.enabled = true;
+                        traIcon.gameObject.SetActive(true);
+
+                        SetIcon(true);
+
+                        break;
+                    case PlayerPosState.Close:
+
+                        //近距离
+                        SetIcon(false);
+
+                        break;
+                }
+            }
+        }
+
+        Vector3 v3IconTarget = Vector3.one;
+        void SetIcon(bool bShow)
+        {
+            if (bShow)
+                v3IconTarget = Vector3.one;
+            else
+                v3IconTarget = Vector3.zero;
+
+            float _fDis = Vector3.Distance(traIcon.localScale, v3IconTarget);
+            bUIChanging = (_fDis >= fThreshold);
+            if (bUIChanging == true)
+            {
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, v3IconTarget, fUISpeed * Time.deltaTime);
+            }
+            else
+            {
+                traIcon.localScale = v3IconTarget;
+
+                //启动Mark
+                if (markTrackTranslate == null)
+                    markTrackTranslate = FindObjectOfType<Image2DTrackingTranslate>();
+                if (markTrackTranslate != null)
+                {
+                    if (bShow)
+                    {
+                        markTrackTranslate.StopTrack();
+                        markTrackTranslate.enabled = false;
+
+                        OnQuit();
+                    }
+                    else
+                    {
+                        markTrackTranslate.enabled = true;
+                        markTrackTranslate.StartTrack();
+                    }
+                }
             }
         }
 
@@ -95,173 +178,29 @@ namespace SpaceDesign.Translate
 
             PlayerPosState lastPPS = curPlayerPosState;
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.TranslateFar;
+            float _fMid = LoadPrefab.IconDisData.TranslateMiddle;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 1.5f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 1.5f)
+            else if (_dis <= _fMid)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
                     return;
             }
 
-            StopCoroutine("IERefreshPos");
-            StartCoroutine("IERefreshPos", lastPPS);
-        }
-
-
-        /// <summary>
-        /// UI等刷新位置消息
-        /// </summary>
-        IEnumerator IERefreshPos(PlayerPosState lastPPS)
-        {
-            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
-
-            if (lastPPS == PlayerPosState.Far)
-            {
-                if (curPlayerPosState == PlayerPosState.Middle)/// 远距离=>中距离
-                    yield return IEFarToMiddle();/// 远距离=>中距离
-                else if (curPlayerPosState == PlayerPosState.Close)/// 远距离=>近距离
-                {
-                    yield return IEFarToMiddle();
-                    yield return IEMiddleToClose();
-                }
-            }
-            else if (lastPPS == PlayerPosState.Middle)
-            {
-                if (curPlayerPosState == PlayerPosState.Close)/// 中距离=>近距离
-                    yield return IEMiddleToClose();
-
-                else if (curPlayerPosState == PlayerPosState.Far)/// 中距离=>远距离
-                    yield return IEMiddleToFar();
-            }
-            else if (lastPPS == PlayerPosState.Close)
-            {
-                if (curPlayerPosState == PlayerPosState.Middle)/// 近距离=>中距离
-                    yield return IECloseToMiddle();
-                else if (curPlayerPosState == PlayerPosState.Far)/// 近距离=>远距离
-                {
-                    yield return IECloseToMiddle();
-                    yield return IEMiddleToFar();
-                }
-            }
-
-            yield return 0;
-        }
-
-        /// <summary>
-        /// 远距离=>中距离
-        /// </summary>
-        IEnumerator IEFarToMiddle()
-        {
-            //UI开始变化
             bUIChanging = true;
-
-            //远距离=>中距离
-            //Icon从静态变成动态
-            //Icon的自旋转动画开启
-            foreach (var v in animIconMiddle)
-                v.enabled = true;
-            //Icon自身上下浮动开启
-            animIconFar.enabled = true;
-            traIcon.gameObject.SetActive(true);
-
-            yield return 0;
-            //UI变化结束
-            bUIChanging = false;
-        }
-        /// <summary>
-        /// 中距离=>远距离
-        /// </summary>
-        IEnumerator IEMiddleToFar()
-        {
-            //UI开始变化
-            bUIChanging = true;
-
-            //中距离=>远距离
-            //Icon从动态变成静态
-            //Icon的自旋转动画关闭
-            foreach (var v in animIconMiddle)
-            {
-                v.Play(0, -1, 0f);
-                v.Update(0);
-                v.enabled = false;
-            }
-            //Icon自身上下浮动关闭
-            animIconFar.enabled = false;
-            traIcon.gameObject.SetActive(true);
-
-            OnQuit();
-
-            yield return 0;
-            //UI变化结束
-            bUIChanging = false;
-        }
-        /// <summary>
-        /// 中距离=>近距离
-        /// </summary>
-        IEnumerator IEMiddleToClose()
-        {
-            //UI开始变化
-            bUIChanging = true;
-
-            //中距离=>近距离
-
-            while (true)
-            {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
-                if (_fDis < fThreshold)
-                {
-                    traIcon.localScale = Vector3.zero;
-                    break;
-                }
-                yield return 0;
-            }
-
-            //启动Mark
-            markTrackTranslate.enabled = true;
-            markTrackTranslate.StartTrack();
-
-            //UI变化结束
-            bUIChanging = false;
-        }
-
-        /// <summary>
-        /// 近距离=>中距离
-        /// </summary>
-        IEnumerator IECloseToMiddle()
-        {
-            //UI开始变化
-            bUIChanging = true;
-
-            //近距离=>中距离
-
-            while (true)
-            {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
-                if (_fDis < fThreshold)
-                {
-                    traIcon.localScale = Vector3.one;
-                    break;
-                }
-                yield return 0;
-            }
-
-            OnQuit();
-
-            //UI变化结束
-            bUIChanging = false;
         }
 
         #region Icon变化
@@ -282,11 +221,9 @@ namespace SpaceDesign.Translate
         /// </summary>
         public void ClickIcon()
         {
-            if (curPlayerPosState == PlayerPosState.Close)
-            {
-                StopCoroutine("IEMiddleToClose");
-                StartCoroutine("IEMiddleToClose");
-            }
+            if (bUIChanging)
+                return;
+            bUIChanging = true;
         }
 
         #endregion
@@ -301,6 +238,8 @@ namespace SpaceDesign.Translate
         public GameObject timelineHide;
         //查看翻译按钮
         public ButtonRayReceiver btnCheckTranslate;
+        //查看翻译按钮的父节点
+        public GameObject objCheckTranslateParent;
         //退出翻译按钮
         public ButtonRayReceiver btnQuit;
 
@@ -309,11 +248,9 @@ namespace SpaceDesign.Translate
         /// </summary>
         public void OnCheckTranslate()
         {
-            btnCheckTranslate.gameObject.SetActive(false);
+            objCheckTranslateParent.SetActive(false);
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
-            markTrackTranslate.StopTrack();
-            markTrackTranslate.enabled = false;
         }
 
         /// <summary>
@@ -321,10 +258,11 @@ namespace SpaceDesign.Translate
         /// </summary>
         public void OnQuit()
         {
-            timelineHide.SetActive(true);
+            objCheckTranslateParent.SetActive(true);
+            btnCheckTranslate.gameObject.SetActive(false);
+            if (timelineShow.activeSelf == true)
+                timelineHide.SetActive(true);
             timelineShow.SetActive(false);
-            markTrackTranslate.StopTrack();
-            markTrackTranslate.enabled = false;
         }
         #endregion
     }

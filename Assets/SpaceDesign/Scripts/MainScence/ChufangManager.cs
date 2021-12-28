@@ -84,20 +84,23 @@ namespace SpaceDesign
 
             PlayerPosState lastPPS = curPlayerPosState;
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.ChuFangFar;
+            float _fMid = LoadPrefab.IconDisData.ChuFangMiddle;
+
+            if (_dis > _fFar)
             {
                 if (lastPPS == PlayerPosState.Far)
                     return;
                 curPlayerPosState = PlayerPosState.Far;
             }
-            else if (_dis <= 5f && _dis > 2f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
                 if (lastPPS == PlayerPosState.Middle)
                     return;
                 //从近距离到中距离，大于2m切换状态
                 if (lastPPS == PlayerPosState.Close)
                 {
-                    if (_dis > 3f)
+                    if (_dis > (_fMid + 1))
                         curPlayerPosState = PlayerPosState.Middle;
                 }//否则1.5m就切换状态
                 else
@@ -105,7 +108,7 @@ namespace SpaceDesign
                     curPlayerPosState = PlayerPosState.Middle;
                 }
             }
-            else if (_dis <= 2f)
+            else if (_dis <= _fMid)
             {
                 //Debug.Log(lastPPS);
                 if (lastPPS == PlayerPosState.Close)
@@ -277,7 +280,12 @@ namespace SpaceDesign
                 qiukuiTouch = qiukuiBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
                 qiukuiTouch.pressableHandler = qiukuiBtn.transform;
             }
-            qiukuiTouch.onPressDown.AddListener(GotoQiukui);
+            if (qiukuiTouch != null)
+            {
+                if (qiukuiTouch.onPressDown == null)
+                    qiukuiTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+                qiukuiTouch.onPressDown.AddListener(GotoQiukui);
+            }
 
             fanqieBtn.onPinchDown.AddListener(GotoFanqie);
             if (fanqieTouch == null)
@@ -285,7 +293,12 @@ namespace SpaceDesign
                 fanqieTouch = fanqieBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
                 fanqieTouch.pressableHandler = fanqieBtn.transform;
             }
-            fanqieTouch.onPressDown.AddListener(GotoFanqie);
+            if (fanqieTouch != null)
+            {
+                if (fanqieTouch.onPressDown == null)
+                    fanqieTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+                fanqieTouch.onPressDown.AddListener(GotoFanqie);
+            }
 
             bocaiBtn.onPinchDown.AddListener(GotoBocai);
             if (bocaiTouch == null)
@@ -293,48 +306,68 @@ namespace SpaceDesign
                 bocaiTouch = bocaiBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
                 bocaiTouch.pressableHandler = bocaiBtn.transform;
             }
-            bocaiTouch.onPressDown.AddListener(GotoBocai);
+            if (bocaiTouch != null)
+            {
+                if (bocaiTouch.onPressDown == null)
+                    bocaiTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+                bocaiTouch.onPressDown.AddListener(GotoBocai);
+            }
 
             backBtn.onPinchDown.AddListener(BackToCaipu);
             if (backTouchBtn == null)
             {
                 backTouchBtn = backBtn.GetComponent<ButtonTouchableReceiver>();
             }
-            backTouchBtn.onPressDown.AddListener(BackToCaipu);
+            if (backTouchBtn != null)
+            {
+                if (backTouchBtn.onPressDown == null)
+                    backTouchBtn.onPressDown = new UnityEngine.Events.UnityEvent();
+                backTouchBtn.onPressDown.AddListener(BackToCaipu);
+            }
 
             showCaipuBtn.onPinchDown.AddListener(ShowCaipu);
             if (showTouchCaipuBtn == null)
             {
                 showTouchCaipuBtn = showCaipuBtn.GetComponent<ButtonTouchableReceiver>();
             }
-            showTouchCaipuBtn.onPressDown.AddListener(ShowCaipu);
+            if (showTouchCaipuBtn != null)
+            {
+                if (showTouchCaipuBtn.onPressDown == null)
+                    showTouchCaipuBtn.onPressDown = new UnityEngine.Events.UnityEvent();
+                showTouchCaipuBtn.onPressDown.AddListener(ShowCaipu);
+            }
 
             //挥手,射线
             waveInteractionGazeHandle.g_OnHandWave.AddListener(WaveHandle);
-            
+
         }
 
         void RemoveButtonRayEvent()
         {
             qiukuiBtn.onPinchDown.RemoveAllListeners();
-            qiukuiTouch.onPressDown.RemoveAllListeners();
+            if (qiukuiTouch != null && qiukuiTouch.onPressDown != null)
+                qiukuiTouch.onPressDown.RemoveAllListeners();
 
             fanqieBtn.onPinchDown.RemoveAllListeners();
-            fanqieTouch.onPressDown.RemoveAllListeners();
+            if (fanqieTouch != null && fanqieTouch.onPressDown != null)
+                fanqieTouch.onPressDown.RemoveAllListeners();
 
             bocaiBtn.onPinchDown.RemoveAllListeners();
-            bocaiTouch.onPressDown.RemoveAllListeners();
+            if (bocaiTouch != null && bocaiTouch.onPressDown != null)
+                bocaiTouch.onPressDown.RemoveAllListeners();
 
             backBtn.onPinchDown.RemoveAllListeners();
-            backTouchBtn.onPressDown.RemoveAllListeners();
+            if (backTouchBtn != null && backTouchBtn.onPressDown != null)
+                backTouchBtn.onPressDown.RemoveAllListeners();
 
             showCaipuBtn.onPinchDown.RemoveAllListeners();
-            showTouchCaipuBtn.onPressDown.RemoveAllListeners();
+            if (showTouchCaipuBtn != null && showTouchCaipuBtn.onPressDown != null)
+                showTouchCaipuBtn.onPressDown.RemoveAllListeners();
 
             //挥手
             //射线
             waveInteractionGazeHandle.g_OnHandWave.RemoveAllListeners();
-            
+
         }
 
         #endregion
@@ -401,7 +434,8 @@ namespace SpaceDesign
         void ShowCaipu()
         {
             timeline.SetCurTimelineData("提示消失",
-                ()=> {
+                () =>
+                {
                     timeline.SetCurTimelineData("显示菜谱");
                 });
         }
@@ -485,7 +519,7 @@ namespace SpaceDesign
             }
 
             timeline.SetCurTimelineData(curCai + lastIndex.ToString() + "-" + curIndex.ToString(),
-                ()=>
+                () =>
                 {
                     if (curIndex != 1)
                     {
@@ -500,7 +534,7 @@ namespace SpaceDesign
 
         #region 挥手,不稳定
         public WaveInteractionGazeHandle waveInteractionGazeHandle;
-        
+
         void WaveHandle(Vector2Int dir)
         {
             if (dir.x < 0)

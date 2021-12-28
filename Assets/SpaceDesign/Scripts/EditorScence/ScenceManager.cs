@@ -321,6 +321,9 @@ namespace SpaceDesign
 
         void LoadMainScence()
         {
+            //------------ Modify by zh ------------
+            PlayerManage.InitPlayerPosEvt();
+            //------------------End------------------
             UnityEngine.SceneManagement.SceneManager.LoadScene(0);
         }
 

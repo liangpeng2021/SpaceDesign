@@ -4,6 +4,7 @@
 
  */
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -58,11 +59,28 @@ namespace SpaceDesign
         //}
         void Update()
         {
+            if (refreshPlayerPosEvt == null)
+                return;
+
             fTime += Time.deltaTime;
             if (fTime >= refreshFrequency)
             {
                 fTime = 0;
-                refreshPlayerPosEvt?.Invoke(transform.position);
+                if (refreshPlayerPosEvt != null)
+                    refreshPlayerPosEvt.Invoke(transform.position);
+            }
+        }
+
+        public static void InitPlayerPosEvt()
+        {
+            if (refreshPlayerPosEvt == null)
+                return;
+
+            Delegate[] _dels = refreshPlayerPosEvt.GetInvocationList();
+            int _iLen = _dels.Length;
+            for (int i = 0; i < _iLen; i++)
+            {
+                refreshPlayerPosEvt -= _dels[i] as RefreshPlayerPosEvent;
             }
         }
     }

@@ -36,11 +36,11 @@ namespace SpaceDesign
 
                 if (angle < 30)
                 {
-                    ChufangManager.Inst.ChangeLiuChengLastAnimation(false);
+                    ChufangManager.Inst?.ChangeLiuChengLastAnimation(false);
                 }
                 else if (angle > 150)
                 {
-                    ChufangManager.Inst.ChangeLiuChengLastAnimation(true);
+                    ChufangManager.Inst?.ChangeLiuChengLastAnimation(true);
                 }
             }
         }

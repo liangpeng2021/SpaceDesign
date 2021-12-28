@@ -79,7 +79,7 @@ namespace SpaceDesign.Phone
         {
             if (bCalling)
             {
-                fCallEventDis = 1.5f;
+                fCallEventDis = LoadPrefab.IconDisData.PhoneCalling;
 
                 fCallingTempTime += Time.deltaTime;
                 if (fCallingTempTime > fCallingTime)
@@ -94,7 +94,7 @@ namespace SpaceDesign.Phone
             }
             else if (bTalking)
             {
-                fCallEventDis = 4f;
+                fCallEventDis = LoadPrefab.IconDisData.PhoneTalking;
 
                 int second = 0;
                 int min = 0;
@@ -119,13 +119,13 @@ namespace SpaceDesign.Phone
             }
             else
             {
-                fCallEventDis = 2.5f;
+                fCallEventDis = LoadPrefab.IconDisData.PhoneMissAndReCall;
             }
 
         }
 
         //触发事件的距离
-        float fCallEventDis = 1.5f;
+        float fCallEventDis = LoadPrefab.IconDisData.PhoneCalling;
 
         /// <summary>
         /// 刷新位置消息
@@ -143,13 +143,15 @@ namespace SpaceDesign.Phone
             PlayerPosState lastPPS = curPlayerPosState;
             //print($"目标的距离:{_dis}--lastPPS:{lastPPS}--curPPS:{curPlayerPosState}");
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.PhoneFar;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > fCallEventDis)
+            else if (_dis <= _fFar && _dis > fCallEventDis)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
@@ -267,6 +269,9 @@ namespace SpaceDesign.Phone
 
                 traCallingUI.localScale = Vector3.one;
                 yield return IECallingUI(true);
+                //UI变化未结束
+                bUIChanging = true;
+
             }
             else
             {
@@ -313,6 +318,9 @@ namespace SpaceDesign.Phone
         /// </summary>
         IEnumerator IECloseToMiddle(bool bTalkOver)
         {
+            //UI开始变化
+            bUIChanging = true;
+
             if (audioSource.isPlaying)
                 audioSource.Stop();
 
@@ -346,9 +354,6 @@ namespace SpaceDesign.Phone
                 audioSource.loop = false;
                 audioSource.Play();
             }
-
-            //UI开始变化
-            bUIChanging = true;
 
             //近距离=>中距离
             animAnswer.enabled = false;
@@ -493,8 +498,8 @@ namespace SpaceDesign.Phone
                 }
             }
 
-            bUIChanging = false;
             yield return 0;
+            bUIChanging = false;
 
         }
         /// <summary>
@@ -543,14 +548,21 @@ namespace SpaceDesign.Phone
                     }
                     yield return 0;
                 }
+                //等待的过程中可以挂断电话
+                bUIChanging = false;
 
                 //等待N秒
                 yield return new WaitForSeconds(4);
                 audioSource.Stop();
                 yield return IEReCallUI(false);
+                //UI变化未结束
+                bUIChanging = true;
                 yield return IETalkingUI(true);
+                //UI变化未结束
+                bUIChanging = true;
             }
 
+            yield return 0;
             bUIChanging = false;
 
         }
@@ -604,9 +616,8 @@ namespace SpaceDesign.Phone
                     yield return 0;
                 }
             }
-            bUIChanging = false;
-
             yield return 0;
+            bUIChanging = false;
         }
 
         #region Icon变化，远距离
@@ -697,6 +708,9 @@ namespace SpaceDesign.Phone
 
         void StopSomeCoroutine()
         {
+            if (bUIChanging)
+                return;
+
             StopCoroutine("IECallingUI");
             StopCoroutine("IEMissedUI");
             StopCoroutine("IEReCallUI");
@@ -710,6 +724,9 @@ namespace SpaceDesign.Phone
 
         public void OnRingOff()
         {
+            if (bUIChanging)
+                return;
+
             //这里需要停止所有协程
             StopSomeCoroutine();
             ResetBoolState();
@@ -724,6 +741,9 @@ namespace SpaceDesign.Phone
 
         public void OnAnswer()
         {
+            if (bUIChanging)
+                return;
+
             //这里需要停止所有协程
             StopSomeCoroutine();
             ResetBoolState();
@@ -735,6 +755,9 @@ namespace SpaceDesign.Phone
 
         public void OnReCall()
         {
+            if (bUIChanging)
+                return;
+
             //这里需要停止所有协程
             StopSomeCoroutine();
             ResetBoolState();
@@ -743,6 +766,9 @@ namespace SpaceDesign.Phone
 
         public void OnTalkingOff()
         {
+            if (bUIChanging)
+                return;
+
             videoPlayer.Stop();
             //这里需要停止所有协程
             StopSomeCoroutine();

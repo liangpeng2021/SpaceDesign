@@ -152,6 +152,9 @@ public class UserUI : MonoBehaviour
     {
         //dengluzhuceTran.gameObject.SetActive(false);
         //_keyBoardManager.gameObject.SetActive(false);
+        //------------ Modify by zh ------------
+        PlayerManage.InitPlayerPosEvt();
+        //------------------End------------------
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
     

@@ -85,7 +85,7 @@ namespace OXRTK.ARHandTracking
                 {
                     
                     CheckHandActive();
-                    Debug.Log("MyLog::m_ActiveHand:" + m_ActiveHand);
+                    //Debug.Log("MyLog::m_ActiveHand:" + m_ActiveHand);
                     if (m_ActiveHand != null)
                     {
                         CheckHandArea();

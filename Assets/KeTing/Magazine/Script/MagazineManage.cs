@@ -97,24 +97,28 @@ namespace SpaceDesign.Magazine
 
             PlayerPosState lastPPS = curPlayerPosState;
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.MagazineFar;
+            float _fMid = LoadPrefab.IconDisData.MagazineMiddle;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 2.5f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 2.5f)
+            else if (_dis <= _fMid)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
                     return;
             }
+            
             StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
@@ -316,7 +320,6 @@ namespace SpaceDesign.Magazine
         /// </summary>
         public void OnCheckDetail()
         {
-            //btnCheckDetail.transform.localScale = Vector3.zero;
             objCheckDetailParent.SetActive(false);
             //btnCheckDetail.gameObject.SetActive(false);
             timelineShow.SetActive(true);

@@ -87,7 +87,9 @@ namespace SpaceDesign.CPEShow
 
             PlayerPosState lastPPS = curPlayerPosState;
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.ShowCPEFar;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
@@ -99,7 +101,6 @@ namespace SpaceDesign.CPEShow
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-
             StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }

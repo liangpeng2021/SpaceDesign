@@ -1,9 +1,11 @@
 ﻿using OXRTK.ARHandTracking;
+using SpaceDesign;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -105,6 +107,9 @@ public class LoadMainScence : MonoBehaviour
 
     void BackToLoginScence()
     {
+        //------------ Modify by zh ------------
+        PlayerManage.InitPlayerPosEvt();
+        //------------------End------------------
         SceneManager.LoadScene(0);
     }
 
@@ -188,6 +193,24 @@ public class LoadMainScence : MonoBehaviour
             }
         }
         //Debug.Log("MyLog::objectDatas.roomDatasList.Count:" + objectDatas.roomDatasList.Count);
+
+        //------------ Modify by zh ------------
+        //加载触点触发距离数据
+        path = SpaceDesign.PathConfig.GetPth();
+        path = Path.Combine(path, "IconDisData.json");
+        if (File.Exists(path) == false)
+        {
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(LoadPrefab.IconDisData);
+            File.WriteAllText(path, json);
+        }
+        else
+        {
+            string json = File.ReadAllText(path);
+            if (string.IsNullOrEmpty(json))
+                return;
+            LoadPrefab.IconDisData = Newtonsoft.Json.JsonConvert.DeserializeObject<IconDisData>(json);
+        }
+        //------------------End------------------
     }
 
     ScenceData MyDeSerial(string path)
@@ -231,6 +254,9 @@ public class LoadMainScence : MonoBehaviour
             {
                 timeCount = 0;
                 clickNum = 0;
+                //------------ Modify by zh ------------
+                PlayerManage.InitPlayerPosEvt();
+                //------------------End------------------
                 SceneManager.LoadScene("EditorScence");
             }
         }

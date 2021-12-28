@@ -239,6 +239,9 @@ public class EditorControl : MonoBehaviour
 
     void BackToStarScence()
     {
+        //------------ Modify by zh ------------
+        PlayerManage.InitPlayerPosEvt();
+        //------------------End------------------
         SceneManager.LoadScene(0);
     }
 

@@ -81,6 +81,8 @@ namespace SpaceDesign.Music
         //对象初始位置
         private Vector3 v3OriPos;
 
+        //Oppo手机系统的最大音量
+        const float OPPOSystemMaxVolum = 16f;
         //===========================================================================
         //临时测距
         public TextMesh tt;
@@ -190,6 +192,16 @@ namespace SpaceDesign.Music
             traImgCenter.localScale = Vector3.zero;
 
             targetRotation = traMaxUIImage.localRotation;
+            int _iVolum = 1;
+#if UNITY_ANDROID && !UNITY_EDITOR  
+            //系统音量：【0-16】整型
+            XR.AudioManager.GetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC, ref _iVolum);
+            //XR.AudioManager.SetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC,);
+#endif
+            //Debug.Log("MyLog: 声音" + _iVolum);
+
+            OnSliderVolumeChange((float)_iVolum / OPPOSystemMaxVolum);
+            OnSliderVolume();
         }
 
         private Quaternion targetRotation;    //声明旋转目标角度
@@ -199,7 +211,6 @@ namespace SpaceDesign.Music
 
         void Update()
         {
-
             if (bUIChanging)
                 return;
 
@@ -383,7 +394,9 @@ namespace SpaceDesign.Music
         {
             bSlideDragging = false;
             //print($"pinchSliderMusicMax.sliderValue:{pinchSliderMusicMax.sliderValue },fTotalPlayTime:{fTotalPlayTime}");
+            imgSliderMin.fillAmount = pinchSliderMusicMax.sliderValue;//slidMusicMax.value;
             SetAudioTime(pinchSliderMusicMax.sliderValue * fTotalPlayTime);
+            _SetCurPlayTime(false);
         }
 
         /// <summary>
@@ -391,6 +404,9 @@ namespace SpaceDesign.Music
         /// </summary>
         public void ClickFarToMiddle()
         {
+            if (bUIChanging)
+                return;
+
             if (curPlayerPosState == PlayerPosState.Middle)
             {
                 if (bMinTiming)
@@ -406,6 +422,9 @@ namespace SpaceDesign.Music
         /// </summary>
         public void OnMoreMusicMin()
         {
+            if (bUIChanging)
+                return;
+
             StopCoroutine("IEMinToMax");
             StartCoroutine("IEMinToMax");
             btnSliderVolumMax.gameObject.SetActive(false);
@@ -597,24 +616,21 @@ namespace SpaceDesign.Music
 
             PlayerPosState lastPPS = curPlayerPosState;
 
-            if (_dis >= 5f)
+
+            float _fFar = LoadPrefab.IconDisData.MusicFar;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else //if (_dis < 5f && _dis > 1.5f)
+            else
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            //else if (_dis <= 1.5f)
-            //{
-            //    curPlayerPosState = PlayerPosState.Close;
-            //    if (lastPPS == PlayerPosState.Close)
-            //        return;
-            //}
 
             StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
@@ -767,13 +783,15 @@ namespace SpaceDesign.Music
             while (true)
             {
                 //播放中，显示音符特效，并Icon缩小为0
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, (bPlaying ? Vector3.zero : Vector3.one), fIconSpeed * Time.deltaTime * 2);
+                //traIcon.localScale = Vector3.Lerp(traIcon.localScale, (bPlaying ? Vector3.zero : Vector3.one), fIconSpeed * Time.deltaTime * 2);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * Time.deltaTime * 2);
 
                 traIcon.localPosition = Vector3.Lerp(traIcon.localPosition, Vector3.zero, fIconSpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localPosition, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = bPlaying ? Vector3.zero : Vector3.one;
+                    //traIcon.localScale = bPlaying ? Vector3.zero : Vector3.one;
+                    traIcon.localScale = Vector3.one;
                     traIcon.localPosition = Vector3.zero;
                     //Icon自身上下浮动开启
                     animIconFar.enabled = true;
@@ -1245,6 +1263,7 @@ namespace SpaceDesign.Music
         public void OnVolumeMute()
         {
             pinchSliderVolumMax.sliderValue = 0;
+
             JudgeVolume();
             //OnSliderVolume();
 
@@ -1274,6 +1293,15 @@ namespace SpaceDesign.Music
         }
         void JudgeVolume()
         {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            int _i = Mathf.FloorToInt(pinchSliderVolumMax.sliderValue * OPPOSystemMaxVolum);
+            if (_i < 0)
+                _i = 0;
+            else if (_i > 16)
+                _i = 16;
+            XR.AudioManager.SetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC, _i);
+#endif
+
             SetAudioVolume(pinchSliderVolumMax.sliderValue);
         }
 
@@ -1433,8 +1461,14 @@ namespace SpaceDesign.Music
                 AutoNext();
                 return;
             }
-            //fTime = fTotalPlayTime - 2f;
+            bool _bPlaying = audioSource.isPlaying;
+            //暂停情况下先播放，audioSource.time才能被赋值（暂停情况下，拖拽进度条，设置当前播放时间用）
+            if (_bPlaying == false)
+                audioSource.Play();
             audioSource.time = fTime;
+
+            if (_bPlaying == false)
+                audioSource.Pause();
 
             //进度CPE赋值：数值即为当前秒数
             //===========================================================================

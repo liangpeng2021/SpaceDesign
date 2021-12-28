@@ -9,7 +9,11 @@ public class LoadPrefab : MonoBehaviour
     public Prefab3D[] prefab3Ds;
 
     public static Dictionary<string, GameObject> prefabDic = new Dictionary<string, GameObject>();
-    
+
+    //------------ Modify by zh ------------
+    public static IconDisData IconDisData = new IconDisData();
+    //------------------End------------------
+
     // Start is called before the first frame update
     void Start()
     {

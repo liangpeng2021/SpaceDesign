@@ -24,14 +24,17 @@ namespace SpaceDesign.VirtualCoach
         }
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
+        //初次体验（虚拟人只出现一次）
+        private bool bFirstTime = true;
         //Icon、UI等正在切换中
-        bool bUIChanging = false;
+        private bool bUIChanging = false;
+        //虚拟人物介绍中（实时面向用户）
+        public bool bIntroducing;
         //运动阈值
-        float fThreshold = 0.1f;
+        private float fThreshold = 0.1f;
         //对象初始位置
         [SerializeField]
         private Vector3 v3OriPos;
-
         //===========================================================================
         //临时测距
         public TextMesh tt;
@@ -57,7 +60,16 @@ namespace SpaceDesign.VirtualCoach
 
         void Start() { v3OriPos = this.transform.position; }
         void OnDestroy() { StopAllCoroutines(); }
-
+        void LateUpdate()
+        {
+            if (bIntroducing)
+            {
+                Vector3 _v3 = PlayerManage.Inst.transform.position;
+                _v3.y = transform.position.y;
+                transform.LookAt(_v3, Vector3.up);
+                transform.forward = -transform.forward;
+            }
+        }
         /// <summary>
         /// 刷新位置消息
         /// </summary>
@@ -74,19 +86,22 @@ namespace SpaceDesign.VirtualCoach
             PlayerPosState lastPPS = curPlayerPosState;
             //print($"目标的距离:{_dis}--lastPPS:{lastPPS}--curPPS:{curPlayerPosState}");
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.VirtualCoachFar;
+            float _fMid = LoadPrefab.IconDisData.VirtualCoachMiddle;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 3f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 3f)
+            else if (_dis <= _fMid)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
@@ -143,6 +158,7 @@ namespace SpaceDesign.VirtualCoach
         /// </summary>
         IEnumerator IEFarToMiddle()
         {
+            bIntroducing = false;
             //UI开始变化
             bUIChanging = true;
 
@@ -164,6 +180,7 @@ namespace SpaceDesign.VirtualCoach
         /// </summary>
         IEnumerator IEMiddleToFar()
         {
+            bIntroducing = false;
             //UI开始变化
             bUIChanging = true;
 
@@ -192,6 +209,9 @@ namespace SpaceDesign.VirtualCoach
             //UI开始变化
             bUIChanging = true;
 
+            //开始介绍
+            bIntroducing = true;
+
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
 
@@ -217,6 +237,9 @@ namespace SpaceDesign.VirtualCoach
             yield return new WaitForSeconds(18f);
             //等待讲话16秒之后，关闭动画
 
+            //介绍结束
+            bIntroducing = false;
+
             yield return IECloseToMiddle();
         }
 
@@ -225,6 +248,7 @@ namespace SpaceDesign.VirtualCoach
         /// </summary>
         IEnumerator IECloseToMiddle()
         {
+            bIntroducing = false;
             //UI开始变化
             bUIChanging = true;
 
@@ -267,6 +291,9 @@ namespace SpaceDesign.VirtualCoach
         /// </summary>
         public void ClickIcon()
         {
+            if (bUIChanging)
+                return;
+
             if (curPlayerPosState != PlayerPosState.Far)
             {
                 StopCoroutine("IEMiddleToClose");

@@ -90,12 +90,12 @@ namespace SpaceDesign.Video
 
             btnARWindows.onPointerEnter.AddListener(() =>
             {
-                if (bSizeSmall == false)
+                if (bKarting == true || bSizeSmall == false)
                     SetExpand(true);
             });
             btnARWindows.onPinchDown.AddListener(() =>
             {
-                if (bSizeSmall == true)
+                if (bKarting == false && bSizeSmall == true)
                     OnVideoSize();
             });
             btnPlay.onPinchDown.AddListener(() =>
@@ -120,6 +120,8 @@ namespace SpaceDesign.Video
 
         void OnDisable()
         {
+            OnPause();
+
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             btnIcon.onPinchDown.RemoveAllListeners();
             btnVideoClose.onPinchDown.RemoveAllListeners();
@@ -137,7 +139,10 @@ namespace SpaceDesign.Video
             sliderVideo.onInteractionStart.RemoveAllListeners();
             sliderVideo.onInteractionEnd.RemoveAllListeners();
         }
-
+        private void OnDestroy()
+        {
+            OnStop();
+        }
         void Start()
         {
             //tvCtr.OnInit();
@@ -148,7 +153,11 @@ namespace SpaceDesign.Video
             //关闭视频上的碰撞盒，防止触碰显示宽展界面
             colliderBtnARWindows.enabled = false;
 
-            Invoke("_DelayOpen3D", 1);
+
+            btnVideoClose.gameObject.SetActive(false);
+            btnVideoSize.gameObject.SetActive(false);
+
+            //Invoke("_DelayOpen3D", 1);
         }
 
         void _DelayOpen3D()
@@ -240,7 +249,8 @@ namespace SpaceDesign.Video
             if (b2D == false && b3DOK == false)
                 return;
 
-            if ((bTV == false) && (bExpand == true) && (bSizeSmall == false))
+            //隐藏的判断：AR模式 + 扩展模式 + （卡丁车模式、或非小框模式）
+            if ((bTV == false) && (bExpand == true) && ((bSizeSmall == false) || (bKarting == true)))
             {
                 if (fAutoHideUITiming >= 0)
                 {
@@ -344,19 +354,22 @@ namespace SpaceDesign.Video
 
             PlayerPosState lastPPS = curPlayerPosState;
 
-            if (_dis > 5f)
+            float _fFar = LoadPrefab.IconDisData.VideoFar;
+            float _fMid = LoadPrefab.IconDisData.VideoMiddle;
+
+            if (_dis > _fFar)
             {
                 curPlayerPosState = PlayerPosState.Far;
                 if (lastPPS == PlayerPosState.Far)
                     return;
             }
-            else if (_dis <= 5f && _dis > 3f)
+            else if (_dis <= _fFar && _dis > _fMid)
             {
                 curPlayerPosState = PlayerPosState.Middle;
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            else if (_dis <= 3f)
+            else if (_dis <= _fMid)
             {
                 curPlayerPosState = PlayerPosState.Close;
                 if (lastPPS == PlayerPosState.Close)
@@ -520,6 +533,9 @@ namespace SpaceDesign.Video
             //UI开始变化
             bUIChanging = true;
 
+            btnVideoClose.gameObject.SetActive(false);
+            btnVideoSize.gameObject.SetActive(false);
+
             if (bReminder == true)
                 SetReminder(false);
             else if (bExpand == true)
@@ -574,6 +590,9 @@ namespace SpaceDesign.Video
         /// </summary>
         public void ClickIcon()
         {
+            if (bUIChanging)
+                return;
+
             if (curPlayerPosState == PlayerPosState.Close)
             {
                 StopCoroutine("IEMiddleToClose");
@@ -700,6 +719,8 @@ namespace SpaceDesign.Video
 
         //小尺寸
         public bool bSizeSmall = false;
+        //卡丁车模式（绑定在卡丁车界面）
+        public bool bKarting = false;
         /// <summary>
         /// 设置预览UI
         /// </summary>
@@ -842,28 +863,59 @@ namespace SpaceDesign.Video
             bOpenVideo = true;
 
             b3DOK = false;
+            ////===========================================================================
+            ////if (iPlayState == 2 || vdp3D.meshComponent.mesh == null)
+            //if (b3DStop)
+            //{
+            //    //print("==============mesh为空");
+            //    vdp3D.OpenSourceAsync(str3DVideoPth, false, 0, () => { b3DStop = false; Debug.Log("MyLog:3DVideo_Open_OK"); });
+            //    //vdp3D.OpenSource(str3DVideoPth);
+            //}
+            //else
+            ////===========================================================================
+            //{
+            //    if (vdp3D.isPlaying == false)
+            //    {
+            //        //vdp3D.Play();
+            //        vdp3D.JumpFrame(0, false);
+            //    }
+            //}
+            SetReminder(false);
+
+            WatchNowOpen3D();
+
+            Invoke("_InvokeWatchNow", 1.3f);
+        }
+
+        void WatchNowOpen3D()
+        {
+            //先显示Render
+            mrVdp3D.enabled = false;
             //===========================================================================
-            //if (iPlayState == 2 || vdp3D.meshComponent.mesh == null)
             if (b3DStop)
             {
                 //print("==============mesh为空");
-                vdp3D.OpenSourceAsync(str3DVideoPth, false, 0, () => { b3DStop = false; Debug.Log("MyLog:3DVideo_Open_OK"); });
+                vdp3D.OpenSourceAsync(str3DVideoPth, true, 0, () =>
+                {
+                    b3DStop = false;
+                    Debug.Log("MyLog:WatchNow_3DVideo_Open_OK");
+                    if (vdp3D.isPlaying)
+                        vdp3D.Pause();
+                });
                 //vdp3D.OpenSource(str3DVideoPth);
             }
             else
-            //===========================================================================
-            {
-                if (vdp3D.isPlaying == false)
-                {
-                    //vdp3D.Play();
-                    vdp3D.JumpFrame(0, false);
-                }
-            }
-            SetReminder(false);
-            Invoke("_InvokeWatchNow", 1.2f);
+                //===========================================================================
+                vdp3D.JumpFrame(0, true);
+
+            if (ads3D.isPlaying == true)
+                ads3D.Pause();
         }
+
         void _InvokeWatchNow()
         {
+            if (vdp3D.isPlaying)
+                vdp3D.Pause();
             //animator3DChar.gameObject.SetActive(false);
             //particle3D.gameObject.SetActive(false);
             vdp2D.targetTexture.Release();
@@ -929,8 +981,13 @@ namespace SpaceDesign.Video
             traVideoExpand.localEulerAngles = traVideoExpand.localPosition = Vector3.zero;
             traVideoExpand.localScale = Vector3.one;
 
-            btnVideoClose.gameObject.SetActive(!bTV);
-            btnVideoSize.gameObject.SetActive(!bTV);
+            bool _bShowVideoCtrBtn = false;
+            if (bSizeSmall == true)
+                _bShowVideoCtrBtn = false;
+            else
+                _bShowVideoCtrBtn = !bTV;
+            btnVideoClose.gameObject.SetActive(_bShowVideoCtrBtn);
+            btnVideoSize.gameObject.SetActive(_bShowVideoCtrBtn);
 
             btnAR.gameObject.SetActive(bTV);
             btnTV.gameObject.SetActive(!bTV);
