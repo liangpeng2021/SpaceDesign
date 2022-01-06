@@ -4,7 +4,7 @@
 
  */
 
-using Newtonsoft.Json;
+using LitJson;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -151,7 +151,11 @@ namespace SpaceDesign.Karting
 
                     if (www.isDone && string.IsNullOrEmpty(www.error))
                     {
-                        cpeBikeData = JsonConvert.DeserializeObject<CPEBikeData>(www.downloadHandler.text);
+                        //edit by lp,oppo Newtonsoft.json无法使用
+                        //cpeBikeData = JsonConvert.DeserializeObject<CPEBikeData>(www.downloadHandler.text);
+                        cpeBikeData = JsonMapper.ToObject<CPEBikeData>(www.downloadHandler.text);
+                        //end
+
                         //ShowLog(cpeBikeData.ErrorCode.ToString());
                         if (cpeBikeData.ErrorCode == 0)
                         {

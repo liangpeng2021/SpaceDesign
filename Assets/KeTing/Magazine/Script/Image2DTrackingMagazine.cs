@@ -34,10 +34,18 @@ namespace SpaceDesign.Magazine
             //objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child");
             //objShow3 = objTargetModel.Find("Capsule").gameObject;
             SetModelVisible(false);
+
+            Image2DTrackingManager.Instance.OnAddTacker += AddTrack;
+        }
+
+        void AddTrack()
+        {
+
         }
 
         public void StartTrack()
         {
+            Debug.Log("MyLog::StartTrackMagazine");
 #if UNITY_EDITOR
             return;
 #endif

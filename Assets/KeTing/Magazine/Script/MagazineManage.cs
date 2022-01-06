@@ -36,17 +36,30 @@ namespace SpaceDesign.Magazine
         //临时测距
         public TextMesh tt;
         //===========================================================================
+
+        //edit by lp,添加近场点击事件
         void Awake()
         {
             animIconFar = traIcon.GetComponent<Animator>();
             btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+            btnIconTouch = traIcon.GetComponent<ButtonTouchableReceiver>();
+
+            btnCheckDetailTouch = btnCheckDetail.GetComponent<ButtonTouchableReceiver>();
+            btnQuitTouch = btnQuit.GetComponent<ButtonTouchableReceiver>();
         }
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
+
             btnIcon.onPinchDown.AddListener(ClickIcon);
+            btnIconTouch.onPressDown.AddListener(ClickIcon);
+
             btnCheckDetail.onPinchDown.AddListener(OnCheckDetail);
+            btnCheckDetailTouch.onPressDown.AddListener(OnCheckDetail);
+
             btnQuit.onPinchDown.AddListener(OnQuit);
+            btnQuitTouch.onPressDown.AddListener(OnQuit);
+
             timelineHide.SetActive(false);
             timelineShow.SetActive(false);
         }
@@ -54,12 +67,20 @@ namespace SpaceDesign.Magazine
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-            btnIcon.onPinchDown.RemoveAllListeners();
-            btnCheckDetail.onPinchDown.RemoveAllListeners();
-            btnQuit.onPinchDown.RemoveAllListeners();
+
+            btnIcon.onPinchDown.RemoveListener(ClickIcon);
+            btnIconTouch.onPressDown.RemoveListener(ClickIcon);
+
+            btnCheckDetail.onPinchDown.RemoveListener(OnCheckDetail);
+            btnCheckDetailTouch.onPressDown.RemoveListener(OnCheckDetail);
+
+            btnQuit.onPinchDown.RemoveListener(OnQuit);
+            btnQuitTouch.onPressDown.RemoveListener(OnQuit);
+
             timelineHide.SetActive(false);
             timelineShow.SetActive(false);
         }
+        //end
 
         void Start()
         {
@@ -233,9 +254,9 @@ namespace SpaceDesign.Magazine
                 yield return 0;
             }
 
-            //启动Mark
-            markTrackMagazine.enabled = true;
-            markTrackMagazine.StartTrack();
+            //启动Mark//TODO
+            //markTrackMagazine.enabled = true;
+            //markTrackMagazine.StartTrack();
 
             //UI变化结束
             bUIChanging = false;
@@ -262,9 +283,9 @@ namespace SpaceDesign.Magazine
                 }
                 yield return 0;
             }
-
-            markTrackMagazine.StopTrack();
-            markTrackMagazine.enabled = false;
+            //TODO
+            //markTrackMagazine.StopTrack();
+            //markTrackMagazine.enabled = false;
 
             OnQuit();
 
@@ -280,6 +301,8 @@ namespace SpaceDesign.Magazine
         public Transform traIcon;
         //Icon对象的AR手势Button按钮
         private ButtonRayReceiver btnIcon;
+        ButtonTouchableReceiver btnIconTouch;
+
         //吸引态，上下移动动画
         private Animator animIconFar;
         //轻交互，半球动画+音符动画
@@ -310,10 +333,13 @@ namespace SpaceDesign.Magazine
         public GameObject timelineHide;
         //查看翻译按钮
         public ButtonRayReceiver btnCheckDetail;
+        ButtonTouchableReceiver btnCheckDetailTouch;
+
         //查看翻译按钮的父节点
         public GameObject objCheckDetailParent;
         //退出翻译按钮
         public ButtonRayReceiver btnQuit;
+        ButtonTouchableReceiver btnQuitTouch;
 
         /// <summary>
         /// 查看详情按钮响应
@@ -324,8 +350,8 @@ namespace SpaceDesign.Magazine
             //btnCheckDetail.gameObject.SetActive(false);
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
-            //markTrackMagazine.StopTrack();
-            //markTrackMagazine.enabled = false;
+            markTrackMagazine.StopTrack();
+            markTrackMagazine.enabled = false;
         }
 
         /// <summary>
@@ -338,8 +364,8 @@ namespace SpaceDesign.Magazine
             if (timelineShow.activeSelf == true)
                 timelineHide.SetActive(true);
             timelineShow.SetActive(false);
-            //markTrackMagazine.StopTrack();
-            //markTrackMagazine.enabled = false;
+            markTrackMagazine.StopTrack();
+            markTrackMagazine.enabled = false;
         }
         #endregion
     }

@@ -115,10 +115,149 @@ namespace SpaceDesign
                     return;
                 curPlayerPosState = PlayerPosState.Close;
             }
-
+            
             StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
+
+            //RefreshPosState(lastPPS);
         }
+        //edit by lp,不用协程处理测试
+
+        public enum MoveState
+        {
+            MiddleToFar,
+            MiddleToClose,
+            CloseToMiddle
+        }
+
+        MoveState moveState=MoveState.MiddleToFar;
+
+        void Update()
+        {
+            switch (moveState)
+            {
+                case MoveState.MiddleToClose:
+                    MiddleToClose();
+                    break;
+                case MoveState.CloseToMiddle:
+                    CloseToMiddle();
+                    break;
+            }
+        }
+
+        void FarToMiddle()
+        {
+            //远距离=>中距离
+            //Icon从静态变成动态
+            //Icon的自旋转动画开启
+            foreach (var v in animIconMiddle)
+                v.enabled = true;
+            //Icon自身上下浮动开启
+            animIconFar.enabled = true;
+            traIcon.gameObject.SetActive(true);
+        }
+
+        void MiddleToClose()
+        {
+            float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
+
+            if (_fDis < fThreshold)
+            {
+                traIcon.localScale = Vector3.zero;
+            }
+            else
+            {
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+                return;
+            }
+            
+            timeline.gameObject.SetActive(true);
+            timeline.SetCurTimelineData("提示出现");
+            backBtn.gameObject.SetActive(false);
+
+            //UI变化结束
+            bUIChanging = false;
+        }
+
+        void MiddleToFar()
+        {
+            //中距离=>远距离
+            //Icon从动态变成静态
+            //Icon的自旋转动画关闭
+            foreach (var v in animIconMiddle)
+            {
+                v.Play(0, -1, 0f);
+                v.Update(0);
+                v.enabled = false;
+            }
+            //Icon自身上下浮动关闭
+            animIconFar.enabled = false;
+            traIcon.gameObject.SetActive(true);
+
+            OnQuit();
+        }
+
+        void CloseToMiddle()
+        {
+            float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+            if (_fDis < fThreshold)
+            {
+                traIcon.localScale = Vector3.one;
+            }
+            else
+            {
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
+                return;
+            }
+
+            timeline.gameObject.SetActive(false);
+
+            OnQuit();
+
+            //UI变化结束
+            bUIChanging = false;
+        }
+
+        void RefreshPosState(PlayerPosState lastPPS)
+        {
+            if (lastPPS == PlayerPosState.Far)
+            {
+                if (curPlayerPosState == PlayerPosState.Middle)/// 远距离=>中距离
+                    FarToMiddle();
+                else if (curPlayerPosState == PlayerPosState.Close)/// 远距离=>近距离
+                {
+                    FarToMiddle();
+                    //UI开始变化
+                    bUIChanging = true;
+                    moveState = MoveState.MiddleToClose;
+                }
+            }
+            else if (lastPPS == PlayerPosState.Middle)
+            {
+                if (curPlayerPosState == PlayerPosState.Close)/// 中距离=>近距离
+                {
+                    //UI开始变化
+                    bUIChanging = true;
+                    moveState = MoveState.MiddleToClose;
+                } 
+                else if (curPlayerPosState == PlayerPosState.Far)/// 中距离=>远距离
+                    MiddleToFar();
+            }
+            else if (lastPPS == PlayerPosState.Close)
+            {
+                if (curPlayerPosState == PlayerPosState.Middle)/// 近距离=>中距离
+                {
+                    //UI开始变化
+                    bUIChanging = true;
+                    moveState = MoveState.CloseToMiddle;
+                }
+                else if (curPlayerPosState == PlayerPosState.Far)/// 近距离=>远距离
+                {
+                    MiddleToFar();
+                }
+            }
+        }
+        //end
 
         /// <summary>
         /// UI等刷新位置消息
@@ -275,67 +414,64 @@ namespace SpaceDesign
         {
             qiukuiBtn.onPinchDown.AddListener(GotoQiukui);
             //触摸
-            if (qiukuiTouch == null)
-            {
-                qiukuiTouch = qiukuiBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
-                qiukuiTouch.pressableHandler = qiukuiBtn.transform;
-            }
-            if (qiukuiTouch != null)
-            {
-                if (qiukuiTouch.onPressDown == null)
-                    qiukuiTouch.onPressDown = new UnityEngine.Events.UnityEvent();
-                qiukuiTouch.onPressDown.AddListener(GotoQiukui);
-            }
+            //if (qiukuiTouch == null)
+            //{
+            //    qiukuiTouch = qiukuiBtn.GetComponent<ButtonTouchableReceiver>();
+            //}
+            //if (qiukuiTouch != null)
+            //{
+            //    if (qiukuiTouch.onPressDown == null)
+            //        qiukuiTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+            //    qiukuiTouch.onPressDown.AddListener(GotoQiukui);
+            //}
 
             fanqieBtn.onPinchDown.AddListener(GotoFanqie);
-            if (fanqieTouch == null)
-            {
-                fanqieTouch = fanqieBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
-                fanqieTouch.pressableHandler = fanqieBtn.transform;
-            }
-            if (fanqieTouch != null)
-            {
-                if (fanqieTouch.onPressDown == null)
-                    fanqieTouch.onPressDown = new UnityEngine.Events.UnityEvent();
-                fanqieTouch.onPressDown.AddListener(GotoFanqie);
-            }
+            //if (fanqieTouch == null)
+            //{
+            //    fanqieTouch = fanqieBtn.GetComponent<ButtonTouchableReceiver>();
+            //}
+            //if (fanqieTouch != null)
+            //{
+            //    if (fanqieTouch.onPressDown == null)
+            //        fanqieTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+            //    fanqieTouch.onPressDown.AddListener(GotoFanqie);
+            //}
 
             bocaiBtn.onPinchDown.AddListener(GotoBocai);
-            if (bocaiTouch == null)
-            {
-                bocaiTouch = bocaiBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
-                bocaiTouch.pressableHandler = bocaiBtn.transform;
-            }
-            if (bocaiTouch != null)
-            {
-                if (bocaiTouch.onPressDown == null)
-                    bocaiTouch.onPressDown = new UnityEngine.Events.UnityEvent();
-                bocaiTouch.onPressDown.AddListener(GotoBocai);
-            }
+            //if (bocaiTouch == null)
+            //{
+            //    bocaiTouch = bocaiBtn.GetComponent<ButtonTouchableReceiver>();
+            //}
+            //if (bocaiTouch != null)
+            //{
+            //    if (bocaiTouch.onPressDown == null)
+            //        bocaiTouch.onPressDown = new UnityEngine.Events.UnityEvent();
+            //    bocaiTouch.onPressDown.AddListener(GotoBocai);
+            //}
 
             backBtn.onPinchDown.AddListener(BackToCaipu);
-            if (backTouchBtn == null)
-            {
-                backTouchBtn = backBtn.GetComponent<ButtonTouchableReceiver>();
-            }
-            if (backTouchBtn != null)
-            {
-                if (backTouchBtn.onPressDown == null)
-                    backTouchBtn.onPressDown = new UnityEngine.Events.UnityEvent();
-                backTouchBtn.onPressDown.AddListener(BackToCaipu);
-            }
+            //if (backTouchBtn == null)
+            //{
+            //    backTouchBtn = backBtn.GetComponent<ButtonTouchableReceiver>();
+            //}
+            //if (backTouchBtn != null)
+            //{
+            //    if (backTouchBtn.onPressDown == null)
+            //        backTouchBtn.onPressDown = new UnityEngine.Events.UnityEvent();
+            //    backTouchBtn.onPressDown.AddListener(BackToCaipu);
+            //}
 
             showCaipuBtn.onPinchDown.AddListener(ShowCaipu);
-            if (showTouchCaipuBtn == null)
-            {
-                showTouchCaipuBtn = showCaipuBtn.GetComponent<ButtonTouchableReceiver>();
-            }
-            if (showTouchCaipuBtn != null)
-            {
-                if (showTouchCaipuBtn.onPressDown == null)
-                    showTouchCaipuBtn.onPressDown = new UnityEngine.Events.UnityEvent();
-                showTouchCaipuBtn.onPressDown.AddListener(ShowCaipu);
-            }
+            //if (showTouchCaipuBtn == null)
+            //{
+            //    showTouchCaipuBtn = showCaipuBtn.GetComponent<ButtonTouchableReceiver>();
+            //}
+            //if (showTouchCaipuBtn != null)
+            //{
+            //    if (showTouchCaipuBtn.onPressDown == null)
+            //        showTouchCaipuBtn.onPressDown = new UnityEngine.Events.UnityEvent();
+            //    showTouchCaipuBtn.onPressDown.AddListener(ShowCaipu);
+            //}
 
             //挥手,射线
             waveInteractionGazeHandle.g_OnHandWave.AddListener(WaveHandle);
@@ -345,24 +481,24 @@ namespace SpaceDesign
         void RemoveButtonRayEvent()
         {
             qiukuiBtn.onPinchDown.RemoveAllListeners();
-            if (qiukuiTouch != null && qiukuiTouch.onPressDown != null)
-                qiukuiTouch.onPressDown.RemoveAllListeners();
+            //if (qiukuiTouch != null && qiukuiTouch.onPressDown != null)
+            //    qiukuiTouch.onPressDown.RemoveAllListeners();
 
             fanqieBtn.onPinchDown.RemoveAllListeners();
-            if (fanqieTouch != null && fanqieTouch.onPressDown != null)
-                fanqieTouch.onPressDown.RemoveAllListeners();
+            //if (fanqieTouch != null && fanqieTouch.onPressDown != null)
+            //    fanqieTouch.onPressDown.RemoveAllListeners();
 
             bocaiBtn.onPinchDown.RemoveAllListeners();
-            if (bocaiTouch != null && bocaiTouch.onPressDown != null)
-                bocaiTouch.onPressDown.RemoveAllListeners();
+            //if (bocaiTouch != null && bocaiTouch.onPressDown != null)
+            //    bocaiTouch.onPressDown.RemoveAllListeners();
 
             backBtn.onPinchDown.RemoveAllListeners();
-            if (backTouchBtn != null && backTouchBtn.onPressDown != null)
-                backTouchBtn.onPressDown.RemoveAllListeners();
+            //if (backTouchBtn != null && backTouchBtn.onPressDown != null)
+            //    backTouchBtn.onPressDown.RemoveAllListeners();
 
             showCaipuBtn.onPinchDown.RemoveAllListeners();
-            if (showTouchCaipuBtn != null && showTouchCaipuBtn.onPressDown != null)
-                showTouchCaipuBtn.onPressDown.RemoveAllListeners();
+            //if (showTouchCaipuBtn != null && showTouchCaipuBtn.onPressDown != null)
+            //    showTouchCaipuBtn.onPressDown.RemoveAllListeners();
 
             //挥手
             //射线
@@ -390,25 +526,25 @@ namespace SpaceDesign
         /// 秋葵按钮
         /// </summary>
         public ButtonRayReceiver qiukuiBtn;
-        ButtonTouchableReceiver qiukuiTouch;
+        //ButtonTouchableReceiver qiukuiTouch;
 
         /// <summary>
         /// 番茄
         /// </summary>
         public ButtonRayReceiver fanqieBtn;
-        ButtonTouchableReceiver fanqieTouch;
+        //ButtonTouchableReceiver fanqieTouch;
 
         /// <summary>
         /// 菠菜
         /// </summary>
         public ButtonRayReceiver bocaiBtn;
-        ButtonTouchableReceiver bocaiTouch;
+        //ButtonTouchableReceiver bocaiTouch;
 
         /// <summary>
         /// 返回
         /// </summary>
         public ButtonRayReceiver backBtn;
-        ButtonTouchableReceiver backTouchBtn;
+        //ButtonTouchableReceiver backTouchBtn;
 
         /// <summary>
         /// 当前点击的菜谱流程
@@ -427,7 +563,7 @@ namespace SpaceDesign
         /// 显示菜谱按钮
         /// </summary>
         public ButtonRayReceiver showCaipuBtn;
-        ButtonTouchableReceiver showTouchCaipuBtn;
+        //ButtonTouchableReceiver showTouchCaipuBtn;
         /// <summary>
         /// 显示菜谱
         /// </summary>

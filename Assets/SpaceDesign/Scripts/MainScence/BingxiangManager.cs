@@ -60,6 +60,8 @@ namespace SpaceDesign
             bingxiangTimeline.gameObject.SetActive(false);
 
             RemoveTestEvent();
+
+            startTip = false;
         }
 
         void Start()
@@ -316,6 +318,8 @@ namespace SpaceDesign
             yield return 0;
             //UI变化结束
             bUIChanging = false;
+
+            startTip = false;
         }
         /// <summary>
         /// 中距离=>近距离
@@ -362,7 +366,7 @@ namespace SpaceDesign
         /// 开始提示，提示到一半如果距离变化，关闭
         /// </summary>
         bool startTip;
-
+        
         /// <summary>
         /// 是否购买来切换不同的信息
         /// </summary>
@@ -414,6 +418,9 @@ namespace SpaceDesign
             }
             //UI变化结束
             bUIChanging = false;
+
+            startTip = false;
+            StopCoroutine("TipToInfo");
         }
 
         #region Icon变化，远距离
@@ -553,31 +560,31 @@ namespace SpaceDesign
             startTip = false;
             dangaoObj.SetActive(false);
             niunaiObj.SetActive(false);
-
-            switch (curTimelineState)
-            {
-                case "开头提示":
-                    SetTimelineData("关闭开头提示", null);
-                    return true;
-                case "开冰箱":
-                    SetTimelineData("关闭开冰箱信息", null);
-                    return true;
-                case "点击可乐":
-                    SetTimelineData("关闭点击可乐信息", null);
-                    return true;
-                case "未购买门外信息":
-                    SetTimelineData("关闭未购买门外信息", null);
-                    return true;
-                case "已购买门外信息":
-                    SetTimelineData("关闭已购买门外信息", null);
-                    return true;
-                case "一键复购":
-                case "点击购买":
-                    bingxiangTimeline.gameObject.SetActive(false);
-                    break;
-                default:
-                    break;
-            }
+            bingxiangTimeline.gameObject.SetActive(false);
+            //switch (curTimelineState)
+            //{
+            //    case "开头提示":
+            //        SetTimelineData("关闭开头提示", null);
+            //        return true;
+            //    case "开冰箱":
+            //        SetTimelineData("关闭开冰箱信息", null);
+            //        return true;
+            //    case "点击可乐":
+            //        SetTimelineData("关闭点击可乐信息", null);
+            //        return true;
+            //    case "未购买门外信息":
+            //        SetTimelineData("关闭未购买门外信息", null);
+            //        return true;
+            //    case "已购买门外信息":
+            //        SetTimelineData("关闭已购买门外信息", null);
+            //        return true;
+            //    case "一键复购":
+            //    case "点击购买":
+            //        bingxiangTimeline.gameObject.SetActive(false);
+            //        break;
+            //    default:
+            //        break;
+            //}
 
             return false;
         }

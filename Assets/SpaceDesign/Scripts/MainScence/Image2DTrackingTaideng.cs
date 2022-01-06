@@ -41,6 +41,7 @@ namespace SpaceDesign.Lamp
 
         public void StartTrack()
         {
+            Debug.Log("MyLog::StartTrackTaideng");
 #if UNITY_EDITOR
             return;
 #endif

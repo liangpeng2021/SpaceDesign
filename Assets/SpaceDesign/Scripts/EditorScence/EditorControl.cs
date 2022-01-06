@@ -57,11 +57,7 @@ public class EditorControl : MonoBehaviour
     /// 返回编辑模式
     /// </summary>
     public ButtonRayReceiver backToEditorBtn;
-
-    /// <summary>
-    /// 退出程序
-    /// </summary>
-    public Button quitBtn;
+    
     [HideInInspector]
     public LoadPreviewScence loadPreviewScence;
 
@@ -112,7 +108,6 @@ public class EditorControl : MonoBehaviour
         previewUIObj = null;
         previewBtn = null;
         backToEditorBtn = null;
-        quitBtn = null;
         loadPreviewScence = null;
         previewParent = null;
         prefabManager = null;
@@ -155,8 +150,7 @@ public class EditorControl : MonoBehaviour
     {
         previewBtn.onPinchDown.AddListener(LoadPreview);
         backToEditorBtn.onPinchDown.AddListener(BackToEditor);
-        quitBtn.onClick.AddListener(BackToStarScence);
-
+        
         backtoTopBtn.onPinchDown.AddListener(BackToScenceList);
         resetMenuBtn.onPinchDown.AddListener(ResetMenuPos);
     }
@@ -165,8 +159,7 @@ public class EditorControl : MonoBehaviour
     {
         previewBtn.onPinchDown.RemoveListener(LoadPreview);
         backToEditorBtn.onPinchDown.RemoveListener(BackToEditor);
-        quitBtn.onClick.RemoveListener(BackToStarScence);
-
+        
         backtoTopBtn.onPinchDown.RemoveListener(BackToScenceList);
         resetMenuBtn.onPinchDown.RemoveAllListeners();
     }

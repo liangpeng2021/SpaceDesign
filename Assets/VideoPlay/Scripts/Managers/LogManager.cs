@@ -28,8 +28,25 @@ public class LogManager : Singleton<LogManager>
 
 	List<LogData> strList = new List<LogData>();
 	int startCount = 0;
-    
-	void InitLog()
+    /// <summary>
+    /// 是否自动显示最新消息
+    /// </summary>
+    bool isAutoShowNew;
+    /// <summary>
+    /// 不显示最新消息，防止覆盖
+    /// </summary>
+    public Button dontShowNewBtn;
+    /// <summary>
+    /// 自动显示最新消息
+    /// </summary>
+    public Button showNewBtn;
+    /// <summary>
+    /// 菜单，点击复位所有按钮
+    /// </summary>
+    public Button resetMenuBtn;
+    public Transform uiTran;
+    Transform stereoCameraTran;
+    void InitLog()
 	{
 		//隐藏调试对象
 		for (int i = 0; i < testObjs.Length; i++)
@@ -46,8 +63,26 @@ public class LogManager : Singleton<LogManager>
 #elif UNITY_ANDROID
 			localLogPath = Application.persistentDataPath.Substring(0, Application.persistentDataPath.IndexOf("Android", StringComparison.Ordinal)) + "LenQiy/Log/";
 #endif
+            //是否自动显示新消息
+            dontShowNewBtn.onClick.AddListener(()=> {
+                isAutoShowNew = false;
+                dontShowNewBtn.gameObject.SetActive(false);
+                showNewBtn.gameObject.SetActive(true);
+            });
+            showNewBtn.onClick.AddListener(()=> {
+                isAutoShowNew = true;
+                dontShowNewBtn.gameObject.SetActive(true);
+                showNewBtn.gameObject.SetActive(false);
+            });
+            isAutoShowNew = true;
+            dontShowNewBtn.gameObject.SetActive(true);
+            showNewBtn.gameObject.SetActive(false);
+            //end
+            //重置UI位置
+            resetMenuBtn.onClick.AddListener(ResetMenuPos);
+            stereoCameraTran = XRCameraManager.Instance.stereoCamera.transform;
 
-			topBtn.onClick.AddListener(() => { SetLogTextPos(true); });
+            topBtn.onClick.AddListener(() => { SetLogTextPos(true); });
 			bottomBtn.onClick.AddListener(() => { SetLogTextPos(false); });
 
             lastBtn.onClick.AddListener(() => { SetLogTextStr(true); });
@@ -69,7 +104,8 @@ public class LogManager : Singleton<LogManager>
                 if (strList[i].str.Equals(temp))
                 {
                     strList[i].num++;
-                    startCount = i;
+                    if (isAutoShowNew)
+                        startCount = i;
                     return;
                 }
             }
@@ -88,7 +124,14 @@ public class LogManager : Singleton<LogManager>
             }
         }
     }
-   
+    //重置UI位置
+    void ResetMenuPos()
+    {
+        uiTran.position = stereoCameraTran.position;
+        uiTran.forward = stereoCameraTran.forward;
+        uiTran.eulerAngles = new Vector3(0, uiTran.eulerAngles.y, 0);
+    }
+
     bool isShow = false;
     private void Update()
     {
@@ -103,7 +146,17 @@ public class LogManager : Singleton<LogManager>
 
             logNumText.text = "log: " + (startCount + 1) + "/" + strList.Count;
         }
-        
+
+        Vector3 cameraPos = new Vector3(stereoCameraTran.position.x, 0, stereoCameraTran.position.z);
+        Vector3 uipos = new Vector3(uiTran.position.x, 0, uiTran.position.z);
+
+        //判断距离超过3米或者夹角较大时出现复位按钮
+        if (Vector3.Distance(cameraPos, uipos) > 3f || Vector3.Angle(stereoCameraTran.forward, uiTran.forward) > 75f)
+        {
+            resetMenuBtn.gameObject.SetActive(true);
+        }
+        else
+            resetMenuBtn.gameObject.SetActive(false);
     }
     void Clear()
     {

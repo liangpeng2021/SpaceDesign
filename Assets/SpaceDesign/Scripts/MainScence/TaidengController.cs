@@ -255,8 +255,7 @@ namespace SpaceDesign.Lamp
             startpayRayReceiver.onPinchDown.AddListener(StartPay);
             if (startPayTouch == null)
             {
-                startPayTouch = startpayRayReceiver.gameObject.AddComponent<ButtonTouchableReceiver>();
-                startPayTouch.pressableHandler = startpayRayReceiver.transform;
+                startPayTouch = startpayRayReceiver.GetComponent<ButtonTouchableReceiver>();
             }
             if (startPayTouch != null)
             {
@@ -268,8 +267,7 @@ namespace SpaceDesign.Lamp
             justpayRayReceiver.onPinchDown.AddListener(PaySuccess);
             if (justPayTouch == null)
             {
-                justPayTouch = justpayRayReceiver.gameObject.AddComponent<ButtonTouchableReceiver>();
-                justPayTouch.pressableHandler = justpayRayReceiver.transform;
+                justPayTouch = justpayRayReceiver.GetComponent<ButtonTouchableReceiver>();
             }
             if (justPayTouch != null)
             {

@@ -45,6 +45,7 @@ namespace SpaceDesign.Lamp
         {
             animIconFar = traIcon.GetComponent<Animator>();
             btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+            btnIconTouch = traIcon.GetComponent<ButtonTouchableReceiver>();
         }
         void OnEnable()
         {
@@ -291,6 +292,7 @@ namespace SpaceDesign.Lamp
         public Transform traIcon;
         //Icon对象的AR手势Button按钮
         private ButtonRayReceiver btnIcon;
+        ButtonTouchableReceiver btnIconTouch;
 
         //吸引态，上下移动动画
         private Animator animIconFar;
@@ -333,46 +335,44 @@ namespace SpaceDesign.Lamp
         void AddButtonRayEvent()
         {
             btnIcon.onPinchDown.AddListener(ClickIcon);
+            if (btnIconTouch != null)
+            {
+                btnIconTouch.onPressDown.AddListener(ClickIcon);
+            }
 
             closeBtn.onPinchDown.AddListener(OnClose);
             if (closeBtnTouch == null)
             {
-                closeBtnTouch = closeBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
-                closeBtnTouch.pressableHandler = closeBtn.transform;
+                closeBtnTouch = closeBtn.GetComponent<ButtonTouchableReceiver>();
             }
             if (closeBtnTouch != null)
             {
-                if (closeBtnTouch.onPressDown == null)
-                    closeBtnTouch.onPressDown = new UnityEngine.Events.UnityEvent();
                 closeBtnTouch.onPressDown.AddListener(OnClose);
             }
 
             placeBtn.onPinchDown.AddListener(OnCheckPlace);
             if (placeBtnTouch == null)
             {
-                placeBtnTouch = placeBtn.gameObject.AddComponent<ButtonTouchableReceiver>();
-                placeBtnTouch.pressableHandler = placeBtn.transform;
+                placeBtnTouch = placeBtn.GetComponent<ButtonTouchableReceiver>();
             }
-            if (placeBtnTouch == null)
+            if (placeBtnTouch != null)
             {
-                if (placeBtnTouch.onPressDown == null)
-                    placeBtnTouch.onPressDown = new UnityEngine.Events.UnityEvent();
                 placeBtnTouch.onPressDown.AddListener(OnCheckPlace);
             }
         }
 
         void RemoveButtonRayEvent()
         {
-            btnIcon.onPinchDown.RemoveAllListeners();
+            btnIcon.onPinchDown.RemoveListener(ClickIcon);
+            btnIconTouch.onPressDown.RemoveListener(ClickIcon);
 
-            closeBtn.onPinchDown.RemoveAllListeners();
+            closeBtn.onPinchDown.RemoveListener(OnClose);
             if (closeBtnTouch != null && closeBtnTouch.onPressDown != null)
-                closeBtnTouch.onPressDown.RemoveAllListeners();
-
-
-            placeBtn.onPinchDown.RemoveAllListeners();
+                closeBtnTouch.onPressDown.RemoveListener(OnClose);
+            
+            placeBtn.onPinchDown.RemoveListener(OnCheckPlace);
             if (placeBtnTouch != null && placeBtnTouch.onPressDown != null)
-                placeBtnTouch.onPressDown.RemoveAllListeners();
+                placeBtnTouch.onPressDown.RemoveListener(OnCheckPlace);
         }
 
         #endregion

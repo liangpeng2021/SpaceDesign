@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 
 /// <summary>
 ///  <summary>/// create by liangpeng 2020-7-1 下载管理
@@ -64,22 +63,6 @@ public class DownLoadManager : Singleton<DownLoadManager>
 
 #endif
 		CheckStorageSpace();
-	}
-
-	//读取json文件
-	private static T ParseJson<T>(string filePath)
-	{
-		try
-		{
-			if (!File.Exists(filePath)) return default(T);
-			var content = File.ReadAllText(filePath);
-			return JsonConvert.DeserializeObject<T>(content);
-		}
-		catch (Exception ex)
-		{
-			Debug.Log("File Parse" + ex.Message);
-			return default(T);
-		}
 	}
     
 	/// <summary>

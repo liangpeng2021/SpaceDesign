@@ -39,6 +39,7 @@ namespace SpaceDesign.Translate
 
         public void StartTrack()
         {
+            Debug.Log("MyLog::StartTrackTranslate");
 #if UNITY_EDITOR
             return;
 #endif

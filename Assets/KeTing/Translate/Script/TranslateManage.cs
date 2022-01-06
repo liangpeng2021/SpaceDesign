@@ -35,10 +35,16 @@ namespace SpaceDesign.Translate
         //临时测距
         public TextMesh tt;
         //===========================================================================
+        //edit by lp,添加近场点击事件
         void Awake()
         {
             animIconFar = traIcon.GetComponent<Animator>();
             btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+            //add by lp
+            btnIconTouch = btnIcon.GetComponent<ButtonTouchableReceiver>();
+            btnCheckTranslateTouch = btnCheckTranslate.GetComponent<ButtonTouchableReceiver>();
+            btnQuitTouch = btnQuit.GetComponent<ButtonTouchableReceiver>();
+            //end
         }
         void OnEnable()
         {
@@ -49,6 +55,12 @@ namespace SpaceDesign.Translate
             btnQuit.onPinchDown.AddListener(OnQuit);
             timelineHide.SetActive(false);
             timelineShow.SetActive(false);
+
+            //add by lp
+            btnIconTouch.onPressDown.AddListener(ClickIcon);
+            btnCheckTranslateTouch.onPressDown.AddListener(OnCheckTranslate);
+            btnQuitTouch.onPressDown.AddListener(OnQuit);
+            //end
         }
 
         void OnDisable()
@@ -60,7 +72,14 @@ namespace SpaceDesign.Translate
             btnQuit.onPinchDown.RemoveAllListeners();
             timelineHide.SetActive(false);
             timelineShow.SetActive(false);
+
+            //add by lp
+            btnIconTouch.onPressDown.RemoveListener(ClickIcon);
+            btnCheckTranslateTouch.onPressDown.RemoveListener(OnCheckTranslate);
+            btnQuitTouch.onPressDown.RemoveListener(OnQuit);
+            //end
         }
+        //end
 
         void Start()
         {
@@ -211,6 +230,8 @@ namespace SpaceDesign.Translate
         public Transform traIcon;
         //Icon对象的AR手势Button按钮
         private ButtonRayReceiver btnIcon;
+        ButtonTouchableReceiver btnIconTouch;
+
         //吸引态，上下移动动画
         private Animator animIconFar;
         //轻交互，半球动画+音符动画
@@ -238,10 +259,13 @@ namespace SpaceDesign.Translate
         public GameObject timelineHide;
         //查看翻译按钮
         public ButtonRayReceiver btnCheckTranslate;
+        ButtonTouchableReceiver btnCheckTranslateTouch;
+
         //查看翻译按钮的父节点
         public GameObject objCheckTranslateParent;
         //退出翻译按钮
         public ButtonRayReceiver btnQuit;
+        ButtonTouchableReceiver btnQuitTouch;
 
         /// <summary>
         /// 查看翻译按钮响应

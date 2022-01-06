@@ -200,7 +200,7 @@ public class LoadMainScence : MonoBehaviour
         path = Path.Combine(path, "IconDisData.json");
         if (File.Exists(path) == false)
         {
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(LoadPrefab.IconDisData);
+            string json = LitJson.JsonMapper.ToJson(LoadPrefab.IconDisData);
             File.WriteAllText(path, json);
         }
         else
@@ -208,7 +208,7 @@ public class LoadMainScence : MonoBehaviour
             string json = File.ReadAllText(path);
             if (string.IsNullOrEmpty(json))
                 return;
-            LoadPrefab.IconDisData = Newtonsoft.Json.JsonConvert.DeserializeObject<IconDisData>(json);
+            LoadPrefab.IconDisData = LitJson.JsonMapper.ToObject<IconDisData>(json);
         }
         //------------------End------------------
     }
