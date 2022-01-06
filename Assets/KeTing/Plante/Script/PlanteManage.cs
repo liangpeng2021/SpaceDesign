@@ -8,7 +8,7 @@ using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
 
-namespace SpaceDesign.Plante
+namespace SpaceDesign
 {
     public class PlanteManage : MonoBehaviour
     {
@@ -92,7 +92,7 @@ namespace SpaceDesign.Plante
                 if (lastPPS == PlayerPosState.Middle)
                     return;
             }
-            
+
             StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
@@ -170,14 +170,14 @@ namespace SpaceDesign.Plante
 
             //中距离=>远距离
             traIcon.gameObject.SetActive(true);
-
+            Vector3 v3Icon = new Vector3(2.5f, 2.5f, 2.5f);
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, v3Icon, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traIcon.localScale, v3Icon);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = Vector3.one;
+                    traIcon.localScale = v3Icon;
                     break;
                 }
                 yield return 0;

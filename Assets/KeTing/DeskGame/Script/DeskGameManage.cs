@@ -12,7 +12,7 @@ using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
 
-namespace SpaceDesign.DeskGame
+namespace SpaceDesign
 {
     public class DeskGameManage : MonoBehaviour
     {

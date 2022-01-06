@@ -9,7 +9,7 @@ using UnityEngine.Events;
 /// 面板接收端射线交互的类。/*create by 梁鹏 2021-9-26 */
 /// </summary>
 
-namespace SpaceDesign.Music
+namespace SpaceDesign
 {
     public class MySlateRayReceiver : RayPointerHandler
     {

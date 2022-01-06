@@ -28,6 +28,14 @@ public class LoadMainScence : MonoBehaviour
     public Canvas[] canvas;
 
     public GameObject kaichangObj;
+    //新手引导
+    public GameObject noviceGuidanceObj;
+    //新手引导，跳过
+    public ButtonRayReceiver btnSkip;
+    //新手引导，开始
+    public ButtonRayReceiver btnStart;
+
+
     //#region 拉起其他应用
     ///// <summary>
     ///// 奇幻森林按钮
@@ -93,17 +101,23 @@ public class LoadMainScence : MonoBehaviour
 
     //#endregion
 
-    //private void OnEnable()
-    //{
-    //    backto.onClick.AddListener(QuitApp);
-    //    //AddLaqiEvent();
-    //}
+    private void OnEnable()
+    {
+        //backto.onClick.AddListener(QuitApp);
+        //AddLaqiEvent();
 
-    //private void OnDisable()
-    //{
-    //    backto.onClick.RemoveListener(QuitApp);
-    //    //RemoveLaqiEvent();
-    //}
+        btnSkip.onPinchDown.AddListener(StartOrSkipGame);
+        btnStart.onPinchDown.AddListener(StartOrSkipGame);
+    }
+
+    private void OnDisable()
+    {
+        //backto.onClick.RemoveListener(QuitApp);
+        //RemoveLaqiEvent();
+
+        btnSkip.onPinchDown.RemoveAllListeners();
+        btnStart.onPinchDown.RemoveAllListeners();
+    }
 
     void BackToLoginScence()
     {
@@ -147,28 +161,37 @@ public class LoadMainScence : MonoBehaviour
         {
             canvas[i].worldCamera = eventCamera;
         }
+
+        //新手引导先关闭（开场动画完毕后开启）
+        noviceGuidanceObj.SetActive(false);
         //播放开场动效
         kaichangObj.SetActive(true);
         Invoke("HideKaichang", 7.1f);
     }
 
+    /// <summary>
+    /// 新手引导：跳过或者开始按钮
+    /// </summary>
+    public void StartOrSkipGame()
+    {
+        noviceGuidanceObj.SetActive(false);
+        //加载物体
+        LoadGameObjectData();
+    }
+
     void HideKaichang()
     {
         kaichangObj.SetActive(false);
-        //加载物体
-        LoadGameObjectData();
+        //新手引导开始
+        noviceGuidanceObj.SetActive(true);
+        ////加载物体
+        //LoadGameObjectData();
     }
 
     void LoadGameObjectData()
     {
         //===========================================================================
-
-
-
         //return;
-
-
-
         //===========================================================================
 
         //BitConverter方式

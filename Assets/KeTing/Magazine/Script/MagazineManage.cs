@@ -8,7 +8,7 @@ using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
 
-namespace SpaceDesign.Magazine
+namespace SpaceDesign
 {
     public class MagazineManage : MonoBehaviour
     {

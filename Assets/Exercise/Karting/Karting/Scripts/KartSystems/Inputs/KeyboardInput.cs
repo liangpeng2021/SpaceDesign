@@ -1,4 +1,4 @@
-﻿using SpaceDesign.Karting;
+﻿using SpaceDesign;
 using UnityEngine;
 
 namespace KartGame.KartSystems

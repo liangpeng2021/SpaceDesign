@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpaceDesign.Music
+namespace SpaceDesign
 {
     /// <summary>
     /// The class for slate scrolling control. <br>

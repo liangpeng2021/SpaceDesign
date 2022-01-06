@@ -1146,7 +1146,7 @@ RectTransform:
   m_GameObject: {fileID: 2759654904702714653}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.0016, y: 0.0016, z: 0.0016}
+  m_LocalScale: {x: 0.0012, y: 0.0012, z: 0.0012}
   m_Children:
   - {fileID: 2759654904702721872}
   - {fileID: 8059599137989756086}
@@ -5120,12 +5120,12 @@ MonoBehaviour:
   traTempImageMinPos: {fileID: 2759654904702721907}
   traTempImageMaxPos: {fileID: 2759654904702721872}
   imgTempImage: {fileID: 2759654904702720922}
-  tt: {fileID: 2759654904702717964}
   traImgCenter: {fileID: 8059599137989756086}
   iUpCenterPos: -1
   iImgCenterEnterOrExit: -1
   fRotAngle: -4.5
   fRotSpeed2: 0.1
+  tt: {fileID: 2759654904702717964}
   traIconFarPos: {fileID: 2759654904702717367}
   traIconMiddlePos: {fileID: 2759654904702717365}
   traIcon: {fileID: 2759654904702716192}
@@ -5672,8 +5672,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 400, y: 250, z: 1}
-  m_Center: {x: 0, y: 0, z: 30}
+  m_Size: {x: 330, y: 200, z: 1}
+  m_Center: {x: 0, y: 0, z: -1}
 --- !u!114 &2759654904702721011
 MonoBehaviour:
   m_ObjectHideFlags: 0

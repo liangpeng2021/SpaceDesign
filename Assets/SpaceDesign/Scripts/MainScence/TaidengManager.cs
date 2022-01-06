@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// 管理台灯效果，/*create by 梁鹏 2021-10-27 */
 /// </summary>
-namespace SpaceDesign.Lamp
+namespace SpaceDesign
 {
     public class TaidengManager : MonoBehaviour
     {

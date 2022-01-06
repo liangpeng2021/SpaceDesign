@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 修改灯的材质，/*create by 梁鹏 2021-9-3 */
 /// </summary>
-namespace SpaceDesign.Lamp
+namespace SpaceDesign
 {
     public class ChangeLightObjMat : MonoBehaviour
     {

@@ -6,16 +6,16 @@
 
 using UnityEngine;
 using System.Collections;
-namespace SpaceDesign.Video
+namespace SpaceDesign
 {
     public class VideoAutoRotate : MonoBehaviour
     {
+        //是否运行
+        public bool bMove = true;
         //public Transform traVideoExpand;
         private Transform traFollow;
         private Transform traEye;
 
-        float fTime = 0;
-        bool bMove;
         //目标物的偏移速度
         public float fSpeed = 0.05f;
         //目标物up轴的偏移（高度）
@@ -29,6 +29,9 @@ namespace SpaceDesign.Video
         private float fMoveTime;
         void Update()
         {
+            if (bMove == false)
+                return;
+
             if (traFollow == null)
                 traFollow = this.transform;
             if (traEye == null)

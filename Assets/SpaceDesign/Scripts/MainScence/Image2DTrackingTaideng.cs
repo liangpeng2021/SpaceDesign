@@ -4,7 +4,7 @@ using UnityEngine;
 using XR;
 using UnityEngine.SceneManagement;
 
-namespace SpaceDesign.Lamp
+namespace SpaceDesign
 {
     public class Image2DTrackingTaideng : TrackableEventHandler
     {

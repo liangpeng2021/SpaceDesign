@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-namespace SpaceDesign.Phone
+namespace SpaceDesign
 {
     public class PhoneManage : MonoBehaviour
     {

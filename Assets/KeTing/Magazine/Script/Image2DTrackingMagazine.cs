@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using XR;
-namespace SpaceDesign.Magazine
+namespace SpaceDesign
 {
     public class Image2DTrackingMagazine : TrackableEventHandler
     {

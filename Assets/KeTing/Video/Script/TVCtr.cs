@@ -11,7 +11,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SpaceDesign.Video
+namespace SpaceDesign
 {
     public class TVCtr : MonoBehaviour
     {
@@ -68,7 +68,6 @@ namespace SpaceDesign.Video
         //    //url = Application.persistentDataPath;
         //    //textLocal.text = url + "===" + Directory.Exists(url);
         //}
-
 
         /// <summary>
         /// 设置Lebo的回调监听，并初始化SDK

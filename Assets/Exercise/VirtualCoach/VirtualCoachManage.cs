@@ -8,7 +8,7 @@ using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
 
-namespace SpaceDesign.VirtualCoach
+namespace SpaceDesign
 {
     public class VirtualCoachManage : MonoBehaviour
     {
@@ -24,7 +24,8 @@ namespace SpaceDesign.VirtualCoach
         }
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
-        //初次体验（虚拟人只出现一次）
+        //初次体验（虚拟人后续多次出现只打招呼）
+        [SerializeField]
         private bool bFirstTime = true;
         //Icon、UI等正在切换中
         private bool bUIChanging = false;
@@ -56,6 +57,7 @@ namespace SpaceDesign.VirtualCoach
             btnIcon.onPinchDown.RemoveAllListeners();
             timelineHide.SetActive(false);
             timelineShow.SetActive(false);
+            timelineShowSecond.SetActive(false);
         }
 
         void Start() { v3OriPos = this.transform.position; }
@@ -212,7 +214,12 @@ namespace SpaceDesign.VirtualCoach
             //开始介绍
             bIntroducing = true;
 
-            timelineShow.SetActive(true);
+            if (bFirstTime)
+                timelineShow.SetActive(true);
+            else
+                timelineShowSecond.SetActive(true);
+
+            timelineShowSecondLoop.SetActive(false);
             timelineHide.SetActive(false);
 
             //中距离=>近距离
@@ -234,9 +241,18 @@ namespace SpaceDesign.VirtualCoach
             //UI变化结束
             bUIChanging = false;
 
-            yield return new WaitForSeconds(18f);
-            //等待讲话16秒之后，关闭动画
+            if (bFirstTime == false)
+            {
+                yield return new WaitForSeconds(8f);
+                timelineShowSecond.SetActive(false);
+                timelineShowSecondLoop.SetActive(true);
+                yield break;
+            }
 
+            yield return new WaitForSeconds(16f);
+            //等待讲话16秒之后，算是初次体验完毕
+            bFirstTime = false;
+            yield return new WaitForSeconds(2f);
             //介绍结束
             bIntroducing = false;
 
@@ -254,7 +270,11 @@ namespace SpaceDesign.VirtualCoach
 
             objMenuUI.SetActive(false);
 
+            //关闭两个都关
             timelineShow.SetActive(false);
+            timelineShowSecond.SetActive(false);
+            timelineShowSecondLoop.SetActive(false);
+
             timelineHide.SetActive(true);
 
             //近距离=>中距离
@@ -310,6 +330,8 @@ namespace SpaceDesign.VirtualCoach
 
         //Timeline：显示
         public GameObject timelineShow;
+        public GameObject timelineShowSecond;
+        public GameObject timelineShowSecondLoop;
         //Timeline：隐藏
         public GameObject timelineHide;
         #endregion

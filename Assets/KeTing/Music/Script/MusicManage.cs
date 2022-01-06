@@ -9,23 +9,13 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SpaceDesign.Music
+namespace SpaceDesign
 {
-    //public enum MusicAnimType
-    //{
-    //    Center,//【唯一】最中间居中的
-    //    AllRight,//【唯一】全部（包括不显示的）：最右边的
-    //    AlLeft,//【唯一】全部（包括不显示的）：最左边的
-    //    ShowRight,//【唯一】显示：最右边的
-    //    ShowLeft,//【唯一】显示：最左边的
-    //    Other,//【不唯一】
-    //}
     public enum MusicPlayState
     {
         AllLoop,
         OneLoop,
         Order,
-        //Random
     }
 
     public class MusicManage : MonoBehaviour
@@ -43,9 +33,6 @@ namespace SpaceDesign.Music
 
         [Header("(7首歌曲，最右边从0开始，从右往左，依次增大)")]
         public EachMusicAttr[] aryEachMusicAttr;
-        //[Header("(7个图片内容，最右边从0开始，从右往左，依次增大)")]
-        //public EachMusicAnim[] aryEachMusicAnim;
-
         //重交互到轻交互，等待的时长
         public float fAutoTurnUITime = 60f;
 
@@ -62,27 +49,42 @@ namespace SpaceDesign.Music
         public bool bPlaying = false;
         //当前播放的时间进度（秒）
         public float fCurPlayTime = 0;
-
         //当前播放的音乐的序号
         public int iCurMusicNum = 1;
-
         //中距离和近距离，同一个图片动画，轻交互的位置
         public Transform traTempImageMinPos;
         //中距离和近距离，同一个图片动画，重交互的位置
         public Transform traTempImageMaxPos;
         //中距离和近距离，同一个图片动画，的图片
         public Image imgTempImage;
+        //七张音乐图的，中间图片对象
+        public Transform traImgCenter;
+        //抬起在中新图片的左右（0-左短，1-左长，2-右短，3-右长）
+        public int iUpCenterPos = -1;
+        //中心图片进入或离开（0-进入，1-离开）
+        public int iImgCenterEnterOrExit = -1;
+        public float fRotAngle = -4.5f;
+        public float fRotSpeed2 = 0.1f;
 
+        //按下中心图片的放大
+        private Vector3 v3ImgCenterEnter = new Vector3(1.2f, 1.2f, 1.2f);
         //Icon、UI等正在切换中
         private bool bUIChanging = false;
         //运动阈值
         private float fThreshold = 0.1f;
-
         //对象初始位置
         private Vector3 v3OriPos;
-
         //Oppo手机系统的最大音量
-        const float OPPOSystemMaxVolum = 16f;
+        private const float OPPOSystemMaxVolum = 16f;
+        //声明旋转目标角度
+        private Quaternion targetRotation;
+        //定义每次旋转的角度
+        private float RotateAngle = 51.5f;
+        private Vector3 v3ScaleCenter = new Vector3(480f, 480f, 1.5f);
+        private Vector3 v3ScaleNormal = new Vector3(320f, 320f, 1f);
+        //临时计算是否暂停过用
+        private bool _bTempPause = false;
+
         //===========================================================================
         //临时测距
         public TextMesh tt;
@@ -124,7 +126,10 @@ namespace SpaceDesign.Music
             //因为要发送给CPE：不要实时变化，抬起才触发一次
             pinchSliderVolumMax.onValueChanged.AddListener(OnSliderVolumeChange);
             pinchSliderVolumMax.onInteractionEnd.AddListener(OnSliderVolume);
-
+#if UNITY_ANDROID && !UNITY_EDITOR
+            //系统音量触发
+            XR.AudioManager.OnAudioVolume += OnSystemVolumeChange;
+#endif
             pinchSliderMusicMax.onInteractionStart.AddListener(SliderMusicMaxPointerDown);
             pinchSliderMusicMax.onInteractionEnd.AddListener(SliderMusicMaxPointerUp);
 
@@ -159,6 +164,10 @@ namespace SpaceDesign.Music
             btnExitSliderVolum.onPointerExit.RemoveAllListeners();
             pinchSliderVolumMax.onValueChanged.RemoveAllListeners();
             pinchSliderVolumMax.onInteractionEnd.RemoveAllListeners();
+#if UNITY_ANDROID && !UNITY_EDITOR
+            //系统音量触发
+            XR.AudioManager.OnAudioVolume -= OnSystemVolumeChange;
+#endif
             pinchSliderMusicMax.onInteractionStart.RemoveAllListeners();
             pinchSliderMusicMax.onInteractionEnd.RemoveAllListeners();
         }
@@ -187,13 +196,11 @@ namespace SpaceDesign.Music
             _SetCurMusicNum(1);
             _InitEachMusicAnim();
 
-            //OnLeft();
-            //OnRight();
             traImgCenter.localScale = Vector3.zero;
 
             targetRotation = traMaxUIImage.localRotation;
             int _iVolum = 1;
-#if UNITY_ANDROID && !UNITY_EDITOR  
+#if UNITY_ANDROID && !UNITY_EDITOR
             //系统音量：【0-16】整型
             XR.AudioManager.GetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC, ref _iVolum);
             //XR.AudioManager.SetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC,);
@@ -203,11 +210,6 @@ namespace SpaceDesign.Music
             OnSliderVolumeChange((float)_iVolum / OPPOSystemMaxVolum);
             OnSliderVolume();
         }
-
-        private Quaternion targetRotation;    //声明旋转目标角度
-        private float RotateAngle = 51.5f;       //定义每次旋转的角度
-        Vector3 v3ScaleCenter = new Vector3(480f, 480f, 1.5f);
-        Vector3 v3ScaleNormal = new Vector3(320f, 320f, 1f);
 
         void Update()
         {
@@ -357,21 +359,6 @@ namespace SpaceDesign.Music
         }
 
         /// <summary>
-        /// 七张音乐图的，中间图片对象
-        /// </summary>
-        public Transform traImgCenter;
-
-        //抬起在中新图片的左右（0-左短，1-左长，2-右短，3-右长）
-        public int iUpCenterPos = -1;
-        //中心图片进入或离开（0-进入，1-离开）
-        public int iImgCenterEnterOrExit = -1;
-
-        /// <summary>
-        /// 按下中心图片的放大
-        /// </summary>
-        private Vector3 v3ImgCenterEnter = new Vector3(1.2f, 1.2f, 1.2f);
-
-        /// <summary>
         /// 中间图片进入或离开
         /// </summary>
         public void CenterImgEnterOrExit(bool b)
@@ -382,7 +369,7 @@ namespace SpaceDesign.Music
         /// <summary>
         /// 音乐进度条按下
         /// </summary>
-        public void SliderMusicMaxPointerDown()
+        void SliderMusicMaxPointerDown()
         {
             bSlideDragging = true;
         }
@@ -390,7 +377,7 @@ namespace SpaceDesign.Music
         /// <summary>
         /// 音乐进度条抬起
         /// </summary>
-        public void SliderMusicMaxPointerUp()
+        void SliderMusicMaxPointerUp()
         {
             bSlideDragging = false;
             //print($"pinchSliderMusicMax.sliderValue:{pinchSliderMusicMax.sliderValue },fTotalPlayTime:{fTotalPlayTime}");
@@ -402,7 +389,7 @@ namespace SpaceDesign.Music
         /// <summary>
         /// 点击Button，触发从远到近的动画
         /// </summary>
-        public void ClickFarToMiddle()
+        void ClickFarToMiddle()
         {
             if (bUIChanging)
                 return;
@@ -420,7 +407,7 @@ namespace SpaceDesign.Music
         /// <summary>
         /// 更多音乐响应
         /// </summary>
-        public void OnMoreMusicMin()
+        void OnMoreMusicMin()
         {
             if (bUIChanging)
                 return;
@@ -433,7 +420,7 @@ namespace SpaceDesign.Music
         /// <summary>
         /// 播放状态按钮
         /// </summary>
-        public void OnState()
+        void OnState()
         {
             RestartTimeMaxToMin();
             curMusicPlayState = ((int)(curMusicPlayState)) == 2 ? 0 : curMusicPlayState + 1;
@@ -445,7 +432,7 @@ namespace SpaceDesign.Music
         /// <summary>
         /// 播放
         /// </summary>
-        public void OnPlay(int index = -1)
+        void OnPlay(int index = -1)
         {
             //播放某首音乐、没有暂停过、播放到头了、播放时间为0
             if ((index != -1))
@@ -474,12 +461,10 @@ namespace SpaceDesign.Music
             btnPlayMin.gameObject.SetActive(!bPlaying);
         }
 
-        //临时计算是否暂停过用
-        bool _bTempPause = false;
         /// <summary>
         /// 暂停
         /// </summary>
-        public void OnPause()
+        void OnPause()
         {
             _bTempPause = true;
             bPlaying = false;
@@ -603,7 +588,7 @@ namespace SpaceDesign.Music
         /// <summary>
         /// 刷新位置消息
         /// </summary>
-        public void RefreshPos(Vector3 pos)
+        void RefreshPos(Vector3 pos)
         {
             if (bUIChanging == true)
                 return;
@@ -811,8 +796,6 @@ namespace SpaceDesign.Music
             bUIChanging = false;
         }
 
-        public float fRotAngle = -5f;
-        public float fRotSpeed2 = 0.1f;
         /// <summary>
         /// 轻交互=>重交互
         /// </summary>
@@ -860,8 +843,6 @@ namespace SpaceDesign.Music
                 }
                 yield return 0;
             }
-
-
 
             ////2、MaxUI的控制按钮放大，图片旋转出现
 
@@ -1150,24 +1131,21 @@ namespace SpaceDesign.Music
         private bool bMinTiming;
         //轻交互到特效音符，计时用
         private float fMinToEffectTemp = 0f;
-
-
         #endregion
 
         #region 重交互，大UI，近距离
-
         [Header("=====重交互，大UI，近距离")]
-        //重交互，开始计时，N长时间后无操作，自动变为轻交互
-        private bool bMaxTiming;
-        //重交互到轻交互，计时用
-        private float fMaxToMinTemp = 0f;
-
         //大UI的多个图片
         public Transform traMaxUIImage;
         //大UI的控制按钮等
         public Transform traMaxUICtr;
         //大UI的歌曲和作者信息
         public Transform traMaxUIText;
+
+        //重交互，开始计时，N长时间后无操作，自动变为轻交互
+        private bool bMaxTiming;
+        //重交互到轻交互，计时用
+        private float fMaxToMinTemp = 0f;
 
         //渐隐渐显速度
         public float fFadeSpeed = 0.05f;
@@ -1268,6 +1246,16 @@ namespace SpaceDesign.Music
             //OnSliderVolume();
 
         }
+        void OnSystemVolumeChange(XR.XRAudioStream typ, int iValue)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            //系统音量：【0-16】整型
+            if (typ == XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC)
+            {
+                OnSliderVolumeChange((float)iValue / OPPOSystemMaxVolum);
+            }
+#endif
+        }
         public void OnSliderVolumeChange(float fValue)
         {
             RestartTimeMaxToMin();
@@ -1307,26 +1295,33 @@ namespace SpaceDesign.Music
 
         public void EnterBtnVolum()
         {
+            //print("进入音量按钮对象");
+            bTouchObjVolum = false;
             bTouchBtnVolum = true;
             btnSliderVolumMax.gameObject.SetActive(true);
         }
         public void ExitBtnVolum()
         {
+            //print("离开音量按钮对象");
             bTouchBtnVolum = false;
             HideVolum();
         }
         public void EnterObjVolum()
         {
+            //print("进入音量对象");
             bTouchObjVolum = true;
+            bTouchBtnVolum = false;
             btnSliderVolumMax.gameObject.SetActive(true);
         }
         public void ExitObjVolum()
         {
+            //print("离开音量对象");
             bTouchObjVolum = false;
             HideVolum();
         }
         void HideVolum()
         {
+            //延迟0.1秒隐藏，射线在音量图标上，移动到音量控制条上的时候不能隐藏
             CancelInvoke("_InvokeHideVolum");
             Invoke("_InvokeHideVolum", 0.1f);
         }

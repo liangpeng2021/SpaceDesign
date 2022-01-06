@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-namespace SpaceDesign.Karting
+namespace SpaceDesign
 {
     public class CPEBikeData
     {

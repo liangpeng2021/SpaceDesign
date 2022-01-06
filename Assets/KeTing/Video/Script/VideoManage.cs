@@ -21,7 +21,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-namespace SpaceDesign.Video
+namespace SpaceDesign
 {
     public enum VideoAnimType
     {
@@ -47,8 +47,6 @@ namespace SpaceDesign.Video
         }
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
-        //播放模型
-        public Transform traModel;
         //Icon、UI等正在切换中
         bool bUIChanging = false;
         //运动阈值
@@ -71,7 +69,7 @@ namespace SpaceDesign.Video
         //自动隐藏UI界面等待时间
         public float fAutoHideUITime = 30;
         //自动隐藏UI界面计时时间
-        private float fAutoHideUITiming;
+        public float fAutoHideUITiming;
         void Awake()
         {
             fAutoHideUITiming = fAutoHideUITime;
@@ -84,6 +82,9 @@ namespace SpaceDesign.Video
             btnIcon.onPinchDown.AddListener(ClickIcon);
             btnVideoClose.onPinchDown.AddListener(OnVideoClose);
             btnVideoSize.onPinchDown.AddListener(OnVideoSize);
+            btnVideoNotMove.onPinchDown.AddListener(OnVideoNotMove);
+            btnVideoMove.onPinchDown.AddListener(OnVideoMove);
+
             btnWatchNow.onPinchDown.AddListener(OnWatchNow);
             btnVideo2D.onPinchDown.AddListener(() => { SetVideo(true, false); });
             btnVideo3D.onPinchDown.AddListener(() => { SetVideo(false, false); });
@@ -126,6 +127,9 @@ namespace SpaceDesign.Video
             btnIcon.onPinchDown.RemoveAllListeners();
             btnVideoClose.onPinchDown.RemoveAllListeners();
             btnVideoSize.onPinchDown.RemoveAllListeners();
+            btnVideoNotMove.onPinchDown.RemoveAllListeners();
+            btnVideoMove.onPinchDown.RemoveAllListeners();
+
             btnWatchNow.onPinchDown.RemoveAllListeners();
             btnARWindows.onPointerEnter.RemoveAllListeners();
             btnARWindows.onPinchDown.RemoveAllListeners();
@@ -153,9 +157,9 @@ namespace SpaceDesign.Video
             //关闭视频上的碰撞盒，防止触碰显示宽展界面
             colliderBtnARWindows.enabled = false;
 
-
-            btnVideoClose.gameObject.SetActive(false);
-            btnVideoSize.gameObject.SetActive(false);
+            objWindowsBtnParent.SetActive(false);
+            //btnVideoClose.gameObject.SetActive(false);
+            //btnVideoSize.gameObject.SetActive(false);
 
             //Invoke("_DelayOpen3D", 1);
         }
@@ -305,8 +309,8 @@ namespace SpaceDesign.Video
             }
             else
             {
-                //AR状态下，一秒内，距离大于1米，自动到小窗模式
-                if (bTV == false)
+                //AR状态下，移动跟随窗口状态，一秒内，距离大于1米，自动到小窗模式
+                if ((bTV == false) && (videoAutoRotate.bMove == true))
                 {
                     if (bSizeSmall == false)
                     {
@@ -533,8 +537,10 @@ namespace SpaceDesign.Video
             //UI开始变化
             bUIChanging = true;
 
-            btnVideoClose.gameObject.SetActive(false);
-            btnVideoSize.gameObject.SetActive(false);
+            objWindowsBtnParent.SetActive(false);
+
+            //btnVideoClose.gameObject.SetActive(false);
+            //btnVideoSize.gameObject.SetActive(false);
 
             if (bReminder == true)
                 SetReminder(false);
@@ -648,10 +654,17 @@ namespace SpaceDesign.Video
         //按钮：暂停
         public ButtonRayReceiver btnPause;
 
+        //窗口旁边按钮的父节点
+        public GameObject objWindowsBtnParent;
         //按钮：退出视频
         public ButtonRayReceiver btnVideoClose;
         //按钮：放大或缩小视频
         public ButtonRayReceiver btnVideoSize;
+        //按钮：固定位置
+        public ButtonRayReceiver btnVideoNotMove;
+        //按钮：跟随移动
+        public ButtonRayReceiver btnVideoMove;
+
 
         //按钮：TV转AR模式
         public ButtonRayReceiver btnAR;
@@ -796,8 +809,10 @@ namespace SpaceDesign.Video
             //加一个临时bool变量，普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
             bool bTempSizeSmall = bSizeSmall;
 
-            btnVideoClose.gameObject.SetActive(bTempSizeSmall);
-            btnVideoSize.gameObject.SetActive(bTempSizeSmall);
+            objWindowsBtnParent.SetActive(bTempSizeSmall);
+
+            //btnVideoClose.gameObject.SetActive(bTempSizeSmall);
+            //btnVideoSize.gameObject.SetActive(bTempSizeSmall);
 
             if (bTempSizeSmall == false)
             {
@@ -853,6 +868,25 @@ namespace SpaceDesign.Video
             traVideoExpand.localRotation = Quaternion.identity;
 
             yield return 0;
+        }
+        /// <summary>
+        /// 视频，固定按钮响应
+        /// </summary>
+        void OnVideoNotMove()
+        {
+            btnVideoNotMove.gameObject.SetActive(false);
+            btnVideoMove.gameObject.SetActive(true);
+            videoAutoRotate.bMove = true;
+        }
+
+        /// <summary>
+        /// 视频，跟随按钮响应
+        /// </summary>
+        void OnVideoMove()
+        {
+            btnVideoMove.gameObject.SetActive(false);
+            btnVideoNotMove.gameObject.SetActive(true);
+            videoAutoRotate.bMove = false;
         }
 
         /// <summary>
@@ -986,8 +1020,10 @@ namespace SpaceDesign.Video
                 _bShowVideoCtrBtn = false;
             else
                 _bShowVideoCtrBtn = !bTV;
-            btnVideoClose.gameObject.SetActive(_bShowVideoCtrBtn);
-            btnVideoSize.gameObject.SetActive(_bShowVideoCtrBtn);
+
+            objWindowsBtnParent.SetActive(_bShowVideoCtrBtn);
+            //btnVideoClose.gameObject.SetActive(_bShowVideoCtrBtn);
+            //btnVideoSize.gameObject.SetActive(_bShowVideoCtrBtn);
 
             btnAR.gameObject.SetActive(bTV);
             btnTV.gameObject.SetActive(!bTV);

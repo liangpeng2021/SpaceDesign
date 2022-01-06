@@ -5,7 +5,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 控制灯的开关，/*create by 梁鹏 2021-9-3 */
 /// </summary>
-namespace SpaceDesign.Lamp
+namespace SpaceDesign
 {
     public class LightController : MonoBehaviour
     {

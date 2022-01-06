@@ -8,7 +8,7 @@ using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
 
-namespace SpaceDesign.CPEShow
+namespace SpaceDesign
 {
     public class CPEShowManage : MonoBehaviour
     {

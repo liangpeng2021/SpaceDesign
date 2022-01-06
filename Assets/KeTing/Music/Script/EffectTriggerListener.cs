@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace SpaceDesign.Music
+namespace SpaceDesign
 {
     public class EffectTriggerListener : MonoBehaviour, IPointerClickHandler
     {

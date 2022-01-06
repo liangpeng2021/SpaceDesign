@@ -8,7 +8,7 @@ using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
 
-namespace SpaceDesign.Aerobics
+namespace SpaceDesign
 {
     public class AerobicsManage : MonoBehaviour
     {
@@ -49,7 +49,7 @@ namespace SpaceDesign.Aerobics
 
         void OnEnable()
         {
-            PlayerManage.refreshPlayerPosEvt += RefreshPos;
+            //PlayerManage.refreshPlayerPosEvt += RefreshPos;
             btnIcon.onPinchDown.AddListener(ClickIcon);
             btnStart.onPinchDown.AddListener(OnStartGame);
             btnQuit.onPinchDown.AddListener(OnQuit);
@@ -57,7 +57,7 @@ namespace SpaceDesign.Aerobics
 
         void OnDisable()
         {
-            PlayerManage.refreshPlayerPosEvt -= RefreshPos;
+            //PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             btnIcon.onPinchDown.RemoveAllListeners();
             btnStart.onPinchDown.RemoveAllListeners();
             btnQuit.onPinchDown.RemoveAllListeners();

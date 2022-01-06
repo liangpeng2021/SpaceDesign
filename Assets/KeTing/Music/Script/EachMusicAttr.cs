@@ -7,7 +7,7 @@
 
 using UnityEngine;
 
-namespace SpaceDesign.Music
+namespace SpaceDesign
 {
     public class EachMusicAttr : MonoBehaviour
     {

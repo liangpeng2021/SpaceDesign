@@ -2,12 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using SpaceDesign;
 
 /// <summary>
 /// 控制台灯UI显示，/*create by 梁鹏 2021-9-3 */
 /// </summary>
-namespace SpaceDesign.Lamp
+namespace SpaceDesign
 {
     public class TaidengController : MonoBehaviour
     {

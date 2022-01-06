@@ -5,7 +5,6 @@
  */
 
 using OXRTK.ARHandTracking;
-using SpaceDesign.Video;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +12,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Playables;
 using UnityEngine.UI;
 
-namespace SpaceDesign.Karting
+namespace SpaceDesign
 {
     public class KartingManage : MonoBehaviour
     {

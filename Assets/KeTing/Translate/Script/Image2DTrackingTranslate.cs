@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using XR;
-namespace SpaceDesign.Translate
+namespace SpaceDesign
 {
     public class Image2DTrackingTranslate : TrackableEventHandler
     {
@@ -50,8 +50,10 @@ namespace SpaceDesign.Translate
             bCallback = true;
             //Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
             //Image2DTrackingManager.Instance.m_feamName = "c2dd24647f17a05fdc273e7aa95bc674_21102021003932";
+            //Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
+            //Image2DTrackingManager.Instance.m_feamName = "7c47ed6410de1f914d06e1075c52e1e8_01112021175446";
             Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
-            Image2DTrackingManager.Instance.m_feamName = "7c47ed6410de1f914d06e1075c52e1e8_01112021175446";
+            Image2DTrackingManager.Instance.m_feamName = "95e8a7c9d1b01e2720be6ba323479b32_06012022095734";
             Image2DTrackingManager.Instance.m_TargetTexture = texture;
             Image2DTrackingManager.Instance.TrackStart();
         }

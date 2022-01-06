@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.VFX;
-using SpaceDesign.Karting;
+using SpaceDesign;
 
 namespace KartGame.KartSystems
 {

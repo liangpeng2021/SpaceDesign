@@ -7,7 +7,7 @@
 using OXRTK.ARHandTracking;
 using UnityEngine;
 
-namespace SpaceDesign.Translate
+namespace SpaceDesign
 {
     public class TranslateManage : MonoBehaviour
     {
