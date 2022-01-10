@@ -121,143 +121,145 @@ namespace SpaceDesign
 
             //RefreshPosState(lastPPS);
         }
-        //edit by lp,不用协程处理测试
+        ////edit by lp,不用协程处理测试
 
-        public enum MoveState
-        {
-            MiddleToFar,
-            MiddleToClose,
-            CloseToMiddle
-        }
+        //public enum MoveState
+        //{
+        //    MiddleToFar,
+        //    MiddleToClose,
+        //    CloseToMiddle
+        //}
 
-        MoveState moveState=MoveState.MiddleToFar;
+        //MoveState moveState=MoveState.MiddleToFar;
 
-        void Update()
-        {
-            switch (moveState)
-            {
-                case MoveState.MiddleToClose:
-                    MiddleToClose();
-                    break;
-                case MoveState.CloseToMiddle:
-                    CloseToMiddle();
-                    break;
-            }
-        }
+        //void Update()
+        //{
+        //    switch (moveState)
+        //    {
+        //        case MoveState.MiddleToClose:
+        //            MiddleToClose();
+        //            break;
+        //        case MoveState.CloseToMiddle:
+        //            CloseToMiddle();
+        //            break;
+        //    }
+        //}
 
-        void FarToMiddle()
-        {
-            //远距离=>中距离
-            //Icon从静态变成动态
-            //Icon的自旋转动画开启
-            foreach (var v in animIconMiddle)
-                v.enabled = true;
-            //Icon自身上下浮动开启
-            animIconFar.enabled = true;
-            traIcon.gameObject.SetActive(true);
-        }
+        //void FarToMiddle()
+        //{
+        //    //远距离=>中距离
+        //    //Icon从静态变成动态
+        //    //Icon的自旋转动画开启
+        //    foreach (var v in animIconMiddle)
+        //        v.enabled = true;
+        //    //Icon自身上下浮动开启
+        //    animIconFar.enabled = true;
+        //    traIcon.gameObject.SetActive(true);
+        //}
 
-        void MiddleToClose()
-        {
-            float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
+        //void MiddleToClose()
+        //{
+        //    float _fDis = Vector3.Distance(traIcon.localScale, Vector3.zero);
 
-            if (_fDis < fThreshold)
-            {
-                traIcon.localScale = Vector3.zero;
-            }
-            else
-            {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
-                return;
-            }
+        //    if (_fDis < fThreshold)
+        //    {
+        //        traIcon.localScale = Vector3.zero;
+        //    }
+        //    else
+        //    {
+        //        traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
+        //        return;
+        //    }
             
-            timeline.gameObject.SetActive(true);
-            timeline.SetCurTimelineData("提示出现");
-            backBtn.gameObject.SetActive(false);
+        //    timeline.gameObject.SetActive(true);
+        //    timeline.SetCurTimelineData("提示出现");
+        //    backBtn.gameObject.SetActive(false);
 
-            //UI变化结束
-            bUIChanging = false;
-        }
+        //    //UI变化结束
+        //    bUIChanging = false;
+        //}
 
-        void MiddleToFar()
-        {
-            //中距离=>远距离
-            //Icon从动态变成静态
-            //Icon的自旋转动画关闭
-            foreach (var v in animIconMiddle)
-            {
-                v.Play(0, -1, 0f);
-                v.Update(0);
-                v.enabled = false;
-            }
-            //Icon自身上下浮动关闭
-            animIconFar.enabled = false;
-            traIcon.gameObject.SetActive(true);
+        //void MiddleToFar()
+        //{
+        //    //中距离=>远距离
+        //    //Icon从动态变成静态
+        //    //Icon的自旋转动画关闭
+        //    foreach (var v in animIconMiddle)
+        //    {
+        //        v.Play(0, -1, 0f);
+        //        v.Update(0);
+        //        v.enabled = false;
+        //    }
+        //    //Icon自身上下浮动关闭
+        //    animIconFar.enabled = false;
+        //    traIcon.gameObject.SetActive(true);
 
-            OnQuit();
-        }
+        //    OnQuit();
+        //}
 
-        void CloseToMiddle()
-        {
-            float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
-            if (_fDis < fThreshold)
-            {
-                traIcon.localScale = Vector3.one;
-            }
-            else
-            {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                return;
-            }
+        //void CloseToMiddle()
+        //{
+        //    Vector3 _v3Icon = LoadPrefab.IconSize;
 
-            timeline.gameObject.SetActive(false);
+        //    float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
+        //    if (_fDis < fThreshold)
+        //    {
+        //        traIcon.localScale = _v3Icon;
+        //    }
+        //    else
+        //    {
+        //        traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fUISpeed * Time.deltaTime);
+        //        return;
+        //    }
 
-            OnQuit();
+        //    timeline.gameObject.SetActive(false);
 
-            //UI变化结束
-            bUIChanging = false;
-        }
+        //    OnQuit();
 
-        void RefreshPosState(PlayerPosState lastPPS)
-        {
-            if (lastPPS == PlayerPosState.Far)
-            {
-                if (curPlayerPosState == PlayerPosState.Middle)/// 远距离=>中距离
-                    FarToMiddle();
-                else if (curPlayerPosState == PlayerPosState.Close)/// 远距离=>近距离
-                {
-                    FarToMiddle();
-                    //UI开始变化
-                    bUIChanging = true;
-                    moveState = MoveState.MiddleToClose;
-                }
-            }
-            else if (lastPPS == PlayerPosState.Middle)
-            {
-                if (curPlayerPosState == PlayerPosState.Close)/// 中距离=>近距离
-                {
-                    //UI开始变化
-                    bUIChanging = true;
-                    moveState = MoveState.MiddleToClose;
-                } 
-                else if (curPlayerPosState == PlayerPosState.Far)/// 中距离=>远距离
-                    MiddleToFar();
-            }
-            else if (lastPPS == PlayerPosState.Close)
-            {
-                if (curPlayerPosState == PlayerPosState.Middle)/// 近距离=>中距离
-                {
-                    //UI开始变化
-                    bUIChanging = true;
-                    moveState = MoveState.CloseToMiddle;
-                }
-                else if (curPlayerPosState == PlayerPosState.Far)/// 近距离=>远距离
-                {
-                    MiddleToFar();
-                }
-            }
-        }
-        //end
+        //    //UI变化结束
+        //    bUIChanging = false;
+        //}
+
+        //void RefreshPosState(PlayerPosState lastPPS)
+        //{
+        //    if (lastPPS == PlayerPosState.Far)
+        //    {
+        //        if (curPlayerPosState == PlayerPosState.Middle)/// 远距离=>中距离
+        //            FarToMiddle();
+        //        else if (curPlayerPosState == PlayerPosState.Close)/// 远距离=>近距离
+        //        {
+        //            FarToMiddle();
+        //            //UI开始变化
+        //            bUIChanging = true;
+        //            moveState = MoveState.MiddleToClose;
+        //        }
+        //    }
+        //    else if (lastPPS == PlayerPosState.Middle)
+        //    {
+        //        if (curPlayerPosState == PlayerPosState.Close)/// 中距离=>近距离
+        //        {
+        //            //UI开始变化
+        //            bUIChanging = true;
+        //            moveState = MoveState.MiddleToClose;
+        //        } 
+        //        else if (curPlayerPosState == PlayerPosState.Far)/// 中距离=>远距离
+        //            MiddleToFar();
+        //    }
+        //    else if (lastPPS == PlayerPosState.Close)
+        //    {
+        //        if (curPlayerPosState == PlayerPosState.Middle)/// 近距离=>中距离
+        //        {
+        //            //UI开始变化
+        //            bUIChanging = true;
+        //            moveState = MoveState.CloseToMiddle;
+        //        }
+        //        else if (curPlayerPosState == PlayerPosState.Far)/// 近距离=>远距离
+        //        {
+        //            MiddleToFar();
+        //        }
+        //    }
+        //}
+        ////end
 
         /// <summary>
         /// UI等刷新位置消息
@@ -382,13 +384,14 @@ namespace SpaceDesign
             bUIChanging = true;
             //近距离=>中距离
 
+            Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = Vector3.one;
+                    traIcon.localScale = _v3Icon;
                     break;
                 }
                 yield return 0;

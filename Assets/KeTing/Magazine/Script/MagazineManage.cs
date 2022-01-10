@@ -84,7 +84,7 @@ namespace SpaceDesign
 
         void Start()
         {
-            v3OriPos = this.transform.position;
+            v3OriPos = traIconRoot.position;// this.transform.position;
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
             //traIconRoot.SetParent(null);
             traIconRoot.SetParent(transform.parent);
@@ -254,9 +254,9 @@ namespace SpaceDesign
                 yield return 0;
             }
 
-            //启动Mark//TODO
-            //markTrackMagazine.enabled = true;
-            //markTrackMagazine.StartTrack();
+            //启动Mark
+            markTrackMagazine.enabled = true;
+            markTrackMagazine.StartTrack();
 
             //UI变化结束
             bUIChanging = false;
@@ -272,20 +272,21 @@ namespace SpaceDesign
 
             //近距离=>中距离
 
+            Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = Vector3.one;
+                    traIcon.localScale = _v3Icon;
                     break;
                 }
                 yield return 0;
             }
-            //TODO
-            //markTrackMagazine.StopTrack();
-            //markTrackMagazine.enabled = false;
+
+            markTrackMagazine.StopTrack();
+            markTrackMagazine.enabled = false;
 
             OnQuit();
 
@@ -350,8 +351,8 @@ namespace SpaceDesign
             //btnCheckDetail.gameObject.SetActive(false);
             timelineShow.SetActive(true);
             timelineHide.SetActive(false);
-            markTrackMagazine.StopTrack();
-            markTrackMagazine.enabled = false;
+            //markTrackMagazine.StopTrack();
+            //markTrackMagazine.enabled = false;
         }
 
         /// <summary>
@@ -364,8 +365,8 @@ namespace SpaceDesign
             if (timelineShow.activeSelf == true)
                 timelineHide.SetActive(true);
             timelineShow.SetActive(false);
-            markTrackMagazine.StopTrack();
-            markTrackMagazine.enabled = false;
+            //markTrackMagazine.StopTrack();
+            //markTrackMagazine.enabled = false;
         }
         #endregion
     }

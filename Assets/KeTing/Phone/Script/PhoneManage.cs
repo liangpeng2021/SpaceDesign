@@ -358,16 +358,17 @@ namespace SpaceDesign
             //近距离=>中距离
             animAnswer.enabled = false;
 
+            Vector3 _v3Icon = LoadPrefab.IconSize;
             float _fSp;
             while (true)
             {
                 _fSp = fUISpeed * Time.deltaTime;
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, _fSp);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, _fSp);
                 traTotalUI.localScale = Vector3.Lerp(traTotalUI.localScale, Vector3.zero, _fSp);
                 float _fDis = Vector3.Distance(traTotalUI.localScale, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = Vector3.one;
+                    traIcon.localScale = _v3Icon;
                     traTotalUI.localScale = Vector3.zero;
 
                     if (audioSource.isPlaying)

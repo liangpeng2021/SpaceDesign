@@ -62,7 +62,8 @@ namespace SpaceDesign
         void Start()
         {
             //taidengController.gameObject.SetActive(false);
-            v3OriPos = this.transform.position;
+            v3OriPos = traIconRoot.position;// this.transform.position;
+
             //timelineShow.SetActive(false);
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
             //Invoke("SetIconParent", 0.1f);
@@ -80,14 +81,14 @@ namespace SpaceDesign
                     DestroyImmediate(obj);
             }
         }
-        void LateUpdate()
-        {
-            if (taidengController.iShowUIState == 1 || taidengController.iShowUIState == 2)
-            {
-                //永远保持向上
-                transform.up = Vector3.up;
-            }
-        }
+        //void LateUpdate()
+        //{
+        //    if (taidengController.iShowUIState == 1 || taidengController.iShowUIState == 2)
+        //    {
+        //        //永远保持向上
+        //        transform.up = Vector3.up;
+        //    }
+        //}
         //void SetIconParent()
         //{
         //    if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
@@ -266,13 +267,14 @@ namespace SpaceDesign
             bUIChanging = true;
             //近距离=>中距离
 
+            Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = Vector3.one;
+                    traIcon.localScale = _v3Icon;
                     break;
                 }
                 yield return 0;

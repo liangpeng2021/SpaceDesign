@@ -121,7 +121,7 @@ public  class IconDisData
     public float TranslateMiddle = 2.5f;
     //视频（电视、2D、3D容积）
     public float VideoFar = 5f;
-    public float VideoMiddle = 3f;
+    public float VideoMiddle = 3.5f;
     //音乐
     public float MusicFar = 5f;
     public float MusicMiddle = 0f;

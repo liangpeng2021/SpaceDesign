@@ -30,12 +30,14 @@ namespace SpaceDesign
         bool bCallback = false;
         //原来的父节点
         private Transform oriParent;
+
+        bool bMarking = false;
+        Vector3 v3OriPos;
+        Vector3 v3OriRot;
+
         private void Awake()
         {
             oriParent = transform.parent;
-            //objTargetModel = XRCameraManager.Instance.stereoCamera.transform.Find("TtackingManager/root/child").gameObject;
-            //objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child");
-            //objShow3 = objTargetModel.Find("Capsule").gameObject;
             SetModelVisible(false);
         }
 
@@ -117,6 +119,22 @@ namespace SpaceDesign
         //是否开始计时（隐藏前先计时，确定没看到就隐藏）
         bool bTiming;
         float fTiming;
+        private void LateUpdate()
+        {
+            if (bMarking)
+            {
+                TaidengManager.Inst.transform.position = objTargetModel.position;
+                //TaidengManager.Inst.transform.rotation = objTargetModel.rotation;
+                ////反向
+                //TaidengManager.Inst.transform.forward = -(objTargetModel.forward);
+                ////永远保持向上
+                //TaidengManager.Inst.transform.up = Vector3.up;
+                Vector3 _eur = objTargetModel.eulerAngles;
+                _eur.x = _eur.z = 0;
+                _eur.y += 180f;
+                TaidengManager.Inst.transform.eulerAngles = _eur;
+            }
+        }
         void Update()
         {
             if (bTiming)
@@ -126,7 +144,7 @@ namespace SpaceDesign
                 {
                     fTiming = 0;
                     bTiming = false;
-                    TaidengManager.Inst.transform.SetParent(oriParent);
+                    //TaidengManager.Inst.transform.SetParent(oriParent);
                     TaidengManager.Inst.taidengController.ShowMark(false);
                 }
             }
@@ -134,6 +152,7 @@ namespace SpaceDesign
 
         private void SetModelVisible(bool isVisible)
         {
+            bMarking = isVisible;
             if (objTargetModel == null)
                 return;
 
@@ -142,17 +161,15 @@ namespace SpaceDesign
             if (isVisible)
             {
                 bTiming = false;
-                TaidengManager.Inst.transform.SetParent(objTargetModel);
-                TaidengManager.Inst.transform.localPosition = new Vector3(0, -0.15f, 0);
-                TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
+                //TaidengManager.Inst.transform.SetParent(objTargetModel);
+                //TaidengManager.Inst.transform.localPosition = new Vector3(0, -0.15f, 0);
+                //TaidengManager.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
                 TaidengManager.Inst.taidengController.ShowMark(true);
             }
             else
             {
                 bTiming = true;
                 //不直接隐藏，计时3秒，还没看到，直接隐藏
-                //TaidengManager.Inst.transform.SetParent(oriParent);
-                //TaidengManager.Inst.taidengController.ShowMark(false);
             }
         }
 

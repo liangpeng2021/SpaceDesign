@@ -117,6 +117,7 @@ namespace SpaceDesign
             timelineExpandShow.SetActive(false);
             timelineReminderHide.SetActive(false);
             timelineReminderShow.SetActive(false);
+            HideLoadingUI();
         }
 
         void OnDisable()
@@ -149,7 +150,9 @@ namespace SpaceDesign
         }
         void Start()
         {
-            //tvCtr.OnInit();
+            HideLoadingUI();
+
+            tvCtr.OnInit();
             //fTotalTime2D = (float)vdp2D.length;
             //视频播放不播放最后一帧
             fTotalFrame2D = (float)(vdp2D.frameCount - 1);
@@ -164,11 +167,11 @@ namespace SpaceDesign
             //Invoke("_DelayOpen3D", 1);
         }
 
-        void _DelayOpen3D()
-        {
-            //vdp3D.OpenSource(str3DVideoPth);
-            vdp3D.OpenSourceAsync(str3DVideoPth, false, 0, () => { b3DStop = false; Debug.Log("MyLog:3DVideo_Open_OK"); });
-        }
+        //void _DelayOpen3D()
+        //{
+        //    //vdp3D.OpenSource(str3DVideoPth);
+        //    vdp3D.OpenSourceAsync(str3DVideoPth, false, 0, () => { b3DStop = false; Debug.Log("MyLog:3DVideo_Open_OK"); });
+        //}
 
         /// <summary>
         /// 重置隐藏UI计时
@@ -390,7 +393,7 @@ namespace SpaceDesign
         /// </summary>
         IEnumerator IERefreshPos(PlayerPosState lastPPS)
         {
-            print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
+            //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
             //WaitForSeconds _wfs = new WaitForSeconds(0.1f);
 
@@ -550,13 +553,14 @@ namespace SpaceDesign
             ////近距离=>中距离
             //animAnswer.enabled = false;
 
+            Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fUISpeed * 2f * Time.deltaTime);
-                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fUISpeed * 2f * Time.deltaTime);
+                float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = Vector3.one;
+                    traIcon.localScale = _v3Icon;
                     break;
                 }
                 yield return 0;
@@ -734,6 +738,8 @@ namespace SpaceDesign
         public bool bSizeSmall = false;
         //卡丁车模式（绑定在卡丁车界面）
         public bool bKarting = false;
+        //加载中等待的UI对象
+        public GameObject objLoadingUI;
         /// <summary>
         /// 设置预览UI
         /// </summary>
@@ -764,6 +770,8 @@ namespace SpaceDesign
 
             timelineExpandShow.SetActive(bOpen);
             timelineExpandHide.SetActive(!bOpen);
+
+            objWindowsBtnParent.SetActive(bOpen);
         }
         /// <summary>
         /// 设置是否显示2D的播放框
@@ -809,7 +817,7 @@ namespace SpaceDesign
             //加一个临时bool变量，普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
             bool bTempSizeSmall = bSizeSmall;
 
-            objWindowsBtnParent.SetActive(bTempSizeSmall);
+            //objWindowsBtnParent.SetActive(bTempSizeSmall);
 
             //btnVideoClose.gameObject.SetActive(bTempSizeSmall);
             //btnVideoSize.gameObject.SetActive(bTempSizeSmall);
@@ -935,6 +943,7 @@ namespace SpaceDesign
                     Debug.Log("MyLog:WatchNow_3DVideo_Open_OK");
                     if (vdp3D.isPlaying)
                         vdp3D.Pause();
+                    b3DOK = true;
                 });
                 //vdp3D.OpenSource(str3DVideoPth);
             }
@@ -958,7 +967,7 @@ namespace SpaceDesign
             bTV = false;
             SetTV(true, true, true);
             //再设置是否2D视频
-            b2D = true;
+            b2D = true;//SetVideo函数中判断b2D是否与传进的数值相同，下面传的是false，所以这里先true一下，让函数可以运行
             SetVideo(false, true);
         }
 
@@ -977,6 +986,16 @@ namespace SpaceDesign
             if (bTV == false)
             {
                 SetExpand(false);
+
+                //非TV模式，隐藏加载中UI提示
+                HideLoadingUI();
+            }
+            else
+            {
+                //TV模式，先显示加载中UI提示
+                objLoadingUI.SetActive(true);
+
+                //print("TV模式，先显示加载中UI提示");
             }
 
             btnQuit.gameObject.SetActive(bTV);
@@ -1015,15 +1034,15 @@ namespace SpaceDesign
             traVideoExpand.localEulerAngles = traVideoExpand.localPosition = Vector3.zero;
             traVideoExpand.localScale = Vector3.one;
 
-            bool _bShowVideoCtrBtn = false;
-            if (bSizeSmall == true)
-                _bShowVideoCtrBtn = false;
-            else
-                _bShowVideoCtrBtn = !bTV;
+            //bool _bShowVideoCtrBtn = false;
+            //if (bSizeSmall == true)
+            //    _bShowVideoCtrBtn = false;
+            //else
+            //    _bShowVideoCtrBtn = !bTV;
 
-            objWindowsBtnParent.SetActive(_bShowVideoCtrBtn);
-            //btnVideoClose.gameObject.SetActive(_bShowVideoCtrBtn);
-            //btnVideoSize.gameObject.SetActive(_bShowVideoCtrBtn);
+            //objWindowsBtnParent.SetActive(_bShowVideoCtrBtn);
+            ////btnVideoClose.gameObject.SetActive(_bShowVideoCtrBtn);
+            ////btnVideoSize.gameObject.SetActive(_bShowVideoCtrBtn);
 
             btnAR.gameObject.SetActive(bTV);
             btnTV.gameObject.SetActive(!bTV);
@@ -1048,7 +1067,7 @@ namespace SpaceDesign
                 OnStop(false);
 
             b2D = b2d;
-            if (b2D == false)
+            if (b2D == false && bFromBtnWatchNow == false)
                 b3DOK = false;
 
             //暂停完，等半秒再打开新的，防止容积视频崩溃
@@ -1145,6 +1164,9 @@ namespace SpaceDesign
                     vdp2D.Play();
 
                 iPlayState = 0;
+
+                //2D模式播放后，隐藏加载中UI提示
+                HideLoadingUI();
             }
             else
             {
@@ -1178,6 +1200,9 @@ namespace SpaceDesign
                     b3DOK = true;
                     if (ads3D.isPlaying == false)
                         ads3D.Play();
+
+                    //3D模式-不用加载容积，隐藏加载中UI提示
+                    HideLoadingUI();
                 }
             }
         }
@@ -1204,17 +1229,34 @@ namespace SpaceDesign
                     b3DStop = false;
                     Debug.Log("MyLog:3DVideo_Open_OK");
                     vdp3D.Play();
+
+                    //3D模式-加载容积，隐藏加载中UI提示
+                    HideLoadingUI();
                 });
                 //vdp3D.OpenSource(str3DVideoPth);
             }
             else
+            {
                 //===========================================================================
                 vdp3D.JumpFrame(0, true);
+                //3D模式-容积跳转，隐藏加载中UI提示
+                HideLoadingUI();
+            }
 
             if (ads3D.isPlaying == false)
                 ads3D.Play();
             iPlayState = 0;
             b3DOK = true;
+        }
+        /// <summary>
+        /// TV模式下，播放后，隐藏加载提示UI（2D，3D根据各自的播放流程判断隐藏）
+        /// </summary>
+        void HideLoadingUI()
+        {
+            //print("隐藏了");
+
+            if (objLoadingUI.activeSelf == true)
+                objLoadingUI.SetActive(false);
         }
 
         /// <summary>

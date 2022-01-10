@@ -16,17 +16,12 @@ using XR;
 /// </summary>
 public class LoadMainScence : MonoBehaviour
 {
-    //版本号
-    public Text version;
-
     public ScenceData objectDatas;
 
     public GameObject roomPrefab;
 
     //public Button backto;
-
-    public Canvas[] canvas;
-
+    //public Canvas[] canvas;
     public GameObject kaichangObj;
     //新手引导
     public GameObject noviceGuidanceObj;
@@ -35,7 +30,8 @@ public class LoadMainScence : MonoBehaviour
     //新手引导，开始
     public ButtonRayReceiver btnStart;
 
-
+    //加载完成
+    private bool bLoadFinish = false;
     //#region 拉起其他应用
     ///// <summary>
     ///// 奇幻森林按钮
@@ -141,11 +137,11 @@ public class LoadMainScence : MonoBehaviour
 
         //backto = null;
 
-        for (int i = 0; i < canvas.Length; i++)
-        {
-            canvas[i] = null;
-        }
-        canvas = null;
+        //for (int i = 0; i < canvas.Length; i++)
+        //{
+        //    canvas[i] = null;
+        //}
+        //canvas = null;
 
         //artowermotionBtn = null;
         //omobaBtn = null;
@@ -154,19 +150,28 @@ public class LoadMainScence : MonoBehaviour
 
     private void Start()
     {
-        version.text = Application.version;
+        bLoadFinish = false;
 
-        Camera eventCamera = XRCameraManager.Instance.eventCamera;
-        for (int i = 0; i < canvas.Length; i++)
-        {
-            canvas[i].worldCamera = eventCamera;
-        }
+        //Camera eventCamera = XRCameraManager.Instance.eventCamera;
+        //for (int i = 0; i < canvas.Length; i++)
+        //{
+        //    canvas[i].worldCamera = eventCamera;
+        //}
 
         //新手引导先关闭（开场动画完毕后开启）
         noviceGuidanceObj.SetActive(false);
         //播放开场动效
         kaichangObj.SetActive(true);
         Invoke("HideKaichang", 7.1f);
+    }
+
+    void HideKaichang()
+    {
+        kaichangObj.SetActive(false);
+        //新手引导开始
+        noviceGuidanceObj.SetActive(true);
+        ////加载物体
+        //LoadGameObjectData();
     }
 
     /// <summary>
@@ -177,15 +182,6 @@ public class LoadMainScence : MonoBehaviour
         noviceGuidanceObj.SetActive(false);
         //加载物体
         LoadGameObjectData();
-    }
-
-    void HideKaichang()
-    {
-        kaichangObj.SetActive(false);
-        //新手引导开始
-        noviceGuidanceObj.SetActive(true);
-        ////加载物体
-        //LoadGameObjectData();
     }
 
     void LoadGameObjectData()
@@ -234,6 +230,8 @@ public class LoadMainScence : MonoBehaviour
             LoadPrefab.IconDisData = LitJson.JsonMapper.ToObject<IconDisData>(json);
         }
         //------------------End------------------
+
+        bLoadFinish = true;
     }
 
     ScenceData MyDeSerial(string path)
@@ -263,6 +261,9 @@ public class LoadMainScence : MonoBehaviour
         if (bTest)
             return;
 #endif
+
+        if (bLoadFinish == false)
+            return;
 
         timeCount += Time.deltaTime;
         if (timeCount < 1f)

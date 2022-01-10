@@ -131,8 +131,10 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 0.3.2.106.2
-  preloadedAssets: []
+  bundleVersion: 0.3.2.110.2
+  preloadedAssets:
+  - {fileID: -5920313778470366557, guid: 4979ced50c1b5ae4d8d7a1c293be4d43, type: 2}
+  - {fileID: 11400000, guid: 03ed929fe54ff8e4e958975ec533d18f, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -251,7 +253,7 @@ PlayerSettings:
   clonedFromGUID: c0afd0d1d80e3634a9dac47e8a0426ea
   templatePackageId: com.unity.template.3d@4.2.8
   templateDefaultScene: Assets/Scenes/SampleScene.unity
-  AndroidTargetArchitectures: 1
+  AndroidTargetArchitectures: 3
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
   AndroidKeystoreName: '{inproject}: design.keystore'
@@ -698,7 +700,7 @@ PlayerSettings:
     7: ARRemoteDebug
   platformArchitecture: {}
   scriptingBackend:
-    Android: 0
+    Android: 1
   il2cppCompilerConfiguration: {}
   managedStrippingLevel: {}
   incrementalIl2cppBuild: {}

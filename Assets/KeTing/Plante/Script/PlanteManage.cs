@@ -170,14 +170,14 @@ namespace SpaceDesign
 
             //中距离=>远距离
             traIcon.gameObject.SetActive(true);
-            Vector3 v3Icon = new Vector3(2.5f, 2.5f, 2.5f);
+            Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, v3Icon, fUISpeed * Time.deltaTime);
-                float _fDis = Vector3.Distance(traIcon.localScale, v3Icon);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fUISpeed * Time.deltaTime);
+                float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = v3Icon;
+                    traIcon.localScale = _v3Icon;
                     break;
                 }
                 yield return 0;

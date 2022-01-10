@@ -83,16 +83,23 @@ namespace SpaceDesign
 
         void Start()
         {
-            v3OriPos = this.transform.position;
+            v3OriPos = traIconRoot.position;// this.transform.position;
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
             traIconRoot.SetParent(transform.parent);
         }
         void OnDestroy()
         {
+            StopAllCoroutines();
             if (traIconRoot != null)
             {
-                traIconRoot.SetParent(transform.parent);
+                GameObject obj = traIconRoot.gameObject;
+                if (obj != null)
+                    DestroyImmediate(obj);
             }
+            //if (traIconRoot != null)
+            //{
+            //    traIconRoot.SetParent(transform.parent);
+            //}
         }
 
         void Update()
@@ -112,7 +119,7 @@ namespace SpaceDesign
                         }
                         //Icon自身上下浮动关闭
                         animIconFar.enabled = false;
-                        traIcon.localScale = Vector3.one;
+                        traIcon.localScale = LoadPrefab.IconSize;
                         traIcon.gameObject.SetActive(true);
 
                         OnQuit();
@@ -146,7 +153,7 @@ namespace SpaceDesign
         void SetIcon(bool bShow)
         {
             if (bShow)
-                v3IconTarget = Vector3.one;
+                v3IconTarget = LoadPrefab.IconSize;
             else
                 v3IconTarget = Vector3.zero;
 

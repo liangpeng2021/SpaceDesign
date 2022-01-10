@@ -203,8 +203,8 @@ namespace SpaceDesign
 #if UNITY_ANDROID && !UNITY_EDITOR
             //系统音量：【0-16】整型
             XR.AudioManager.GetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC, ref _iVolum);
-            //XR.AudioManager.SetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC,);
 #endif
+            //XR.AudioManager.SetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC,);
             //Debug.Log("MyLog: 声音" + _iVolum);
 
             OnSliderVolumeChange((float)_iVolum / OPPOSystemMaxVolum);
@@ -765,18 +765,19 @@ namespace SpaceDesign
             RunIconMiddle();
             traIcon.gameObject.SetActive(true);
             traIcon.SetParent(traIconFarPos);
+            Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
                 //播放中，显示音符特效，并Icon缩小为0
                 //traIcon.localScale = Vector3.Lerp(traIcon.localScale, (bPlaying ? Vector3.zero : Vector3.one), fIconSpeed * Time.deltaTime * 2);
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, fIconSpeed * Time.deltaTime * 2);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fIconSpeed * Time.deltaTime * 2);
 
                 traIcon.localPosition = Vector3.Lerp(traIcon.localPosition, Vector3.zero, fIconSpeed * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localPosition, Vector3.zero);
                 if (_fDis < fThreshold)
                 {
                     //traIcon.localScale = bPlaying ? Vector3.zero : Vector3.one;
-                    traIcon.localScale = Vector3.one;
+                    traIcon.localScale = _v3Icon;
                     traIcon.localPosition = Vector3.zero;
                     //Icon自身上下浮动开启
                     animIconFar.enabled = true;
@@ -1248,13 +1249,14 @@ namespace SpaceDesign
         }
         void OnSystemVolumeChange(XR.XRAudioStream typ, int iValue)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+            //Debug.Log(typ + ":" + iValue);
             //系统音量：【0-16】整型
             if (typ == XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC)
             {
-                OnSliderVolumeChange((float)iValue / OPPOSystemMaxVolum);
+                float _f = (float)iValue / OPPOSystemMaxVolum;
+                pinchSliderVolumMax.sliderValue = _f;
+                OnSliderVolumeChange(_f);
             }
-#endif
         }
         public void OnSliderVolumeChange(float fValue)
         {

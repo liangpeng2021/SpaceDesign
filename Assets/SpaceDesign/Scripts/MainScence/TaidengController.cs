@@ -215,8 +215,8 @@ namespace SpaceDesign
             }
 
 
-            //永远保持向上
-            TaidengManager.Inst.transform.up = Vector3.up;
+            ////永远保持向上
+            //TaidengManager.Inst.transform.up = Vector3.up;
         }
 
         public void Init()
@@ -245,8 +245,8 @@ namespace SpaceDesign
             //Debug.LogError("重新识别到，会闪现编辑框");
             //视频的TV旁边的两个按钮没有隐藏
 
-            //永远保持向上
-            TaidengManager.Inst.transform.up = Vector3.up;
+            ////永远保持向上
+            //TaidengManager.Inst.transform.up = Vector3.up;
         }
 
         private void OnEnable()

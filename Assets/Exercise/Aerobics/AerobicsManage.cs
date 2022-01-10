@@ -261,16 +261,18 @@ namespace SpaceDesign
 
             float _fSp;
             //近距离=>中距离
+
+            Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
                 _fSp = fUISpeed * Time.deltaTime;
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, Vector3.one, _fSp);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, _fSp);
                 btnStart.transform.localScale = Vector3.Lerp(btnStart.transform.localScale, Vector3.zero, _fSp);
                 traReadyUI.localScale = Vector3.Lerp(traReadyUI.localScale, Vector3.zero, _fSp);
-                float _fDis = Vector3.Distance(traIcon.localScale, Vector3.one);
+                float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
                 if (_fDis < fThreshold)
                 {
-                    traIcon.localScale = Vector3.one;
+                    traIcon.localScale = _v3Icon;
                     btnStart.transform.localScale = Vector3.zero;
                     traReadyUI.localScale = Vector3.zero;
                     break;
