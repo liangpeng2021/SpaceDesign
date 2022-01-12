@@ -20,6 +20,13 @@ public class EditCameraRay : MonoBehaviour
     RayPointerHandler hitpointhandler;
 
     public bool canDrag = false;
+
+    private void Awake()
+    {
+#if !UNITY_EDITOR
+        gameObject.SetActive(false);
+#endif
+    }
     // Update is called once per frame
     void Update()
     {

@@ -16,13 +16,11 @@ namespace SpaceDesign
             {
                 if (objTarget == null)
                 {
-                    objTarget = Image2DTrackingManager.Instance.transform.Find("root/child");
+                    objTarget = Image2DTrackingManager.Instance?.transform.Find("root/child");
                 }
                 return objTarget;
             }
         }
-        //Mark识别后，显隐的对象
-        public GameObject objBtnShow;
         public Texture texture;
         private bool bCallback = false;
         //原来的父节点
@@ -34,13 +32,6 @@ namespace SpaceDesign
             //objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child");
             //objShow3 = objTargetModel.Find("Capsule").gameObject;
             SetModelVisible(false);
-
-            Image2DTrackingManager.Instance.OnAddTacker += AddTrack;
-        }
-
-        void AddTrack()
-        {
-
         }
 
         public void StartTrack()
@@ -49,6 +40,8 @@ namespace SpaceDesign
 #if UNITY_EDITOR
             return;
 #endif
+            if (Image2DTrackingManager.Instance == null)
+                return;
 
             StopTrack();
 
@@ -65,6 +58,8 @@ namespace SpaceDesign
 #if UNITY_EDITOR
             return;
 #endif
+            if (Image2DTrackingManager.Instance == null)
+                return;
 
             Image2DTrackingManager.Instance.TrackStop();
         }
@@ -122,29 +117,24 @@ namespace SpaceDesign
             if (objTargetModel == null)
                 return;
 
+            if (MagazineManage.Inst == null)
+                return;
+
             //objTargetModel.SetActive(isVisible);
+            MagazineManage.Inst.btnCheckDetail.gameObject.SetActive(isVisible);
             if (isVisible)
             {
                 MagazineManage.Inst.transform.SetParent(objTargetModel);
                 MagazineManage.Inst.transform.localPosition = new Vector3(0, 0.02f, -0.25f);
                 //MagazineManage.Inst.transform.localPosition = new Vector3(0, 0, -0.25f);
                 MagazineManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
-
-
-                //按钮缩放，代替显隐
-                //objBtnShow.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f);
-                objBtnShow.SetActive(true);
-                //objBtnShow.transform.localScale = Vector3.one;
             }
             else
             {
                 MagazineManage.Inst.transform.SetParent(oriParent);
-
-                //按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
-                //objBtnShow.transform.localScale = Vector3.zero;
-                objBtnShow.SetActive(false);
+                //看不到后隐藏对象
+                MagazineManage.Inst.OnQuit();
             }
-            //objBtnShow.SetActive(isVisible);
         }
     }
 }

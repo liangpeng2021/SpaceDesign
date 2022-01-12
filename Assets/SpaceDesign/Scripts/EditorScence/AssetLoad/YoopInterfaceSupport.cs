@@ -178,7 +178,7 @@ namespace SpaceDesign
                 T yyd;
                 if (request.isHttpError || request.isNetworkError)
                 {
-                    Debug.Log("MyLog::request.error:" + request.error);
+                    //Debug.Log("MyLog::request.error:" + request.error);
                 }
                 else
                 {

@@ -17,7 +17,7 @@ namespace SpaceDesign
             {
                 if (objTarget == null)
                 {
-                    objTarget = Image2DTrackingManager.Instance.transform.Find("root/child");
+                    objTarget = Image2DTrackingManager.Instance?.transform.Find("root/child");
                 }
                 return objTarget;
             }
@@ -47,6 +47,8 @@ namespace SpaceDesign
 #if UNITY_EDITOR
             return;
 #endif
+            if (Image2DTrackingManager.Instance == null)
+                return;
             //Debug.Log("MyLog::StartTrack");
             StopTrack();
 
@@ -65,6 +67,8 @@ namespace SpaceDesign
 #if UNITY_EDITOR
             return;
 #endif
+            if (Image2DTrackingManager.Instance == null)
+                return;
             //Debug.Log("MyLog::StopTrack");
             Image2DTrackingManager.Instance.TrackStop();
         }
@@ -123,6 +127,9 @@ namespace SpaceDesign
         {
             if (bMarking)
             {
+                if (TaidengManager.Inst == null)
+                    return;
+
                 TaidengManager.Inst.transform.position = objTargetModel.position;
                 //TaidengManager.Inst.transform.rotation = objTargetModel.rotation;
                 ////反向
@@ -144,6 +151,10 @@ namespace SpaceDesign
                 {
                     fTiming = 0;
                     bTiming = false;
+
+                    if (TaidengManager.Inst == null)
+                        return;
+
                     //TaidengManager.Inst.transform.SetParent(oriParent);
                     TaidengManager.Inst.taidengController.ShowMark(false);
                 }
@@ -154,6 +165,9 @@ namespace SpaceDesign
         {
             bMarking = isVisible;
             if (objTargetModel == null)
+                return;
+
+            if (TaidengManager.Inst == null)
                 return;
 
             fTiming = 0;

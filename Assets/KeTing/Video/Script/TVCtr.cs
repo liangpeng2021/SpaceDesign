@@ -24,6 +24,7 @@ namespace SpaceDesign
 
         public void TempLog(string s)
         {
+            Debug.Log("电视Debug:" + s);
             t.text = s;
         }
 
@@ -74,7 +75,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnInit()
         {
-            return;
+            //return;
             try
             {
                 AJO.Call("Init", this.transform.name);
@@ -90,7 +91,7 @@ namespace SpaceDesign
         /// </summary>
         public void CallbackLocal(string s)
         {
-            return;
+            //return;
             textLocal.text = s + "\n自动搜索";
 
             if (s.Contains("InitSuc"))
@@ -110,7 +111,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnStartSearch()
         {
-            return;
+            //return;
             try
             {
                 AJO.Call("StartBrowse");
@@ -125,7 +126,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnStopSearch()
         {
-            return;
+            //return;
             //foreach (var v in textAryToggleConnect)
             //{
             //    v.text = null;
@@ -147,7 +148,7 @@ namespace SpaceDesign
         /// </summary>
         public void CallbackSearch(string s)
         {
-            return;
+            //return;
             //textSearch.text = s + "\n停止搜索，自动连接";
 
             string[] strs = s.Split('-');
@@ -178,7 +179,7 @@ namespace SpaceDesign
         public int iConnectIndex = 0;
         public void ToggleConnect(int index)
         {
-            return;
+            //return;
             iConnectIndex = index;
 
             try
@@ -196,7 +197,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnStartConnect()
         {
-            return;
+            //return;
             try
             {
                 AJO.Call("Connect");
@@ -211,7 +212,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnStopConnect()
         {
-            return;
+            //return;
             try
             {
                 AJO.Call("DisConnect");
@@ -228,7 +229,7 @@ namespace SpaceDesign
         /// </summary>
         public void CallbackConnect(string s)
         {
-            return;
+            //return;
             textConnect.text = s;
 
             if (s.Contains("ConnectSuc"))
@@ -259,7 +260,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnClose()
         {
-            return;
+            //return;
             bPushBackAutoPlay = false;
             print("关闭（推送一个黑色的图片）");
 
@@ -289,7 +290,7 @@ namespace SpaceDesign
         /// <param name="bCallbackSetSlider">回调后设置进度条（AR模式切TV模式）</param>
         public void OnPush(bool b2D, bool bCallbackAutoPlay, bool bCallbackSetSlider)
         {
-            return;
+            //return;
             bPushBackAutoPlay = bCallbackAutoPlay;
             bCallBackSetSlider = bCallbackSetSlider;
             TempLog("开始推送视频2D：" + b2D);
@@ -319,7 +320,7 @@ namespace SpaceDesign
         /// </summary>
         public void CallbackPush(string s)
         {
-            return;
+            //return;
             textPush.text = "推送回调：" + s;
 
             //推送的不是黑色关闭图，才触发回调
@@ -359,7 +360,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnPlay(bool b2D)
         {
-            return;
+            //return;
             TempLog("开始Play播放视频2D：" + b2D);
 
             //if (bPushed == false)
@@ -382,7 +383,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnResume()
         {
-            return;
+            //return;
             TempLog("开始恢复暂停");
 
             //if (bPushed == false)
@@ -405,7 +406,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnPause()
         {
-            return;
+            //return;
             TempLog("开始暂停视频");
 
             //if (bPushed == false)
@@ -430,7 +431,7 @@ namespace SpaceDesign
         public void OnStopPlay()
         {
 
-            return;
+            //return;
             OnClose();
 
             //if (bPushed == false)
@@ -455,7 +456,7 @@ namespace SpaceDesign
         public void OnSetSlider(int duration, int position)
         {
 
-            return;
+            //return;
             //if (bPushed == false)
             //{
             //    OnInit();
@@ -476,7 +477,7 @@ namespace SpaceDesign
         /// </summary>
         public void CallbackSlider(string strTime)
         {
-            return;
+            //return;
             string[] ss = strTime.Split('-');
             int duration = int.Parse(ss[0]);
             int position = int.Parse(ss[1]);

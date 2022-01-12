@@ -21,13 +21,10 @@ namespace SpaceDesign
                 return objTarget;
             }
         }
-        //Mark识别后，显隐的对象
-        public GameObject objBtnShow;
         public Texture texture;
-        bool bCallback = false;
+        private bool bCallback = false;
         //原来的父节点
         private Transform oriParent;
-
         private void Awake()
         {
             oriParent = transform.parent;
@@ -124,27 +121,20 @@ namespace SpaceDesign
                 return;
 
             //objTargetModel.SetActive(isVisible);
+            TranslateManage.Inst.btnCheckTranslate.gameObject.SetActive(isVisible);
             if (isVisible)
             {
                 TranslateManage.Inst.transform.SetParent(objTargetModel);
                 TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.02f, -0.25f);
                 //TranslateManage.Inst.transform.localPosition = new Vector3(0, 0 - 0.25f);
                 TranslateManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
-
-                //翻译按钮缩放，代替显隐
-                //objBtnShow.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f);
-                objBtnShow.SetActive(true);
             }
             else
             {
                 TranslateManage.Inst.transform.SetParent(oriParent);
-
-                //翻译按钮不能隐藏，要缩放到0，防止隐藏动画播放未完成bug
-                //objBtnShow.transform.localScale = Vector3.zero;
-                objBtnShow.SetActive(false);
-
+                //看不到后隐藏对象
+                TranslateManage.Inst.OnQuit();
             }
-            //objBtnShow.SetActive(isVisible);
         }
     }
 }
