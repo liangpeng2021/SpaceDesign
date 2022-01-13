@@ -430,7 +430,7 @@ namespace SpaceDesign
             startpayRayReceiver.gameObject.SetActive(true);
             secondObj.SetActive(true);
             pointLight.SetActive(true);
-            //showBoundBox = true;
+            showBoundBox = true;
 
             TaidengManager.Inst.noOperationTime = 0;
         }

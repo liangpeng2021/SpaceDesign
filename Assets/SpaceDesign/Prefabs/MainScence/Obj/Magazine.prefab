@@ -2064,6 +2064,7 @@ GameObject:
   - component: {fileID: 8136684954732520349}
   - component: {fileID: 660481632190418540}
   - component: {fileID: 240585747785418590}
+  - component: {fileID: 5977157335915467731}
   m_Layer: 5
   m_Name: BtnQuit (1)
   m_TagString: Untagged
@@ -2140,6 +2141,25 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 150, y: 150, z: 50}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!95 &5977157335915467731
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996802903959214546}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &2201089255472415408
 GameObject:
   m_ObjectHideFlags: 0
@@ -4886,7 +4906,6 @@ MonoBehaviour:
   OnLossTargetEvent:
     m_PersistentCalls:
       m_Calls: []
-  objBtnShow: {fileID: 8592750298907494992}
   texture: {fileID: 2800000, guid: bcc10d447d13ffb45ba4d906f287f0e4, type: 3}
 --- !u!1 &8279189706033822803
 GameObject:
@@ -5204,7 +5223,7 @@ PlayableDirector:
   - key: {fileID: -3111364084886737443, guid: 222456a287120534c8a6c00aa5bdd400, type: 2}
     value: {fileID: 1311758135316526682}
   - key: {fileID: -1605340756629085875, guid: 222456a287120534c8a6c00aa5bdd400, type: 2}
-    value: {fileID: 0}
+    value: {fileID: 5977157335915467731}
   - key: {fileID: 5286665964056465532, guid: 222456a287120534c8a6c00aa5bdd400, type: 2}
     value: {fileID: 1311758133374493629}
   - key: {fileID: 88089121905060022, guid: 222456a287120534c8a6c00aa5bdd400, type: 2}
@@ -5403,7 +5422,7 @@ PlayableDirector:
   - key: {fileID: -140162420598437668, guid: 5f6f4d477f410f94eba25be65dc5dfd9, type: 2}
     value: {fileID: 1311758135316526682}
   - key: {fileID: -7619273752190134548, guid: 5f6f4d477f410f94eba25be65dc5dfd9, type: 2}
-    value: {fileID: 0}
+    value: {fileID: 5977157335915467731}
   - key: {fileID: -4346208458775421439, guid: 5f6f4d477f410f94eba25be65dc5dfd9, type: 2}
     value: {fileID: 1311758133374493629}
   - key: {fileID: -3959930539412278976, guid: 5f6f4d477f410f94eba25be65dc5dfd9, type: 2}

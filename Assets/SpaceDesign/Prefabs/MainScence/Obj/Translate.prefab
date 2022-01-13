@@ -1707,7 +1707,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2927,7 +2927,6 @@ MonoBehaviour:
   OnLossTargetEvent:
     m_PersistentCalls:
       m_Calls: []
-  objBtnShow: {fileID: 8730654709172206297}
   texture: {fileID: 2800000, guid: adf9cffd8f9ab3d49b2bc6372bfa09d0, type: 3}
 --- !u!1 &8093400909660206771
 GameObject:
@@ -4961,7 +4960,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8730654707889920201
 RectTransform:
   m_ObjectHideFlags: 0

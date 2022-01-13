@@ -64,13 +64,19 @@ namespace SpaceDesign
 
         public void StopTrack()
         {
+            Debug.Log("MyLog::StopTrack");
 #if UNITY_EDITOR
             return;
 #endif
             if (Image2DTrackingManager.Instance == null)
                 return;
-            //Debug.Log("MyLog::StopTrack");
+
+            if (Image2DTrackingManager.Instance.m_TrackerPath == null)
+                return;
             Image2DTrackingManager.Instance.TrackStop();
+            Image2DTrackingManager.Instance.m_TrackerPath = null;
+            Image2DTrackingManager.Instance.m_feamName = null;
+            Image2DTrackingManager.Instance.m_TargetTexture = null;
         }
 
         public override void OnAddTacker()
