@@ -127,8 +127,6 @@ namespace SpaceDesign
             if (TranslateManage.Inst == null)
                 return;
 
-            //objTargetModel.SetActive(isVisible);
-            TranslateManage.Inst.btnCheckTranslate.gameObject.SetActive(isVisible);
             if (isVisible)
             {
                 TranslateManage.Inst.transform.SetParent(objTargetModel);
@@ -142,6 +140,7 @@ namespace SpaceDesign
                 //看不到后隐藏对象
                 TranslateManage.Inst.OnQuit();
             }
+            TranslateManage.Inst.btnCheckTranslate.gameObject.SetActive(isVisible);
         }
     }
 }

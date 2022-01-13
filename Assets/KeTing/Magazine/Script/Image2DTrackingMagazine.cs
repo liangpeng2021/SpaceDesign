@@ -126,8 +126,6 @@ namespace SpaceDesign
             if (MagazineManage.Inst == null)
                 return;
 
-            //objTargetModel.SetActive(isVisible);
-            MagazineManage.Inst.btnCheckDetail.gameObject.SetActive(isVisible);
             if (isVisible)
             {
                 MagazineManage.Inst.transform.SetParent(objTargetModel);
@@ -141,6 +139,7 @@ namespace SpaceDesign
                 //看不到后隐藏对象
                 MagazineManage.Inst.OnQuit();
             }
+            MagazineManage.Inst.btnCheckDetail.gameObject.SetActive(isVisible);
         }
     }
 }
