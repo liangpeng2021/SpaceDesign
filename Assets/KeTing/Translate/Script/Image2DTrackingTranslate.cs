@@ -45,12 +45,16 @@ namespace SpaceDesign
 
             StopTrack();
             bCallback = true;
-            //Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
-            //Image2DTrackingManager.Instance.m_feamName = "c2dd24647f17a05fdc273e7aa95bc674_21102021003932";
+            //白纸
             //Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
             //Image2DTrackingManager.Instance.m_feamName = "7c47ed6410de1f914d06e1075c52e1e8_01112021175446";
+            //深海
+            //Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
+            //Image2DTrackingManager.Instance.m_feamName = "95e8a7c9d1b01e2720be6ba323479b32_06012022095734";
+            //OPPO介绍
             Image2DTrackingManager.Instance.m_TrackerPath = "Translate";
-            Image2DTrackingManager.Instance.m_feamName = "95e8a7c9d1b01e2720be6ba323479b32_06012022095734";
+            Image2DTrackingManager.Instance.m_feamName = "c409698f155ec8bd0a7ce037f7fa0d96_17012022094900";
+
             Image2DTrackingManager.Instance.m_TargetTexture = texture;
             Image2DTrackingManager.Instance.TrackStart();
         }
@@ -140,6 +144,7 @@ namespace SpaceDesign
                 //看不到后隐藏对象
                 TranslateManage.Inst.OnQuit();
             }
+            //OnQuit函数中会隐藏btnCheckDetail对象，这里如果是开启要放在最下面
             TranslateManage.Inst.btnCheckTranslate.gameObject.SetActive(isVisible);
         }
     }

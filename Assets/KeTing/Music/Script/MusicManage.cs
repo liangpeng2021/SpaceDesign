@@ -121,8 +121,10 @@ namespace SpaceDesign
             btnVolumeMuteMax.onPointerExit.AddListener(ExitBtnVolum);
             btnVolumeMuteMax.onPinchDown.AddListener(OnVolumeOpen);
 
-            btnExitSliderVolum.onPointerExit.AddListener(ExitObjVolum);
+            //btnExitSliderVolum.onPointerExit.AddListener(ExitObjVolum);
             btnSliderVolumMax.onPointerEnter.AddListener(EnterObjVolum);
+            btnSliderVolumMax.onPointerExit.AddListener(ExitObjVolum);
+            pinchSliderVolumMax.onHighlightStart.AddListener(EnterObjVolum);
             //因为要发送给CPE：不要实时变化，抬起才触发一次
             pinchSliderVolumMax.onValueChanged.AddListener(OnSliderVolumeChange);
             pinchSliderVolumMax.onInteractionEnd.AddListener(OnSliderVolume);
@@ -160,8 +162,10 @@ namespace SpaceDesign
             btnVolumeMuteMax.onPointerEnter.RemoveAllListeners();
             btnVolumeMuteMax.onPointerExit.RemoveAllListeners();
             btnVolumeMuteMax.onPinchDown.RemoveAllListeners();
+            //btnExitSliderVolum.onPointerExit.RemoveAllListeners();
             btnSliderVolumMax.onPointerEnter.RemoveAllListeners(); ;
-            btnExitSliderVolum.onPointerExit.RemoveAllListeners();
+            btnSliderVolumMax.onPointerExit.RemoveAllListeners();
+
             pinchSliderVolumMax.onValueChanged.RemoveAllListeners();
             pinchSliderVolumMax.onInteractionEnd.RemoveAllListeners();
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -236,6 +240,17 @@ namespace SpaceDesign
             #region 重交互
             if (bMaxTiming)
             {
+                if (bHideVolumObj)
+                {
+                    fHideVolumObj += Time.deltaTime;
+                    if (fHideVolumObj > 0.1f)
+                    {
+                        fHideVolumObj = 0;
+                        bHideVolumObj = false;
+                        btnSliderVolumMax.gameObject.SetActive(false);
+                    }
+                }
+
                 fMaxToMinTemp += Time.deltaTime;
                 if (fMaxToMinTemp > fAutoTurnUITime)
                 {
@@ -1297,42 +1312,58 @@ namespace SpaceDesign
 
         public void EnterBtnVolum()
         {
-            //print("进入音量按钮对象");
-            bTouchObjVolum = false;
-            bTouchBtnVolum = true;
+            //Debug.Log("Music音量：进入音量按钮对象");
+            fHideVolumObj = 0;
+            bHideVolumObj = false;
+            //bTouchObjVolum = false;
+            //bTouchBtnVolum = true;
             btnSliderVolumMax.gameObject.SetActive(true);
         }
         public void ExitBtnVolum()
         {
-            //print("离开音量按钮对象");
-            bTouchBtnVolum = false;
-            HideVolum();
+            //Debug.Log("Music音量：离开音量按钮对象");
+            //bTouchBtnVolum = false;
+            //HideVolum();
+            fHideVolumObj = 0;
+            bHideVolumObj = true;
         }
         public void EnterObjVolum()
         {
-            //print("进入音量对象");
-            bTouchObjVolum = true;
-            bTouchBtnVolum = false;
+            //Debug.Log("Music音量：进入音量对象");
+            fHideVolumObj = 0;
+            bHideVolumObj = false;
+            //bTouchObjVolum = true;
+            //bTouchBtnVolum = false;
             btnSliderVolumMax.gameObject.SetActive(true);
         }
         public void ExitObjVolum()
         {
-            //print("离开音量对象");
-            bTouchObjVolum = false;
-            HideVolum();
+            //Debug.Log("Music音量：离开音量对象");
+            //bTouchObjVolum = false;
+            //HideVolum();
+            fHideVolumObj = 0;
+            bHideVolumObj = true;
         }
-        void HideVolum()
-        {
-            //延迟0.1秒隐藏，射线在音量图标上，移动到音量控制条上的时候不能隐藏
-            CancelInvoke("_InvokeHideVolum");
-            Invoke("_InvokeHideVolum", 0.1f);
-        }
-        void _InvokeHideVolum()
-        {
-            if (bTouchBtnVolum == true || bTouchObjVolum == true)
-                return;
-            btnSliderVolumMax.gameObject.SetActive(false);
-        }
+        //隐藏音量进度条对象
+        bool bHideVolumObj = false;
+        float fHideVolumObj = 0;
+     
+        //void HideVolum()
+        //{
+        //    Debug.Log("Music音量：开始延迟隐藏");
+        //    //延迟0.1秒隐藏，射线在音量图标上，移动到音量控制条上的时候不能隐藏
+        //    CancelInvoke("_InvokeHideVolum");
+        //    Invoke("_InvokeHideVolum", 0.1f);
+        //}
+        //void _InvokeHideVolum()
+        //{
+        //    Debug.Log("Music音量：延迟隐藏:bTouchBtnVolum" + bTouchBtnVolum + "--bTouchObjVolum:" + bTouchObjVolum);
+
+        //    if (bTouchBtnVolum == true || bTouchObjVolum == true)
+        //        return;
+        //    btnSliderVolumMax.gameObject.SetActive(false);
+        //    Debug.Log("Music音量：隐藏进度条");
+        //}
         #endregion
 
         #region 音符特效

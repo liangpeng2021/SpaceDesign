@@ -57,9 +57,9 @@ namespace SpaceDesign
             timelineShow.SetActive(false);
 
             //add by lp
-            btnIconTouch.onPressDown.AddListener(ClickIcon);
-            btnCheckTranslateTouch.onPressDown.AddListener(OnCheckTranslate);
-            btnQuitTouch.onPressDown.AddListener(OnQuit);
+            btnIconTouch.onPressUp.AddListener(ClickIcon);
+            btnCheckTranslateTouch.onPressUp.AddListener(OnCheckTranslate);
+            btnQuitTouch.onPressUp.AddListener(OnQuit);
             //end
         }
 
@@ -74,9 +74,9 @@ namespace SpaceDesign
             timelineShow.SetActive(false);
 
             //add by lp
-            btnIconTouch.onPressDown.RemoveListener(ClickIcon);
-            btnCheckTranslateTouch.onPressDown.RemoveListener(OnCheckTranslate);
-            btnQuitTouch.onPressDown.RemoveListener(OnQuit);
+            btnIconTouch.onPressUp.RemoveListener(ClickIcon);
+            btnCheckTranslateTouch.onPressUp.RemoveListener(OnCheckTranslate);
+            btnQuitTouch.onPressUp.RemoveListener(OnQuit);
             //end
         }
         //end

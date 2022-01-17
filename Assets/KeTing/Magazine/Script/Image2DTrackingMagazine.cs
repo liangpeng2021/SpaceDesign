@@ -139,6 +139,7 @@ namespace SpaceDesign
                 //看不到后隐藏对象
                 MagazineManage.Inst.OnQuit();
             }
+            //OnQuit函数中会隐藏btnCheckDetail对象，这里如果是开启要放在最下面
             MagazineManage.Inst.btnCheckDetail.gameObject.SetActive(isVisible);
         }
     }

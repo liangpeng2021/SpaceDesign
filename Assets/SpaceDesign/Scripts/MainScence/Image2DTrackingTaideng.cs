@@ -142,12 +142,20 @@ namespace SpaceDesign
                 //TaidengManager.Inst.transform.forward = -(objTargetModel.forward);
                 ////永远保持向上
                 //TaidengManager.Inst.transform.up = Vector3.up;
-                Vector3 _eur = objTargetModel.eulerAngles;
-                _eur.x = _eur.z = 0;
-                _eur.y += 180f;
-                TaidengManager.Inst.transform.eulerAngles = _eur;
+
+                //Vector3 _eur = objTargetModel.eulerAngles;
+                //_eur.x = _eur.z = 0;
+                //_eur.y += 180f;
+                //TaidengManager.Inst.transform.eulerAngles = _eur;
+
+                Vector3 _v3 = PlayerManage.Inst.transform.position;
+                Transform _tra = TaidengManager.Inst.transform;
+                _v3.y = _tra.position.y;
+                _tra.LookAt(_v3, Vector3.up);
+                _tra.forward = -_tra.forward;
             }
         }
+    
         void Update()
         {
             if (bTiming)

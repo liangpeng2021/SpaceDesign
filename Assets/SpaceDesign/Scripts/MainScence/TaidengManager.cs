@@ -52,7 +52,6 @@ namespace SpaceDesign
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
             AddButtonRayEvent();
         }
-
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
@@ -339,7 +338,7 @@ namespace SpaceDesign
             btnIcon.onPinchDown.AddListener(ClickIcon);
             if (btnIconTouch != null)
             {
-                btnIconTouch.onPressDown.AddListener(ClickIcon);
+                btnIconTouch.onPressUp.AddListener(ClickIcon);
             }
 
             closeBtn.onPinchDown.AddListener(OnClose);
@@ -349,7 +348,7 @@ namespace SpaceDesign
             }
             if (closeBtnTouch != null)
             {
-                closeBtnTouch.onPressDown.AddListener(OnClose);
+                closeBtnTouch.onPressUp.AddListener(OnClose);
             }
 
             placeBtn.onPinchDown.AddListener(OnCheckPlace);
@@ -359,22 +358,22 @@ namespace SpaceDesign
             }
             if (placeBtnTouch != null)
             {
-                placeBtnTouch.onPressDown.AddListener(OnCheckPlace);
+                placeBtnTouch.onPressUp.AddListener(OnCheckPlace);
             }
         }
 
         void RemoveButtonRayEvent()
         {
             btnIcon.onPinchDown.RemoveListener(ClickIcon);
-            btnIconTouch.onPressDown.RemoveListener(ClickIcon);
+            btnIconTouch.onPressUp.RemoveListener(ClickIcon);
 
             closeBtn.onPinchDown.RemoveListener(OnClose);
-            if (closeBtnTouch != null && closeBtnTouch.onPressDown != null)
-                closeBtnTouch.onPressDown.RemoveListener(OnClose);
+            if (closeBtnTouch != null && closeBtnTouch.onPressUp != null)
+                closeBtnTouch.onPressUp.RemoveListener(OnClose);
             
             placeBtn.onPinchDown.RemoveListener(OnCheckPlace);
-            if (placeBtnTouch != null && placeBtnTouch.onPressDown != null)
-                placeBtnTouch.onPressDown.RemoveListener(OnCheckPlace);
+            if (placeBtnTouch != null && placeBtnTouch.onPressUp != null)
+                placeBtnTouch.onPressUp.RemoveListener(OnCheckPlace);
         }
 
         #endregion

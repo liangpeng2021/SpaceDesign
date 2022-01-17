@@ -49,7 +49,7 @@ namespace SpaceDesign
 
         void OnEnable()
         {
-            //PlayerManage.refreshPlayerPosEvt += RefreshPos;
+            PlayerManage.refreshPlayerPosEvt += RefreshPos;
             btnIcon.onPinchDown.AddListener(ClickIcon);
             btnStart.onPinchDown.AddListener(OnStartGame);
             btnQuit.onPinchDown.AddListener(OnQuit);
@@ -57,7 +57,7 @@ namespace SpaceDesign
 
         void OnDisable()
         {
-            //PlayerManage.refreshPlayerPosEvt -= RefreshPos;
+            PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             btnIcon.onPinchDown.RemoveAllListeners();
             btnStart.onPinchDown.RemoveAllListeners();
             btnQuit.onPinchDown.RemoveAllListeners();

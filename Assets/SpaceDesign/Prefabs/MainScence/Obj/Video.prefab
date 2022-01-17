@@ -105,6 +105,7 @@ GameObject:
   - component: {fileID: 1007620017}
   - component: {fileID: 1007620019}
   - component: {fileID: 1007620018}
+  - component: {fileID: 2034280675580330129}
   m_Layer: 0
   m_Name: Loading
   m_TagString: Untagged
@@ -170,6 +171,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!65 &2034280675580330129
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007620016}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1600, y: 1300, z: 1}
+  m_Center: {x: -132.6, y: 50, z: 0}
 --- !u!1 &1227240854
 GameObject:
   m_ObjectHideFlags: 0
@@ -28012,7 +28026,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 2}
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &7185608711622708250
 MonoBehaviour:
@@ -32600,7 +32614,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7338042872544700409}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.903}
   m_LocalScale: {x: 0.0016, y: 0.0016, z: 0.0016}
   m_Children:
   - {fileID: 7338042872495080437}
@@ -33300,14 +33314,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7338042872838679500}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalRotation: {x: 0, y: 0.2588191, z: 0, w: 0.9659258}
+  m_LocalPosition: {x: 1.5, y: 0, z: -1.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 7338042872544700413}
   m_Father: {fileID: 3550707061893560200}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 30, z: 0}
 --- !u!114 &7185608711902083730
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33320,21 +33334,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6b42ebe5c93a11458f453305d15c567, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  t: {fileID: 7338042873481260534}
   bPlaying: 0
   bConnected: 0
-  textLocal: {fileID: 7338042871891492643}
-  textConnectIndexCallback: {fileID: 7338042872396040034}
-  textSearch: {fileID: 7338042871996238043}
-  textAryToggleConnect:
-  - {fileID: 7338042873496640234}
-  - {fileID: 7338042873806983668}
-  - {fileID: 7338042871926726308}
-  iConnectIndex: 0
-  textConnect: {fileID: 7338042873251468983}
   bPushBackAutoPlay: 0
   bCallBackSetSlider: 0
-  textPush: {fileID: 7338042873264977852}
 --- !u!1 &7338042872939264733
 GameObject:
   m_ObjectHideFlags: 0
@@ -35312,8 +35315,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 150, y: 150, z: 50}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 150, y: 150, z: 100}
+  m_Center: {x: 0, y: 0, z: -50}
 --- !u!114 &8226835084880071543
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -122,7 +122,7 @@ namespace SpaceDesign
 
         void OnDisable()
         {
-            OnPause();
+            //OnPause();
 
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             btnIcon.onPinchDown.RemoveAllListeners();
@@ -159,19 +159,8 @@ namespace SpaceDesign
             obj3DStage.SetActive(false);
             //关闭视频上的碰撞盒，防止触碰显示宽展界面
             colliderBtnARWindows.enabled = false;
-
             objWindowsBtnParent.SetActive(false);
-            //btnVideoClose.gameObject.SetActive(false);
-            //btnVideoSize.gameObject.SetActive(false);
-
-            //Invoke("_DelayOpen3D", 1);
         }
-
-        //void _DelayOpen3D()
-        //{
-        //    //vdp3D.OpenSource(str3DVideoPth);
-        //    vdp3D.OpenSourceAsync(str3DVideoPth, false, 0, () => { b3DStop = false; Debug.Log("MyLog:3DVideo_Open_OK"); });
-        //}
 
         /// <summary>
         /// 重置隐藏UI计时
@@ -183,78 +172,13 @@ namespace SpaceDesign
 
         void Update()
         {
-            //if (Input.GetKeyDown(KeyCode.Alpha0))
-            //{
-            //    vdp3D.autoPlay = false;
-            //    vdp3D.OpenSource(str3DVideoPth);
-            //}
-            //if (Input.GetKeyDown(KeyCode.Alpha1))
-            //{
-            //    vdp3D.autoPlay = true;
-            //    vdp3D.OpenSource(str3DVideoPth);
-
-            //}
-            //if (Input.GetKeyDown(KeyCode.Alpha2))
-            //{
-            //    vdp3D.OpenSource(str3DVideoPth);
-            //    vdp3D.JumpFrame(0, false);
-            //}
-            //if (Input.GetKeyDown(KeyCode.Alpha3))
-            //{
-            //    vdp3D.OpenSource(str3DVideoPth);
-            //    vdp3D.JumpFrame(0, true);
-            //}
-
-            //if (Input.GetKeyDown(KeyCode.Alpha4))
-            //{
-            //    vdp3D.OpenSource(str3DVideoPth);
-            //    vdp3D.JumpFrame(1000, false);
-            //}
-            //if (Input.GetKeyDown(KeyCode.Alpha5))
-            //{
-            //    vdp3D.OpenSource(str3DVideoPth);
-            //    vdp3D.JumpFrame(1000, true);
-            //}
-            //if (Input.GetKeyDown(KeyCode.Alpha6))
-            //{
-            //    vdp3D.OpenSource(str3DVideoPth);
-            //    vdp3D.Pause();
-            //}
-            //if (Input.GetKeyDown(KeyCode.Alpha7))
-            //{
-            //    vdp3D.OpenSource(str3DVideoPth);
-            //    vdp3D.Stop();
-            //}
-            //if (Input.GetKeyDown(KeyCode.Alpha8))
-            //{
-            //    vdp3D.OpenSource(str3DVideoPth);
-            //    vdp3D.JumpFrame(0, true);
-            //    vdp3D.Pause();
-            //}
-            //if (Input.GetKeyDown(KeyCode.A))
-            //{
-            //    vdp3D.Play();
-            //}
-            //if (Input.GetKeyDown(KeyCode.B))
-            //{
-            //    vdp3D.Pause();
-            //}
-            //if (Input.GetKeyDown(KeyCode.C))
-            //{
-            //    vdp3D.Stop();
-            //}
-            //if (Input.GetKeyDown(KeyCode.D))
-            //{
-            //    vdp3D.frameIndex = 0;
-            //}
-
             //视频未打开，后面不运行
             if (bOpenVideo == false)
                 return;
 
             //3D模式下，3D还没有准备成功，后面不运行
-            if (b2D == false && b3DOK == false)
-                return;
+            //if (b2D == false && b3DOK == false)
+            //    return;
 
             //隐藏的判断：AR模式 + 扩展模式 + （卡丁车模式、或非小框模式）
             if ((bTV == false) && (bExpand == true) && ((bSizeSmall == false) || (bKarting == true)))
@@ -436,9 +360,6 @@ namespace SpaceDesign
             //开启电视的模式下（无论TV还是AR），都不判断了
             if (bOpenVideo)
                 yield break;
-            ////如果是AR模式，不关闭扩展界面
-            //if (bTV == false)
-            //    yield break;
 
             //UI开始变化
             bUIChanging = true;
@@ -464,9 +385,6 @@ namespace SpaceDesign
             //开启电视的模式下（无论TV还是AR），都不判断了
             if (bOpenVideo)
                 yield break;
-            ////如果是AR模式，不关闭扩展界面
-            //if (bTV == false)
-            //    yield break;
 
             //UI开始变化
             bUIChanging = true;
@@ -496,9 +414,6 @@ namespace SpaceDesign
             //开启电视的模式下（无论TV还是AR），都不判断了
             if (bOpenVideo)
                 yield break;
-            ////如果是AR模式，不关闭扩展界面
-            //if (bTV == false)
-            //    yield break;
 
             //UI开始变化
             bUIChanging = true;
@@ -533,25 +448,16 @@ namespace SpaceDesign
             //开启电视的模式下（无论TV还是AR），都不判断了
             if (bOpenVideo)
                 yield break;
-            ////如果是AR模式，不关闭扩展界面
-            //if (bTV == false)
-            //    yield break;
 
             //UI开始变化
             bUIChanging = true;
 
             objWindowsBtnParent.SetActive(false);
 
-            //btnVideoClose.gameObject.SetActive(false);
-            //btnVideoSize.gameObject.SetActive(false);
-
             if (bReminder == true)
                 SetReminder(false);
             else if (bExpand == true)
                 SetExpand(false);
-
-            ////近距离=>中距离
-            //animAnswer.enabled = false;
 
             Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
@@ -817,11 +723,6 @@ namespace SpaceDesign
             //加一个临时bool变量，普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
             bool bTempSizeSmall = bSizeSmall;
 
-            //objWindowsBtnParent.SetActive(bTempSizeSmall);
-
-            //btnVideoClose.gameObject.SetActive(bTempSizeSmall);
-            //btnVideoSize.gameObject.SetActive(bTempSizeSmall);
-
             if (bTempSizeSmall == false)
             {
                 //普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
@@ -905,23 +806,7 @@ namespace SpaceDesign
             bOpenVideo = true;
 
             b3DOK = false;
-            ////===========================================================================
-            ////if (iPlayState == 2 || vdp3D.meshComponent.mesh == null)
-            //if (b3DStop)
-            //{
-            //    //print("==============mesh为空");
-            //    vdp3D.OpenSourceAsync(str3DVideoPth, false, 0, () => { b3DStop = false; Debug.Log("MyLog:3DVideo_Open_OK"); });
-            //    //vdp3D.OpenSource(str3DVideoPth);
-            //}
-            //else
-            ////===========================================================================
-            //{
-            //    if (vdp3D.isPlaying == false)
-            //    {
-            //        //vdp3D.Play();
-            //        vdp3D.JumpFrame(0, false);
-            //    }
-            //}
+
             SetReminder(false);
 
             WatchNowOpen3D();
@@ -959,8 +844,6 @@ namespace SpaceDesign
         {
             if (vdp3D.isPlaying)
                 vdp3D.Pause();
-            //animator3DChar.gameObject.SetActive(false);
-            //particle3D.gameObject.SetActive(false);
             vdp2D.targetTexture.Release();
             SetExpand(true);
             //先设置是否TV
@@ -1060,6 +943,12 @@ namespace SpaceDesign
 
             if (b2D == b2d)
                 return;
+
+            if (bTV)
+            {
+                //TV模式，先显示加载中UI提示
+                objLoadingUI.SetActive(true);
+            }
 
             //这里主要为了停止AR的控制，不用给TV停止（即不用多发送一次黑屏图片）
             //如果从立即观看按钮进来，也不停止
@@ -1217,6 +1106,12 @@ namespace SpaceDesign
         }
         void _DelayPlay()
         {
+            if (bTV)
+            {
+                Debug.Log("切换至TV模式，不延迟播放了");
+                return;
+            }
+
             //先显示Render
             mrVdp3D.enabled = true;
             //===========================================================================
@@ -1339,6 +1234,10 @@ namespace SpaceDesign
         /// </summary>
         public void SetSliderVideo(float f)
         {
+            //3D模式下，3D还没有准备成功，后面不运行
+            if (b2D == false && b3DOK == false)
+                return;
+
             try
             {
                 if (f < -0.5f)
@@ -1369,6 +1268,10 @@ namespace SpaceDesign
         /// </summary>
         public void SetTextCurPlayTime(bool bBySlider /*bool bSetSlider*/)
         {
+            //3D模式下，3D还没有准备成功，后面不运行
+            if (b2D == false && b3DOK == false)
+                return;
+
             float fCurTime = 0;
             try
             {
@@ -1403,6 +1306,10 @@ namespace SpaceDesign
         /// <param name="fTotalTime"></param>
         void SetTotalPlayTime()
         {
+            //3D模式下，3D还没有准备成功，后面不运行
+            if (b2D == false && b3DOK == false)
+                return;
+
             try
             {
                 //这里从帧数换算成秒数
@@ -1433,6 +1340,10 @@ namespace SpaceDesign
         /// </summary>
         void SliderVideoPointerDown()
         {
+            //3D模式下，3D还没有准备成功，后面不运行
+            if (b2D == false && b3DOK == false)
+                return;
+
             ResetAutoHideUITime();
             bSlideDragging = true;
             OnPause();
@@ -1443,6 +1354,10 @@ namespace SpaceDesign
         /// </summary>
         public void SliderVideoPointerUp(bool bSetTV)
         {
+            //3D模式下，3D还没有准备成功，后面不运行
+            if (b2D == false && b3DOK == false)
+                return;
+
             ResetAutoHideUITime();
             bSlideDragging = false;
             if (b2D)
@@ -1457,7 +1372,7 @@ namespace SpaceDesign
 
                 //跳帧，3D视频，按照帧数控制
                 //JumpFrame调用后会直接运行,所以如果是TV的3D模式，后面需要再暂停一下
-                print("vdp3D.JumpFrame");
+                Debug.Log("vdp3D.JumpFrame");
                 bool _bAutoPlay = true;
 
                 //TV的3D模式，拖拽进度条后，这里先暂停了
@@ -1489,3 +1404,67 @@ namespace SpaceDesign
 
     }
 }
+//if (Input.GetKeyDown(KeyCode.Alpha0))
+//{
+//    vdp3D.autoPlay = false;
+//    vdp3D.OpenSource(str3DVideoPth);
+//}
+//if (Input.GetKeyDown(KeyCode.Alpha1))
+//{
+//    vdp3D.autoPlay = true;
+//    vdp3D.OpenSource(str3DVideoPth);
+
+//}
+//if (Input.GetKeyDown(KeyCode.Alpha2))
+//{
+//    vdp3D.OpenSource(str3DVideoPth);
+//    vdp3D.JumpFrame(0, false);
+//}
+//if (Input.GetKeyDown(KeyCode.Alpha3))
+//{
+//    vdp3D.OpenSource(str3DVideoPth);
+//    vdp3D.JumpFrame(0, true);
+//}
+
+//if (Input.GetKeyDown(KeyCode.Alpha4))
+//{
+//    vdp3D.OpenSource(str3DVideoPth);
+//    vdp3D.JumpFrame(1000, false);
+//}
+//if (Input.GetKeyDown(KeyCode.Alpha5))
+//{
+//    vdp3D.OpenSource(str3DVideoPth);
+//    vdp3D.JumpFrame(1000, true);
+//}
+//if (Input.GetKeyDown(KeyCode.Alpha6))
+//{
+//    vdp3D.OpenSource(str3DVideoPth);
+//    vdp3D.Pause();
+//}
+//if (Input.GetKeyDown(KeyCode.Alpha7))
+//{
+//    vdp3D.OpenSource(str3DVideoPth);
+//    vdp3D.Stop();
+//}
+//if (Input.GetKeyDown(KeyCode.Alpha8))
+//{
+//    vdp3D.OpenSource(str3DVideoPth);
+//    vdp3D.JumpFrame(0, true);
+//    vdp3D.Pause();
+//}
+//if (Input.GetKeyDown(KeyCode.A))
+//{
+//    vdp3D.Play();
+//}
+//if (Input.GetKeyDown(KeyCode.B))
+//{
+//    vdp3D.Pause();
+//}
+//if (Input.GetKeyDown(KeyCode.C))
+//{
+//    vdp3D.Stop();
+//}
+//if (Input.GetKeyDown(KeyCode.D))
+//{
+//    vdp3D.frameIndex = 0;
+//}

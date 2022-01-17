@@ -52,13 +52,13 @@ namespace SpaceDesign
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
 
             btnIcon.onPinchDown.AddListener(ClickIcon);
-            btnIconTouch.onPressDown.AddListener(ClickIcon);
+            btnIconTouch.onPressUp.AddListener(ClickIcon);
 
             btnCheckDetail.onPinchDown.AddListener(OnCheckDetail);
-            btnCheckDetailTouch.onPressDown.AddListener(OnCheckDetail);
+            btnCheckDetailTouch.onPressUp.AddListener(OnCheckDetail);
 
             btnQuit.onPinchDown.AddListener(OnQuit);
-            btnQuitTouch.onPressDown.AddListener(OnQuit);
+            btnQuitTouch.onPressUp.AddListener(OnQuit);
 
             timelineHide.SetActive(false);
             timelineShow.SetActive(false);
@@ -69,13 +69,13 @@ namespace SpaceDesign
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
 
             btnIcon.onPinchDown.RemoveListener(ClickIcon);
-            btnIconTouch.onPressDown.RemoveListener(ClickIcon);
+            btnIconTouch.onPressUp.RemoveListener(ClickIcon);
 
             btnCheckDetail.onPinchDown.RemoveListener(OnCheckDetail);
-            btnCheckDetailTouch.onPressDown.RemoveListener(OnCheckDetail);
+            btnCheckDetailTouch.onPressUp.RemoveListener(OnCheckDetail);
 
-            btnQuit.onPinchDown.RemoveListener(OnQuit);
-            btnQuitTouch.onPressDown.RemoveListener(OnQuit);
+            btnQuit.onPinchDown.RemoveAllListeners();//.RemoveListener(OnQuit);
+            btnQuitTouch.onPressUp.RemoveListener(OnQuit);
 
             timelineHide.SetActive(false);
             timelineShow.SetActive(false);
@@ -139,7 +139,7 @@ namespace SpaceDesign
                 if (lastPPS == PlayerPosState.Close)
                     return;
             }
-            
+
             StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
