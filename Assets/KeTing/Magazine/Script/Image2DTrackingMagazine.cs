@@ -25,6 +25,10 @@ namespace SpaceDesign
         private bool bCallback = false;
         //原来的父节点
         private Transform oriParent;
+        /// <summary>
+        /// 是否识别到
+        /// </summary>
+        public bool bVisible = false;
         private void Awake()
         {
             oriParent = transform.parent;
@@ -120,6 +124,7 @@ namespace SpaceDesign
 
         private void SetModelVisible(bool isVisible)
         {
+            bVisible = isVisible;
             if (objTargetModel == null)
                 return;
 

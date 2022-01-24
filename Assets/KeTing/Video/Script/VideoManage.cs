@@ -23,16 +23,16 @@ using UnityEngine.Video;
 
 namespace SpaceDesign
 {
-    public enum VideoAnimType
-    {
-        Center,//【唯一】最中间居中的
-        AllRight,//【唯一】全部（包括不显示的）：最右边的
-        AlLeft,//【唯一】全部（包括不显示的）：最左边的
-        ShowRight,//【唯一】显示：最右边的
-        ShowLeft,//【唯一】显示：最左边的
-        Other,//【不唯一】
-    }
-
+    //public enum VideoAnimType
+    //{
+    //    Center,//【唯一】最中间居中的
+    //    AllRight,//【唯一】全部（包括不显示的）：最右边的
+    //    AlLeft,//【唯一】全部（包括不显示的）：最左边的
+    //    ShowRight,//【唯一】显示：最右边的
+    //    ShowLeft,//【唯一】显示：最左边的
+    //    Other,//【不唯一】
+    //}
+  
     public class VideoManage : MonoBehaviour
     {
         static VideoManage inst;
@@ -45,6 +45,7 @@ namespace SpaceDesign
                 return inst;
             }
         }
+
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
         //Icon、UI等正在切换中
@@ -144,10 +145,10 @@ namespace SpaceDesign
             sliderVideo.onInteractionStart.RemoveAllListeners();
             sliderVideo.onInteractionEnd.RemoveAllListeners();
         }
-        private void OnDestroy()
-        {
-            OnStop();
-        }
+        //private void OnDestroy()
+        //{
+        //    OnStop();
+        //}
         void Start()
         {
             HideLoadingUI();
@@ -617,14 +618,14 @@ namespace SpaceDesign
         public AudioSource ads3D;
         //3D视频的图片
         public Sprite spr3DVideo;
-        //当前播放对象的总时长（这里是秒）
-        public float fTotalPlayTime = 0.1f;
-        //2D总长（这里是帧数，不是秒数，秒数乘以帧率）VideoPlayer的总帧数还要减1，因为最后一帧不播放
-        public float fTotalFrame2D;
         //3D总长（这里是帧数，不是秒数，秒数乘以帧率）容积视频的总帧数还要减1，因为最后一帧不播放
         float fTotalFrame3D = 2613;
         //3D的音乐总长，（这里是秒数，跟容积视频的长度是不同的）
         float fTotalTime3DMusic = 115.271f;
+        //当前播放对象的总时长（这里是秒）
+        public float fTotalPlayTime = 0.1f;
+        //2D总长（这里是帧数，不是秒数，秒数乘以帧率）VideoPlayer的总帧数还要减1，因为最后一帧不播放
+        public float fTotalFrame2D;
 
         //2D视频播放
         public VideoPlayer vdp2D;
@@ -1303,7 +1304,6 @@ namespace SpaceDesign
         /// <summary>
         /// 设置总播放时间
         /// </summary>
-        /// <param name="fTotalTime"></param>
         void SetTotalPlayTime()
         {
             //3D模式下，3D还没有准备成功，后面不运行

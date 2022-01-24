@@ -40,14 +40,14 @@ public class RoomControl : MonoBehaviour
     /// 保存生成的对象
     /// </summary>
     public Transform objParent;
-    
+
     /// <summary>
     /// 区间
     /// </summary>
     float xmin, xmax, zmin, zmax;
     List<GameObjectData> objList = new List<GameObjectData>();
-    
-    int curObjIndex=-1;
+
+    int curObjIndex = -1;
 
     //public GameObject textMesh;
     /// <summary>
@@ -58,7 +58,7 @@ public class RoomControl : MonoBehaviour
     /// 是否为预览模式
     /// </summary>
     bool isPreview = false;
-    
+
     private void OnDestroy()
     {
         //Debug.Log("删除房间");
@@ -70,8 +70,8 @@ public class RoomControl : MonoBehaviour
         }
         objList.Clear();
 
-        roomDatas.Clear();
-        roomDatas = null;
+        //roomDatas.Clear();
+        //roomDatas = null;
 
         pointPrefab = null;
 
@@ -105,19 +105,19 @@ public class RoomControl : MonoBehaviour
 #else
 
 #endif
-        roomPos = XRCameraManager.Instance.stereoCamera.transform.position+new Vector3(0,-0.5f,0.5f);
-        
+        roomPos = XRCameraManager.Instance.stereoCamera.transform.position + new Vector3(0, -0.5f, 0.5f);
+
         //textMesh.transform.position = roomPos;
 
         for (int i = 0; i < 4; i++)
         {
-            GameObject obj = Instantiate(pointPrefab,this.transform);
+            GameObject obj = Instantiate(pointPrefab, this.transform);
             obj.transform.localScale = Vector3.one * 0.1f;
             obj.transform.localRotation = Quaternion.identity;
-            
+
             pointTranList.Add(obj.transform);
         }
-        
+
         pointTranList[0].position = roomPos + new Vector3(-startMax, 0, -startMax);
         pointTranList[1].position = roomPos + new Vector3(-startMax, 0, startMax);
         pointTranList[2].position = roomPos + new Vector3(startMax, 0, startMax);
@@ -125,27 +125,33 @@ public class RoomControl : MonoBehaviour
 
         roomPos.y += 0.5f;
     }
-    
+
     void LoadPoint(List<SPoint> sPoints)
     {
-        //textMesh.transform.position = Vector3.zero;
-        
-        //生成四周锚点
-        for (int i = 0; i < sPoints.Count; i++)
+        if (sPoints.Count > 0)
         {
-            GameObject obj = Instantiate(pointPrefab);
+            //textMesh.transform.position = Vector3.zero;
+            //生成四周锚点
+            for (int i = 0; i < sPoints.Count; i++)
+            {
+                GameObject obj = Instantiate(pointPrefab);
 
-            obj.transform.parent = this.transform;
-            obj.transform.localScale = Vector3.one * 0.1f;
-            obj.transform.localRotation = Quaternion.identity;
-            obj.transform.position = new Vector3(sPoints[i].posx, sPoints[i].posy, sPoints[i].posz);
-            
-            pointTranList.Add(obj.transform);
-            //计算提示文字的位置
-            //textMesh.transform.position += obj.transform.position;
+                obj.transform.parent = this.transform;
+                obj.transform.localScale = Vector3.one * 0.1f;
+                obj.transform.localRotation = Quaternion.identity;
+                obj.transform.position = new Vector3(sPoints[i].posx, sPoints[i].posy, sPoints[i].posz);
+
+                pointTranList.Add(obj.transform);
+                //计算提示文字的位置
+                //textMesh.transform.position += obj.transform.position;
+            }
+            //放在中心位置
+            //textMesh.transform.position /= sPoints.Count;
         }
-        //放在中心位置
-        //textMesh.transform.position /= sPoints.Count;
+        else
+        {
+            CreatePoint();
+        }
     }
 
     // Update is called once per frame
@@ -191,6 +197,7 @@ public class RoomControl : MonoBehaviour
         else
         {
             //编辑模式下画线
+            line.gameObject.SetActive(true);
             line.positionCount = 5;
             line.SetPosition(0, new Vector3(xmin, y, zmin));
             line.SetPosition(1, new Vector3(xmin, y, zmax));
@@ -204,7 +211,7 @@ public class RoomControl : MonoBehaviour
             //else
             //    textMesh.SetActive(true);
         }
-        
+
     }
 
     void SetObjActive()
@@ -244,7 +251,7 @@ public class RoomControl : MonoBehaviour
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -268,7 +275,7 @@ public class RoomControl : MonoBehaviour
             GameObject obj = Instantiate(prefab3d);
 
             obj.transform.parent = objParent;
-            obj.transform.position = eyeTran.position+ eyeTran.forward*1.5f;
+            obj.transform.position = eyeTran.position + eyeTran.forward * 1.5f;
             obj.transform.rotation = Quaternion.identity;
             obj.transform.localScale = Vector3.one;
 
@@ -276,7 +283,7 @@ public class RoomControl : MonoBehaviour
 
             objList.Add(gameObjectData);
             //更新选中状态，赋值索引
-            SetShowObjNum(objList.Count-1);
+            SetShowObjNum(objList.Count - 1);
             obj.GetComponent<ChangeSate>().index = objList.Count - 1;
         }
         catch (Exception e)
@@ -285,7 +292,7 @@ public class RoomControl : MonoBehaviour
         }
     }
 
-    void LoadPrefab3D(List<ObjectData> ObjectList,Dictionary<string,GameObject> prefabDics)
+    void LoadPrefab3D(List<ObjectData> ObjectList, Dictionary<string, GameObject> prefabDics)
     {
         try
         {
@@ -311,9 +318,9 @@ public class RoomControl : MonoBehaviour
                     obj.GetComponent<ChangeSate>().index = objList.Count - 1;
                 }
             }
-            
+
             //更新选中状态，赋值索引
-            if (objList.Count>0)
+            if (objList.Count > 0)
                 SetShowObjNum(objList.Count - 1);
         }
         catch (Exception e)
@@ -330,7 +337,7 @@ public class RoomControl : MonoBehaviour
     {
         if (index != -1)
         {
-            if (index==curObjIndex)
+            if (index == curObjIndex)
                 return;
             //上一个关掉
             if (curObjIndex >= 0 && curObjIndex < objList.Count)
@@ -353,7 +360,7 @@ public class RoomControl : MonoBehaviour
         if (curObjIndex == -1)
         {
             //Debug.Log("缺少curprefabID");
-            return ;
+            return;
         }
 
         string id = objList[curObjIndex].id;
@@ -365,7 +372,7 @@ public class RoomControl : MonoBehaviour
         objList[curObjIndex] = null;
         objList.RemoveAt(curObjIndex);
         curObjIndex = objList.Count - 1;
-        if (curObjIndex!=-1)
+        if (curObjIndex != -1)
             objList[curObjIndex].obj.GetComponent<ChangeSate>().HightLightOn();
 
         ResetIndex();
@@ -375,7 +382,7 @@ public class RoomControl : MonoBehaviour
     /// </summary>
     void ResetIndex()
     {
-        if (curObjIndex ==-1)
+        if (curObjIndex == -1)
             return;
         for (int i = curObjIndex; i < objList.Count; i++)
         {
@@ -391,7 +398,7 @@ public class RoomControl : MonoBehaviour
             prefabManager.ResetObjUI(objList[i].id);
         }
     }
-    
+
     public void SaveData()
     {
         roomDatas.ObjectList.Clear();
@@ -414,7 +421,7 @@ public class RoomControl : MonoBehaviour
 
             roomDatas.ObjectList.Add(objectData);
         }
-        
+
         //Debug.Log(roomDatas.ObjectList.Count);
 
         for (int i = 0; i < pointTranList.Count; i++)
@@ -442,7 +449,7 @@ public class RoomControl : MonoBehaviour
     /// 根据房间数据设置和生成物体和锚点
     /// </summary>
     /// <param name="roomDatas"></param>
-    public void SetRoomData(RoomDatas roomDatas, Dictionary<string,GameObject> prefabDics)
+    public void SetRoomData(RoomDatas roomDatas, Dictionary<string, GameObject> prefabDics)
     {
         //是否为预览模式
         isPreview = true;

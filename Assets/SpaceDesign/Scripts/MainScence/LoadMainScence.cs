@@ -158,6 +158,16 @@ public class LoadMainScence : MonoBehaviour
         //    canvas[i].worldCamera = eventCamera;
         //}
 
+
+#if UNITY_EDITOR
+        if (bTest)
+        {
+            LoadGameObjectData();
+            return;
+        }
+#endif
+
+
         //新手引导先关闭（开场动画完毕后开启）
         noviceGuidanceObj.SetActive(false);
         //播放开场动效

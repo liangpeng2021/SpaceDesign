@@ -1,27 +1,24 @@
-﻿/* Create by zh at 2021-10-11
-
-    杂志控制脚本
-
- */
-
-using OXRTK.ARHandTracking;
+﻿using OXRTK.ARHandTracking;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SpaceDesign
 {
-    public class MagazineManage : MonoBehaviour
+    public class VideoManage2 : MonoBehaviour
     {
-        static MagazineManage inst;
-        public static MagazineManage Inst
+        static VideoManage2 inst;
+        public static VideoManage2 Inst
         {
             get
             {
                 if (inst == null)
-                    inst = FindObjectOfType<MagazineManage>();
+                    inst = FindObjectOfType<VideoManage2>();
                 return inst;
             }
         }
+
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
         //Icon、UI等正在切换中
@@ -31,73 +28,52 @@ namespace SpaceDesign
         //对象初始位置
         [SerializeField]
         private Vector3 v3OriPos;
-
         //===========================================================================
         //临时测距
         public TextMesh tt;
         //===========================================================================
 
-        //edit by lp,添加近场点击事件
+        [Header("===Icon变化，远距离")]
+        //Icon的对象
+        public Transform traIcon;
+        //Icon对象的AR手势Button按钮
+        private ButtonRayReceiver btnIcon;
+        //吸引态，上下移动动画
+        private Animator animIconFar;
+        //轻交互，半球动画+音符动画
+        public Animator[] animIconMiddle;
+
+        [Header("===重交互，大UI，近距离")]
+        //UI的变化速度
+        public float fUISpeed = 5;
+
+        //卡丁车模式（绑定在卡丁车界面）
+        public bool bKarting = false;
+        //加载中等待的UI对象
+        public GameObject objLoadingUI;
+
         void Awake()
         {
             animIconFar = traIcon.GetComponent<Animator>();
             btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
-            btnIconTouch = traIcon.GetComponent<ButtonTouchableReceiver>();
-
-            btnCheckDetailTouch = btnCheckDetail.GetComponent<ButtonTouchableReceiver>();
-            btnQuitTouch = btnQuit.GetComponent<ButtonTouchableReceiver>();
         }
         void OnEnable()
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
-
             btnIcon.onPinchDown.AddListener(ClickIcon);
-            btnIconTouch.onPressUp.AddListener(ClickIcon);
-
-            btnCheckDetail.onPinchDown.AddListener(OnCheckDetail);
-            btnCheckDetailTouch.onPressUp.AddListener(OnCheckDetail);
-
-            btnQuit.onPinchDown.AddListener(OnQuit);
-            btnQuitTouch.onPressUp.AddListener(OnQuit);
-
-            timelineHide.SetActive(false);
-            timelineShow.SetActive(false);
+            HideLoadingUI();
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
-
-            btnIcon.onPinchDown.RemoveListener(ClickIcon);
-            btnIconTouch.onPressUp.RemoveListener(ClickIcon);
-
-            btnCheckDetail.onPinchDown.RemoveListener(OnCheckDetail);
-            btnCheckDetailTouch.onPressUp.RemoveListener(OnCheckDetail);
-
-            btnQuit.onPinchDown.RemoveAllListeners();//.RemoveListener(OnQuit);
-            btnQuitTouch.onPressUp.RemoveListener(OnQuit);
-
-            timelineHide.SetActive(false);
-            timelineShow.SetActive(false);
+            btnIcon.onPinchDown.RemoveAllListeners();
+            HideLoadingUI();
         }
-        //end
 
         void Start()
         {
-            v3OriPos = traIconRoot.position;// this.transform.position;
-            //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-            //traIconRoot.SetParent(null);
-            traIconRoot.SetParent(transform.parent);
-        }
-        void OnDestroy()
-        {
-            StopAllCoroutines();
-            if (traIconRoot != null)
-            {
-                GameObject obj = traIconRoot.gameObject;
-                if (obj != null)
-                    DestroyImmediate(obj);
-            }
+            HideLoadingUI();
         }
 
         /// <summary>
@@ -105,21 +81,21 @@ namespace SpaceDesign
         /// </summary>
         public void RefreshPos(Vector3 pos)
         {
+            VideoUICtr.Inst.AutoSmall(pos);
             //if (bUIChanging == true)
             //    return;
 
-            Vector3 _v3 = v3OriPos;
+            Vector3 _v3 = traIcon.position;
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
 
             tt.text = _dis.ToString();
 
-
             PlayerPosState lastPPS = curPlayerPosState;
 
-            float _fFar = LoadPrefab.IconDisData.MagazineFar;
-            float _fMid = LoadPrefab.IconDisData.MagazineMiddle;
+            float _fFar = LoadPrefab.IconDisData.VideoFar;
+            float _fMid = LoadPrefab.IconDisData.VideoMiddle;
 
             if (_dis > _fFar)
             {
@@ -152,6 +128,8 @@ namespace SpaceDesign
         {
             //print($"刷新位置，上一状态：{lastPPS}，目标状态:{curPlayerPosState}");
 
+            //WaitForSeconds _wfs = new WaitForSeconds(0.1f);
+
             if (lastPPS == PlayerPosState.Far)
             {
                 if (curPlayerPosState == PlayerPosState.Middle)/// 远距离=>中距离
@@ -180,7 +158,6 @@ namespace SpaceDesign
                     yield return IEMiddleToFar();
                 }
             }
-
             yield return 0;
         }
 
@@ -189,6 +166,10 @@ namespace SpaceDesign
         /// </summary>
         IEnumerator IEFarToMiddle()
         {
+            //开启电视的模式下（无论TV还是AR），都不判断了
+            if (VideoUICtr.Inst.bOpenVideo)
+                yield break;
+
             //UI开始变化
             bUIChanging = true;
 
@@ -210,6 +191,10 @@ namespace SpaceDesign
         /// </summary>
         IEnumerator IEMiddleToFar()
         {
+            //开启电视的模式下（无论TV还是AR），都不判断了
+            if (VideoUICtr.Inst.bOpenVideo)
+                yield break;
+
             //UI开始变化
             bUIChanging = true;
 
@@ -226,8 +211,6 @@ namespace SpaceDesign
             animIconFar.enabled = false;
             traIcon.gameObject.SetActive(true);
 
-            OnQuit();
-
             yield return 0;
             //UI变化结束
             bUIChanging = false;
@@ -237,10 +220,16 @@ namespace SpaceDesign
         /// </summary>
         IEnumerator IEMiddleToClose()
         {
+            //开启电视的模式下（无论TV还是AR），都不判断了
+            if (VideoUICtr.Inst.bOpenVideo)
+                yield break;
+
             //UI开始变化
             bUIChanging = true;
 
             //中距离=>近距离
+            if (VideoUICtr.Inst.curVideoUIType != VideoUIType.Reminder)
+                VideoUICtr.Inst.SetReminderUI(false, true);
 
             while (true)
             {
@@ -253,13 +242,10 @@ namespace SpaceDesign
                 }
                 yield return 0;
             }
-
-            //启动Mark
-            markTrackMagazine.enabled = true;
-            markTrackMagazine.StartTrack();
-
             //UI变化结束
             bUIChanging = false;
+
+            yield return 0;
         }
 
         /// <summary>
@@ -267,15 +253,29 @@ namespace SpaceDesign
         /// </summary>
         IEnumerator IECloseToMiddle()
         {
+            //开启电视的模式下（无论TV还是AR），都不判断了
+            if (VideoUICtr.Inst.bOpenVideo)
+                yield break;
+
             //UI开始变化
             bUIChanging = true;
 
-            //近距离=>中距离
+            VideoUICtr.Inst.objWindowsBtnParent.SetActive(false);
+
+
+            //中距离=>近距离
+            if (VideoUICtr.Inst.curVideoUIType == VideoUIType.Reminder)
+                VideoUICtr.Inst.SetReminderUI(false, false);
+            //===========================================================================
+            //这里为什么这么做忘记了，待修改
+            //else if (bExpand == true)
+            //    SetExpand(false);
+            //===========================================================================
 
             Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
-                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fUISpeed * Time.deltaTime);
+                traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, fUISpeed * 2f * Time.deltaTime);
                 float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
                 if (_fDis < fThreshold)
                 {
@@ -285,29 +285,10 @@ namespace SpaceDesign
                 yield return 0;
             }
 
-            markTrackMagazine.StopTrack();
-            markTrackMagazine.enabled = false;
-
-            OnQuit();
-
             //UI变化结束
             bUIChanging = false;
+            yield return 0;
         }
-
-        #region Icon变化
-        [Header("===Icon变化")]
-        //Icon的对象的总根节点
-        public Transform traIconRoot;
-        //Icon的对象
-        public Transform traIcon;
-        //Icon对象的AR手势Button按钮
-        private ButtonRayReceiver btnIcon;
-        ButtonTouchableReceiver btnIconTouch;
-
-        //吸引态，上下移动动画
-        private Animator animIconFar;
-        //轻交互，半球动画+音符动画
-        public Animator[] animIconMiddle;
 
         /// <summary>
         /// 点击Icon
@@ -316,58 +297,23 @@ namespace SpaceDesign
         {
             if (bUIChanging)
                 return;
+
             if (curPlayerPosState == PlayerPosState.Close)
             {
                 StopCoroutine("IEMiddleToClose");
                 StartCoroutine("IEMiddleToClose");
             }
         }
-        #endregion
-
-        #region 重交互，大UI，近距离
-        [Header("===重交互，大UI，近距离")]
-        //UI的变化速度
-        public float fUISpeed = 5;
-        //Mark追踪对象，杂志
-        public Image2DTrackingMagazine markTrackMagazine;
-        public GameObject timelineShow;
-        public GameObject timelineHide;
-        //查看翻译按钮
-        public ButtonRayReceiver btnCheckDetail;
-        ButtonTouchableReceiver btnCheckDetailTouch;
-
-        //查看翻译按钮的父节点
-        public GameObject objCheckDetailParent;
-        //退出翻译按钮
-        public ButtonRayReceiver btnQuit;
-        ButtonTouchableReceiver btnQuitTouch;
 
         /// <summary>
-        /// 查看详情按钮响应
+        /// TV模式下，播放后，隐藏加载提示UI（2D，3D根据各自的播放流程判断隐藏）
         /// </summary>
-        public void OnCheckDetail()
+        void HideLoadingUI()
         {
-            objCheckDetailParent.SetActive(false);
-            //btnCheckDetail.gameObject.SetActive(false);
-            timelineShow.SetActive(true);
-            timelineHide.SetActive(false);
-            //markTrackMagazine.StopTrack();
-            //markTrackMagazine.enabled = false;
-        }
+            //print("隐藏了");
 
-        /// <summary>
-        /// 关闭详情界面响应
-        /// </summary>
-        public void OnQuit()
-        {
-            objCheckDetailParent.SetActive(true);
-            btnCheckDetail.gameObject.SetActive(markTrackMagazine.bVisible);
-            if (timelineShow.activeSelf == true)
-                timelineHide.SetActive(true);
-            timelineShow.SetActive(false);
-            //markTrackMagazine.StopTrack();
-            //markTrackMagazine.enabled = false;
+            if (objLoadingUI.activeSelf == true)
+                objLoadingUI.SetActive(false);
         }
-        #endregion
     }
 }

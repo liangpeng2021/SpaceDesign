@@ -258,9 +258,9 @@ namespace SpaceDesign
             }
             if (startPayTouch != null)
             {
-                if (startPayTouch.onPressDown == null)
-                    startPayTouch.onPressDown = new UnityEngine.Events.UnityEvent();
-                startPayTouch.onPressDown.AddListener(StartPay);
+                if (startPayTouch.onPressUp == null)
+                    startPayTouch.onPressUp = new UnityEngine.Events.UnityEvent();
+                startPayTouch.onPressUp.AddListener(StartPay);
             }
 
             justpayRayReceiver.onPinchDown.AddListener(PaySuccess);
@@ -270,9 +270,9 @@ namespace SpaceDesign
             }
             if (justPayTouch != null)
             {
-                if (justPayTouch.onPressDown == null)
-                    justPayTouch.onPressDown = new UnityEngine.Events.UnityEvent();
-                justPayTouch.onPressDown.AddListener(PaySuccess);
+                if (justPayTouch.onPressUp == null)
+                    justPayTouch.onPressUp = new UnityEngine.Events.UnityEvent();
+                justPayTouch.onPressUp.AddListener(PaySuccess);
             }
 
             if (boundingBox == null)
@@ -292,12 +292,12 @@ namespace SpaceDesign
         private void OnDisable()
         {
             justpayRayReceiver.onPinchDown.RemoveListener(PaySuccess);
-            if (startPayTouch != null && startPayTouch.onPressDown != null)
-                startPayTouch.onPressDown.RemoveAllListeners();
+            if (startPayTouch != null && startPayTouch.onPressUp != null)
+                startPayTouch.onPressUp.RemoveAllListeners();
 
             startpayRayReceiver.onPinchDown.RemoveListener(StartPay);
-            if (justPayTouch != null && justPayTouch.onPressDown != null)
-                justPayTouch.onPressDown.RemoveAllListeners();
+            if (justPayTouch != null && justPayTouch.onPressUp != null)
+                justPayTouch.onPressUp.RemoveAllListeners();
 
             if (boundingBox)
             {

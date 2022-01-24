@@ -83,7 +83,7 @@ public class EditCameraRay : MonoBehaviour
 
             if (canDrag && isMouseDown)
             {
-                if (!hitpointhandler.gameObject.activeInHierarchy)
+                if (hitpointhandler && !hitpointhandler.gameObject.activeInHierarchy)
                 {
                     isMouseDown = false;
                     hitpointhandler = null;

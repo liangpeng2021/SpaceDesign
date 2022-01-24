@@ -155,7 +155,7 @@ namespace SpaceDesign
                 _tra.forward = -_tra.forward;
             }
         }
-    
+
         void Update()
         {
             if (bTiming)
@@ -166,17 +166,23 @@ namespace SpaceDesign
                     fTiming = 0;
                     bTiming = false;
 
+                    Debug.Log("Image2DTrackingDemoLog：计时够3秒了");
+
                     if (TaidengManager.Inst == null)
                         return;
 
                     //TaidengManager.Inst.transform.SetParent(oriParent);
                     TaidengManager.Inst.taidengController.ShowMark(false);
+                    Debug.Log("Image2DTrackingDemoLog：对象隐藏了");
+
                 }
             }
         }
 
         private void SetModelVisible(bool isVisible)
         {
+            Debug.Log("Image2DTrackingDemoLog:SetModelVisible-" + isVisible);
+
             bMarking = isVisible;
             if (objTargetModel == null)
                 return;
@@ -185,6 +191,9 @@ namespace SpaceDesign
                 return;
 
             fTiming = 0;
+
+            Debug.Log("Image2DTrackingDemoLog：计时清零：isVisible" + isVisible + "---fTiming :" + fTiming);
+
             //objTargetModel.SetActive(isVisible);
             if (isVisible)
             {
