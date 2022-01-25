@@ -42,6 +42,7 @@ namespace SpaceDesign
         {
             Debug.Log("MyLog::StartTrackTranslate");
 #if UNITY_EDITOR
+            SetModelVisible(true);
             return;
 #endif
             if (Image2DTrackingManager.Instance == null)
@@ -67,12 +68,13 @@ namespace SpaceDesign
         {
             Debug.Log("MyLog::StopTrack");
 #if UNITY_EDITOR
+            SetModelVisible(false);
             return;
 #endif
             if (Image2DTrackingManager.Instance == null)
                 return;
 
-            if (Image2DTrackingManager.Instance.m_TrackerPath == null)
+            if (Image2DTrackingManager.Instance.m_TrackerPath == null || Image2DTrackingManager.Instance.m_TrackerPath == "")
                 return;
             Image2DTrackingManager.Instance.TrackStop();
             Image2DTrackingManager.Instance.m_TrackerPath = null;
@@ -139,7 +141,7 @@ namespace SpaceDesign
             if (isVisible)
             {
                 TranslateManage.Inst.transform.SetParent(objTargetModel);
-                TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.02f, -0.25f);
+                TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.1f, -0.25f);
                 //TranslateManage.Inst.transform.localPosition = new Vector3(0, 0 - 0.25f);
                 TranslateManage.Inst.transform.localEulerAngles = new Vector3(0, 180f, 0);
             }

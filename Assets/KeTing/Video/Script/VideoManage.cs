@@ -1395,10 +1395,20 @@ namespace SpaceDesign
             else
             {
                 //AR的拖拽播放，用恢复暂停
-                PlayAR(true);
+                //PlayAR(true);
+                //进度条抬起后，延迟0.5秒，再播放，防止回跳一下问题
+                Invoke("InvokeSliderUp", 0.5f);
             }
             print("跳转进度条了");
 
+        }
+		
+		/// <summary>
+        /// 进度条抬起后，延迟0.5秒，再播放，防止回跳一下问题
+        /// </summary>
+        void InvokeSliderUp()
+        {
+            PlayAR(true);
         }
         #endregion
 

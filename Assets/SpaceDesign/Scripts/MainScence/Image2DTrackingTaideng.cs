@@ -71,7 +71,7 @@ namespace SpaceDesign
             if (Image2DTrackingManager.Instance == null)
                 return;
 
-            if (Image2DTrackingManager.Instance.m_TrackerPath == null)
+            if (Image2DTrackingManager.Instance.m_TrackerPath == null || Image2DTrackingManager.Instance.m_TrackerPath == "")
                 return;
             Image2DTrackingManager.Instance.TrackStop();
             Image2DTrackingManager.Instance.m_TrackerPath = null;

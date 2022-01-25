@@ -2,10 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using XR;
 public class Image2DTrackingDemo : TrackableEventHandler
 {
     public GameObject targetModel;
+    public Image StatusImage;
 
     private void Awake()
     {
@@ -21,6 +23,14 @@ public class Image2DTrackingDemo : TrackableEventHandler
     {
         Image2DTrackingManager.Instance.TrackStop();
     }
+    /// <summary>
+    /// 切换模型
+    /// </summary>
+    public void ChangeTracker() {
+
+        //Image2DTrackingManager.Instance.ChangeTracker("传入FeamName", "传入Feam所在文件夹名称");
+
+    }
 
     public override void OnAddTacker()
     {
@@ -32,6 +42,7 @@ public class Image2DTrackingDemo : TrackableEventHandler
     {
         base.OnGetTrackerInfo();
         Debug.Log("Image2DTrackingDemoLog:OnGetTrackerInfo");
+        StatusImage.color = Color.green;
     }
 
     public override void OnStart()
@@ -39,6 +50,7 @@ public class Image2DTrackingDemo : TrackableEventHandler
         base.OnStart();
         Debug.Log("Image2DTrackingDemoLog:OnStart");
         SetModelVisible(false);
+        StatusImage.color = Color.white;
     }
 
     public override void OnStop()
@@ -46,6 +58,7 @@ public class Image2DTrackingDemo : TrackableEventHandler
         base.OnStop();
         Debug.Log("Image2DTrackingDemoLog:OnStop");
         SetModelVisible(false);
+        StatusImage.color = Color.white;
     }
 
     public override void OnFindTarget()

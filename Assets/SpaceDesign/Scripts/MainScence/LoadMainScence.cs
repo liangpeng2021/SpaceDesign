@@ -205,12 +205,9 @@ public class LoadMainScence : MonoBehaviour
         path = Path.Combine(path, "scence.scn");
         objectDatas = MyDeSerial(path);
 
-        if (objectDatas == null)
+        if (objectDatas != null)
         {
-            return;
-        }
-
-        for (int i = 0; i < objectDatas.roomDatasList.Count; i++)
+            for (int i = 0; i < objectDatas.roomDatasList.Count; i++)
         {
             GameObject obj = Instantiate(roomPrefab);
             RoomControl roomControl = obj.GetComponent<RoomControl>();
@@ -222,7 +219,8 @@ public class LoadMainScence : MonoBehaviour
             }
         }
         //Debug.Log("MyLog::objectDatas.roomDatasList.Count:" + objectDatas.roomDatasList.Count);
-
+        }
+		
         //------------ Modify by zh ------------
         //加载触点触发距离数据
         path = SpaceDesign.PathConfig.GetPth();
