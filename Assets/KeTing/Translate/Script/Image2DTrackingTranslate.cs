@@ -28,7 +28,7 @@ namespace SpaceDesign
         /// <summary>
         /// 是否识别到
         /// </summary>
-        public bool bVisible = false;
+        public bool bMarking = false;
         private void Awake()
         {
             oriParent = transform.parent;
@@ -36,11 +36,17 @@ namespace SpaceDesign
             //objTargetModel = Image2DTrackingManager.Instance.transform.Find("root/child");
             //objShow3 = objTargetModel.Find("Capsule").gameObject;
             SetModelVisible(false);
+
+            //v3PosOri = TranslateManage.Inst.transform.position ;
+            //v3RotOri = TranslateManage.Inst.transform.eulerAngles;
         }
 
         public void StartTrack()
         {
-            Debug.Log("MyLog::StartTrackTranslate");
+            if (JudgeGo() == false)
+                return;
+
+            Debug.Log("TranslateMark:StartTrackTranslate");
 #if UNITY_EDITOR
             SetModelVisible(true);
             return;
@@ -66,7 +72,10 @@ namespace SpaceDesign
 
         public void StopTrack()
         {
-            Debug.Log("MyLog::StopTrack");
+            if (JudgeGo() == false)
+                return;
+
+            Debug.Log("TranslateMark:StopTrack");
 #if UNITY_EDITOR
             SetModelVisible(false);
             return;
@@ -74,7 +83,7 @@ namespace SpaceDesign
             if (Image2DTrackingManager.Instance == null)
                 return;
 
-            if (Image2DTrackingManager.Instance.m_TrackerPath == null || Image2DTrackingManager.Instance.m_TrackerPath == "")
+            if (String.IsNullOrEmpty(Image2DTrackingManager.Instance.m_TrackerPath))
                 return;
             Image2DTrackingManager.Instance.TrackStop();
             Image2DTrackingManager.Instance.m_TrackerPath = null;
@@ -84,30 +93,42 @@ namespace SpaceDesign
 
         public override void OnAddTacker()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnAddTacker();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnAddTacker");
+            Debug.Log("TranslateMark:OnAddTacker");
         }
 
         public override void OnGetTrackerInfo()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnGetTrackerInfo();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnGetTrackerInfo");
+            Debug.Log("TranslateMark:OnGetTrackerInfo");
         }
 
         public override void OnStart()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnStart();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnStart");
+            Debug.Log("TranslateMark:OnStart");
             SetModelVisible(false);
         }
 
         public override void OnStop()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnStop();
-            Debug.Log("Image2DTrackingDemoLog:OnStop");
+            Debug.Log("TranslateMark:OnStop");
             SetModelVisible(false);
 
             bCallback = false;
@@ -115,30 +136,56 @@ namespace SpaceDesign
 
         public override void OnFindTarget()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnFindTarget();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnFindTarget");
+            Debug.Log("TranslateMark:OnFindTarget");
             SetModelVisible(true);
         }
 
         public override void OnLossTarget()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnLossTarget();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnLossTarget");
+            Debug.Log("TranslateMark:OnLossTarget");
             SetModelVisible(false);
         }
 
+        //Vector3 v3PosOri;
+        //Vector3 v3RotOri;
+
+        //Vector3 v3PosOff = new Vector3(0, 0.1f, -0.25f);
+        //Vector3 v3RotOff = new Vector3(0, 180f, 0);
+        //private void LateUpdate()
+        //{
+        //    if (bMarking)
+        //    {
+        //        if (TranslateManage.Inst == null)
+        //            return;
+
+        //        TranslateManage.Inst.transform.position = objTargetModel.position + v3PosOff;
+        //        TranslateManage.Inst.transform.eulerAngles = objTargetModel.eulerAngles + v3RotOff;
+        //    }
+        //}
 
         private void SetModelVisible(bool isVisible)
         {
-            bVisible = isVisible;
+            if (JudgeGo() == false)
+                return;
+
+            bMarking = isVisible;
             if (objTargetModel == null)
                 return;
             if (TranslateManage.Inst == null)
                 return;
 
-            if (isVisible)
+            Debug.Log("TranslateMark:bMarking" + bMarking);
+            if (bMarking)
             {
                 TranslateManage.Inst.transform.SetParent(objTargetModel);
                 TranslateManage.Inst.transform.localPosition = new Vector3(0, 0.1f, -0.25f);
@@ -147,12 +194,27 @@ namespace SpaceDesign
             }
             else
             {
+                //TranslateManage.Inst.transform.position = v3PosOri;
+                //TranslateManage.Inst.transform.eulerAngles = v3RotOri;
                 TranslateManage.Inst.transform.SetParent(oriParent);
                 //看不到后隐藏对象
                 TranslateManage.Inst.OnQuit();
             }
             //OnQuit函数中会隐藏btnCheckDetail对象，这里如果是开启要放在最下面
-            TranslateManage.Inst.btnCheckTranslate.gameObject.SetActive(isVisible);
+            TranslateManage.Inst.btnCheckTranslate.gameObject.SetActive(bMarking);
+        }
+
+        bool JudgeGo()
+        {
+            if (TranslateManage.Inst.curPlayerPosState == PlayerPosState.Close)
+            {
+                return true;
+            }
+            else
+            {
+                bMarking = false;
+                return false;
+            }
         }
     }
 }

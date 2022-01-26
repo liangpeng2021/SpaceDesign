@@ -38,8 +38,6 @@ namespace SpaceDesign
         public float fTotalFrame = 1;
         //当前播放视频的帧率
         public float fFrameRate;
-        //当前播放到第几帧
-        //public long lCurFrame = 0;
 
         //视频的状态（默认是Stop状态）
         public VideoState playState = VideoState.Stop;
@@ -50,10 +48,6 @@ namespace SpaceDesign
         }
         void OnEnable()
         {
-            //VideoControl.VideoPlayEvent += OnPlay;
-            //VideoControl.VideoPauseEvent += OnPause;
-            //VideoControl.VideoStopEvent += OnStop;
-            //VideoControl.VideoJumpEvent += OnJump;
             VideoUICtr.ChangeVideTypeEvent += ChangeVideType;
             btnPlay.onPinchDown.AddListener(OnPlay);
             btnPause.onPinchDown.AddListener(OnPause);
@@ -64,10 +58,6 @@ namespace SpaceDesign
 
         void OnDisable()
         {
-            //VideoControl.VideoPlayEvent -= OnPlay;
-            //VideoControl.VideoPauseEvent -= OnPause;
-            //VideoControl.VideoStopEvent -= OnStop;
-            //VideoControl.VideoJumpEvent -= OnJump;
             VideoUICtr.ChangeVideTypeEvent -= ChangeVideType;
             btnPlay.onPinchDown.RemoveAllListeners();
             btnPause.onPinchDown.RemoveAllListeners();
@@ -85,11 +75,9 @@ namespace SpaceDesign
                 return;
 
             if ((playState == VideoState.Play))
-            {
-                SetCurTimeAndSlider();
-            }
-            else if(bSlideDragging)
-                SetCurTimeAndSlider();
+                SetCurTimeAndSlider(true);
+            else if (bSlideDragging)
+                SetCurTimeAndSlider(false);
 
         }
 
@@ -97,6 +85,7 @@ namespace SpaceDesign
         {
             if (curTyp == VideoType.AR2D)
             {
+                VideoManage2.Inst.SetLoadingUI(false);
                 vdp2D.gameObject.SetActive(true);
 
                 //要切换的目标状态，都延迟0.2秒（防止Unity视频和容积视频冲突崩溃）
@@ -131,16 +120,14 @@ namespace SpaceDesign
         void InvokeGo()
         {
             //本次的状态，即要切换的目标状态
-            bRun = true;
             VideoUICtr.Inst.SetVideoValue(spr2DVideo);
             //unity视频播放不播放最后一帧
             fTotalFrame = (vdp2D.frameCount - 1);
             fFrameRate = vdp2D.frameRate;
             //先设置总长度（函数中计算总时长），再设置当前播放进度
             SetTotalPlayTime();
-            //lCurFrame = 0;
             SetCurTimeAndSlider(true, 0);
-            //VideoControl.Inst.SetVideValue(vdp2D.frameRate, fTotalFrame);
+            bRun = true;
         }
 
         /// <summary>
@@ -155,11 +142,6 @@ namespace SpaceDesign
 
             //从暂停恢复的
             bool _bResume = (playState == VideoState.Pause);
-            //VideoPlayEvent?.Invoke(_bResume);
-
-            btnPlay.gameObject.SetActive(false);
-            btnPause.gameObject.SetActive(true);
-
             if (vdp2D.isPlaying == false)
             {
                 //if (vdp2D.isPaused == true)
@@ -169,6 +151,10 @@ namespace SpaceDesign
                 //这里停止后和暂停后播放都是Play
                 vdp2D.Play();
             }
+
+            btnPlay.gameObject.SetActive(false);
+            btnPause.gameObject.SetActive(true);
+
             playState = VideoState.Play;
         }
         /// <summary>
@@ -181,13 +167,11 @@ namespace SpaceDesign
 
             VideoUICtr.Inst.ResetAutoHideUITime();
 
-            //VideoPauseEvent?.Invoke();
+            if (vdp2D.isPlaying)
+                vdp2D.Pause();
 
             btnPause.gameObject.SetActive(false);
             btnPlay.gameObject.SetActive(true);
-
-            if (vdp2D.isPlaying)
-                vdp2D.Pause();
             playState = VideoState.Pause;
         }
         /// <summary>
@@ -200,14 +184,13 @@ namespace SpaceDesign
 
             VideoUICtr.Inst.ResetAutoHideUITime();
 
-            //VideoStopEvent?.Invoke();
+            //停止的时候播放时间和进度条归零
+            SetCurTimeAndSlider(true, 0);
+            vdp2D.time = 0;
+            vdp2D.Stop();
 
             btnPause.gameObject.SetActive(false);
             btnPlay.gameObject.SetActive(true);
-            //停止的时候播放时间和进度条归零
-            SetCurTimeAndSlider(true, 0);
-
-            vdp2D.Stop();
             playState = VideoState.Stop;
         }
 
@@ -233,18 +216,25 @@ namespace SpaceDesign
 
             VideoUICtr.Inst.ResetAutoHideUITime();
 
-
             //跳帧，2D视频，按照帧数控制
             //lCurFrame = Mathf.FloorToInt(sliderVideo.sliderValue * fTotalFrame);
             //vdp2D.frame = lCurFrame;
             vdp2D.time = Mathf.FloorToInt(sliderVideo.sliderValue * fTotalPlayTime);
-            Debug.Log($"抬起的进度：{sliderVideo.sliderValue}==={vdp2D.frame}");
+            //Debug.Log($"抬起的进度：{sliderVideo.sliderValue}==={vdp2D.frame}");
 
+            //进度条抬起后，延迟0.5秒，再播放，防止回跳一下问题
+            Invoke("InvokeSliderUp", 0.5f);
+        }
+
+        /// <summary>
+        /// 进度条抬起后，延迟0.5秒，再播放，防止回跳一下问题
+        /// </summary>
+        void InvokeSliderUp()
+        {
             OnPlay();
-            //SetCurTimeAndSlider();
-            //VideoJumpEvent(sliderVideo.sliderValue);
             bSlideDragging = false;
         }
+
 
         /// <summary>
         /// 设置当前时间和进度条【0-1】
@@ -252,14 +242,34 @@ namespace SpaceDesign
         /// <param name="fVal">直接赋值进度条，不通过当前播放帧计算</param>
         public void SetCurTimeAndSlider(bool bSetSlider = true, float fVal = -1)
         {
-            if (bSlideDragging == false)
+            //if (bSlideDragging == false)
+            //{
+            //    try
+            //    {
+            //        if (fVal < 0)
+            //        {
+            //            fVal = (float)vdp2D.time / fTotalPlayTime;
+            //        }
+            //    }
+            //    catch
+            //    {
+            //        Debug.Log("当前时间进度条错误：" + fVal.ToString());
+            //        fVal = 0;
+            //    }
+
+            //    if (fVal < 0)
+            //        fVal = 0;
+            //    else if (fVal > 1)
+            //        fVal = 1;
+
+            //    sliderVideo.sliderValue = fVal;
+            //}
+            if (bSetSlider)
             {
                 try
                 {
                     if (fVal < 0)
                     {
-                        //lCurFrame = (int)vdp2D.frame;
-                        //fVal = (float)lCurFrame / fTotalFrame;
                         fVal = (float)vdp2D.time / fTotalPlayTime;
                     }
                 }
@@ -276,10 +286,14 @@ namespace SpaceDesign
 
                 sliderVideo.sliderValue = fVal;
             }
+            else
+            {
+                //vdp2D.time = Mathf.FloorToInt(sliderVideo.sliderValue * fTotalPlayTime);
+                fVal = sliderVideo.sliderValue;
+            }
 
-            Debug.Log("播放进度：" + fVal);
-
-            float fCurTime = (float)vdp2D.time;//fVal * fTotalPlayTime;
+            //float fCurTime = (float)vdp2D.time;//fVal * fTotalPlayTime;
+            float fCurTime = fVal * fTotalPlayTime;
 
             if (fCurTime < 0)
                 fCurTime = 0;
@@ -307,7 +321,7 @@ namespace SpaceDesign
             if (fTotalPlayTime < 0)
                 fTotalPlayTime = 0;
 
-            Debug.Log("播放总时间：" + fTotalPlayTime);
+            //Debug.Log("播放总时间：" + fTotalPlayTime);
 
             int s = Mathf.FloorToInt(fTotalPlayTime % 60);
             int m = Mathf.FloorToInt(((fTotalPlayTime - s) / 60) % 60);

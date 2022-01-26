@@ -15,8 +15,8 @@ namespace SpaceDesign
         private string str3DVideoPth = "Video3D.mp4";
         //3D视频播放控制脚本（显隐必须在Pause之后）
         public MeshPlayerPRM vdp3D;
-        //3D视频Stop过
-        public bool b3DStop = true;
+        ////3D视频Stop过
+        //public bool b3DStop = true;
         //3D视频的MeshRender
         public MeshRenderer mrVdp3D;
         //3D视频的舞台模型和特效
@@ -55,11 +55,11 @@ namespace SpaceDesign
         float fTotalFrame = 2613;
         //3D的音乐总长，（这里是秒数，跟容积视频的长度是不同的）
         float fTotalTime3DMusic = 115.271f;
-
         //当前播放视频的帧率
-        public float fFrameRate;
+        float fFrameRate = 22;
+
         //当前播放到第几帧
-        public float fCurFrame = 0;
+        //public int iCurFrame = 0;
 
         //视频的状态（默认是Stop状态）
         public VideoState playState = VideoState.Stop;
@@ -67,10 +67,6 @@ namespace SpaceDesign
 
         void OnEnable()
         {
-            //VideoControl.VideoPlayEvent += OnPlay;
-            //VideoControl.VideoPauseEvent += OnPause;
-            //VideoControl.VideoStopEvent += OnStop;
-            //VideoControl.VideoJumpEvent += OnJump;
             VideoUICtr.ChangeVideTypeEvent += ChangeVideType;
             btnPlay.onPinchDown.AddListener(OnPlay);
             btnPause.onPinchDown.AddListener(OnPause);
@@ -81,10 +77,6 @@ namespace SpaceDesign
 
         void OnDisable()
         {
-            //VideoControl.VideoPlayEvent -= OnPlay;
-            //VideoControl.VideoPauseEvent -= OnPause;
-            //VideoControl.VideoStopEvent -= OnStop;
-            //VideoControl.VideoJumpEvent -= OnJump;
             VideoUICtr.ChangeVideTypeEvent -= ChangeVideType;
             btnPlay.onPinchDown.RemoveAllListeners();
             btnPause.onPinchDown.RemoveAllListeners();
@@ -103,14 +95,19 @@ namespace SpaceDesign
 
             if (playState == VideoState.Play)
             {
-                fCurFrame = vdp3D.frameIndex;
-                SetCurTimeAndSlider();
+                //fCurFrame = vdp3D.frameIndex;
+                SetCurTimeAndSlider(true);
             }
+            else if (bSlideDragging)
+                SetCurTimeAndSlider(false);
+
         }
         public void ChangeVideType(VideoType lastTyp, VideoType curTyp)
         {
             if (curTyp == VideoType.AR3D)
             {
+                VideoManage2.Inst.SetLoadingUI(false);
+
                 //要切换的目标状态，都延迟0.2秒（防止Unity视频和容积视频冲突崩溃）
                 Invoke("InvokeGo", 0.2f);
 
@@ -120,6 +117,7 @@ namespace SpaceDesign
             {
                 //上次的状态，即要停止的状态
                 OnStop();
+                obj3DStage.SetActive(false);
                 //先运行函数，最后再设置状态
                 bRun = false;
 
@@ -127,8 +125,8 @@ namespace SpaceDesign
             }
             else
             {
+                obj3DStage.SetActive(false);
                 bRun = false;
-
                 return;
             }
         }
@@ -139,27 +137,26 @@ namespace SpaceDesign
         void InvokeGo()
         {
             //本次的状态，即要切换的目标状态
-            bRun = true;
             VideoUICtr.Inst.SetVideoValue(spr3DVideo);
-            //unity视频播放不播放最后一帧
-            fFrameRate = vdp3D.frameRate;
-            //先设置总长度（函数中计算总时长），再设置当前播放进度
-            SetTotalPlayTime();
-            fCurFrame = 0;
-            SetCurTimeAndSlider(0);
-            //VideoControl.Inst.SetVideValue(vdp3D.frameRate, fTotalFrame3D);
-        }
 
-        IEnumerator IEOpen3DVideo()
-        {
-            yield return new WaitForSeconds(1);
-            particle3D.gameObject.SetActive(true);
-            particle3D.Play();
-            yield return new WaitForSeconds(0.2f);
-            animator3DChar.gameObject.SetActive(false);
-            particle3D.gameObject.SetActive(false);
-        }
+            vdp3D.OpenSourceAsync(str3DVideoPth, false, 0, () =>
+            {
+                //b3DStop = false;
+                Debug.Log("MyLog:WatchNow_3DVideo_Open_OK");
 
+                //unity视频播放不播放最后一帧
+                fFrameRate = vdp3D.frameRate;
+                //先设置总长度（函数中计算总时长），再设置当前播放进度
+                SetTotalPlayTime();
+                //iCurFrame = 0;
+                SetCurTimeAndSlider(true, 0);
+                //VideoControl.Inst.SetVideValue(vdp3D.frameRate, fTotalFrame3D);
+                OnPlay();
+                obj3DStage.SetActive(true);
+
+                bRun = true;
+            });
+        }
 
 
         /// <summary>
@@ -178,33 +175,57 @@ namespace SpaceDesign
 
             if (_bResume)
             {
-
-
                 playState = VideoState.Play;
                 btnPlay.gameObject.SetActive(false);
                 btnPause.gameObject.SetActive(true);
 
+                if (ads3D.isPlaying == false)
+                    ads3D.Play();
+
+                if (animator3DChar.gameObject.activeSelf == true)
+                    animator3DChar.gameObject.SetActive(false);
+                if (particle3D.gameObject.activeSelf == true)
+                    particle3D.gameObject.SetActive(false);
+
+                mrVdp3D.enabled = true;
+                if (vdp3D.isPlaying == false)
+                    vdp3D.PlayOrPause();
             }
             else
             {
                 animator3DChar.gameObject.SetActive(true);
                 animator3DChar.Play("Take 001");
-
                 StopCoroutine("IEOpen3DVideo");
                 StartCoroutine("IEOpen3DVideo");
-                //Open3DVideo();
                 Invoke("_DelayPlay", 1.3f);
-
-
-                ///放到加载完毕之后
-                //===========================================================================
-                playState = VideoState.Play;
-                btnPlay.gameObject.SetActive(false);
-                btnPause.gameObject.SetActive(true);
-                //===========================================================================
-
             }
         }
+
+        IEnumerator IEOpen3DVideo()
+        {
+            yield return new WaitForSeconds(1);
+            particle3D.gameObject.SetActive(true);
+            particle3D.Play();
+            yield return new WaitForSeconds(0.2f);
+            animator3DChar.gameObject.SetActive(false);
+            particle3D.gameObject.SetActive(false);
+        }
+        void _DelayPlay()
+        {
+            //先显示Render
+            mrVdp3D.enabled = true;
+            vdp3D.frameIndex = 0;
+            vdp3D.JumpFrame(0, true);
+            if (ads3D.isPlaying == false)
+                ads3D.Play();
+
+            //加载完毕之后
+            btnPlay.gameObject.SetActive(false);
+            btnPause.gameObject.SetActive(true);
+
+            playState = VideoState.Play;
+        }
+
         /// <summary>
         /// 暂停播放
         /// </summary>
@@ -215,16 +236,14 @@ namespace SpaceDesign
 
             VideoUICtr.Inst.ResetAutoHideUITime();
 
-            //VideoPauseEvent?.Invoke();
-
-            playState = VideoState.Stop;
-            btnPause.gameObject.SetActive(false);
-            btnPlay.gameObject.SetActive(true);
-
             if (ads3D.isPlaying)
                 ads3D.Pause();
             if (vdp3D.isPlaying)
                 vdp3D.Pause();
+
+            btnPause.gameObject.SetActive(false);
+            btnPlay.gameObject.SetActive(true);
+            playState = VideoState.Pause;
         }
         /// <summary>
         /// 停止播放
@@ -236,33 +255,24 @@ namespace SpaceDesign
 
             VideoUICtr.Inst.ResetAutoHideUITime();
 
-            //VideoStopEvent?.Invoke();
-
-            playState = VideoState.Stop;
-            btnPause.gameObject.SetActive(false);
-            btnPlay.gameObject.SetActive(true);
             //停止的时候播放时间和进度条归零
-            SetCurTimeAndSlider(0);
-
-
-            b3DStop = true;
+            SetCurTimeAndSlider(true, 0);
 
             //这里暂停不住，所以播完之后循环播放
             ads3D.time = 0;
             ads3D.Stop();
-
-            //vdp3D.Pause();
             vdp3D.Stop();
-            b3DStop = true;
-            //===========================================================================
-            //这里如果用Pause，重新开启的时候，模型还是显示的？
             mrVdp3D.enabled = false;
             if (vdp3D.meshComponent.mesh != null)
                 DestroyImmediate(vdp3D.meshComponent.mesh);
-            //vdp3D.frameIndex = 0;
+            vdp3D.frameIndex = 0;
             animator3DChar.Play(0, -1, -0f);
             animator3DChar.Update(0);
             animator3DChar.gameObject.SetActive(true);
+
+            btnPause.gameObject.SetActive(false);
+            btnPlay.gameObject.SetActive(true);
+            playState = VideoState.Stop;
         }
 
 
@@ -273,8 +283,8 @@ namespace SpaceDesign
         {
             VideoUICtr.Inst.ResetAutoHideUITime();
 
-            bSlideDragging = true;
             OnPause();
+            bSlideDragging = true;
         }
 
         /// <summary>
@@ -282,38 +292,72 @@ namespace SpaceDesign
         /// </summary>
         public void SliderVideoPointerUp()
         {
-            VideoUICtr.Inst.ResetAutoHideUITime();
-
-            bSlideDragging = false;
-
             if (bRun == false)
                 return;
 
+            VideoUICtr.Inst.ResetAutoHideUITime();
+
             //跳帧，3D视频，按照帧数控制
-            Debug.Log("vdp3D.JumpFrame");
+            //Debug.Log("vdp3D.JumpFrame");
 
             //声音用秒数计算（计算方法和视频的不同）
             float _f = sliderVideo.sliderValue;
             ads3D.time = _f * fTotalTime3DMusic;
-            ads3D.Play();
-            vdp3D.JumpFrame(Mathf.FloorToInt(_f * fTotalFrame), true);
-            //VideoJumpEvent(sliderVideo.sliderValue);
+            vdp3D.JumpFrame(Mathf.FloorToInt(_f * fTotalFrame), false);
+
+            //进度条抬起后，延迟1秒，再播放，防止回跳一下问题
+            Invoke("InvokeSliderUp", 0.5f);
         }
+
+        /// <summary>
+        /// 进度条抬起后，延迟0.5秒，再播放，防止回跳一下问题
+        /// </summary>
+        void InvokeSliderUp()
+        {
+            OnPlay();
+            bSlideDragging = false;
+        }
+
 
         /// <summary>
         /// 设置当前时间和进度条【0-1】
         /// </summary>
         /// <param name="fVal">直接赋值进度条，不通过当前播放帧计算</param>
-        public void SetCurTimeAndSlider(float fVal = -1)
+        public void SetCurTimeAndSlider(bool bSetSlider = true, float fVal = -1)
         {
-            if (bSlideDragging == false)
+            //if (bSlideDragging == false)
+            //{
+            //    try
+            //    {
+            //        if (fVal < 0)
+            //        {
+            //            fCurFrame = vdp3D.frameIndex;
+            //            fVal = fCurFrame / fTotalFrame;
+            //        }
+            //    }
+            //    catch
+            //    {
+            //        Debug.Log("当前时间进度条错误：" + fVal.ToString());
+            //        fVal = 0;
+            //    }
+
+            //    if (fVal < 0)
+            //        fVal = 0;
+            //    else if (fVal > 1)
+            //        fVal = 1;
+
+            //    sliderVideo.sliderValue = fVal;
+            //}
+            if (bSetSlider)
             {
                 try
                 {
                     if (fVal < 0)
                     {
-                        fCurFrame = vdp3D.frameIndex;
-                        fVal = fCurFrame / fTotalFrame;
+                        //iCurFrame = vdp3D.frameIndex;
+                        //fVal = (float)iCurFrame / fTotalFrame;
+                        fVal = (float)(vdp3D.frameIndex) / fTotalFrame;
+
                     }
                 }
                 catch
@@ -328,6 +372,11 @@ namespace SpaceDesign
                     fVal = 1;
 
                 sliderVideo.sliderValue = fVal;
+            }
+            else
+            {
+                //vdp2D.time = Mathf.FloorToInt(sliderVideo.sliderValue * fTotalPlayTime);
+                fVal = sliderVideo.sliderValue;
             }
 
             float fCurTime = fVal * fTotalPlayTime;

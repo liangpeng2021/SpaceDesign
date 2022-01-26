@@ -8,14 +8,26 @@ namespace SpaceDesign
 {
     public class VideoTVCtr : MonoBehaviour
     {
+        static VideoTVCtr inst;
+        public static VideoTVCtr Inst
+        {
+            get
+            {
+                if (inst == null)
+                    inst = FindObjectOfType<VideoTVCtr>();
+                return inst;
+            }
+        }
+
+
         public void TVLog(string s)
         {
-            Debug.Log("电视Debug:" + s);
+            Debug.Log("视频Debug-电视:" + s);
         }
 
         public void ARLog(string s)
         {
-            Debug.Log("ARDebug:" + s);
+            Debug.Log("视频Debug-AR:" + s);
         }
 
         static AndroidJavaObject _ajo;
@@ -38,18 +50,20 @@ namespace SpaceDesign
 
         void Start()
         {
-            //OnInit();
+            OnInit();
         }
 
 
         string GetBlackImgPth()
         {
-            return Path.Combine(Application.persistentDataPath, "b.jpg");
+            return Path.Combine(SpaceDesign.PathConfig.GetPth(), "b.jpg");
+            //return Path.Combine(Application.persistentDataPath, "b.jpg");
         }
 
         string GetVideoPth(bool b2D)
         {
-            return Path.Combine(Application.persistentDataPath, (b2D ? "2.ts" : "3.ts"));
+            return Path.Combine(SpaceDesign.PathConfig.GetPth(), (b2D ? "2.ts" : "3.ts"));
+            //return Path.Combine(Application.persistentDataPath, (b2D ? "2.ts" : "3.ts"));
         }
 
 
@@ -184,15 +198,238 @@ namespace SpaceDesign
 
         #endregion
 
-        #region 
+        #region 播放控制：Push、Play、Pause、Stop、Jump
+        /// <summary>
+        /// 关闭（推送一个黑色的图片）
+        /// </summary>
+        public void OnClose()
+        {
+            ARLog("关闭（推送一个黑色的图片）");
+
+            if (bConnected == false)
+            {
+                OnInit();
+                return;
+            }
+
+            try
+            {
+                bSetbackSlider = false;
+                AJO.Call("Push", true, GetBlackImgPth(), imgType, true);
+            }
+            catch (Exception exc)
+            {
+                ARLog("关闭，（推送图片）报错/n" + exc.ToString());
+            }
+        }
+
+        bool b2DVideo = true;
 
 
+        /// <summary>
+        /// 推送
+        /// </summary>
+        /// <param name="b2D">播放的是2D视频</param>
+        /// <param name="bCallbackAutoPlay">回调后自动播放</param>
+        /// <param name="bCallbackSetSlider">回调后设置进度条（AR模式切TV模式）</param>
+        public void OnPush(bool b2D)
+        {
+            //ARLog("开始推送视频是否2D：" + b2D + ",回调后是否自动播放:" + bPushBackAutoPlay + ",回调后是否自动设置跳转进度:" + bCallBackSetSlider);
+            ARLog("开始推送视频是否2D：" + b2D);
+
+            if (bConnected == false)
+            {
+                OnInit();
+                return;
+            }
+
+            b2DVideo = b2D;
+
+            try
+            {
+                bSetbackSlider = true;
+                AJO.Call("Push", true, GetVideoPth(b2D), videoType, true);
+            }
+            catch (Exception exc)
+            {
+                ARLog("推送报错/n" + exc.ToString());
+            }
+        }
+
+
+        /// <summary>
+        /// 播放（TV端每次调用都是重新开始的）
+        /// </summary>
+        public void OnPlay()
+        {
+            ARLog("开始Play播放视频：" + b2DVideo);
+
+            if (bConnected == false)
+            {
+                OnInit();
+                return;
+            }
+
+            try
+            {
+                bSetbackSlider = true;
+                AJO.Call("PlayVideo", GetVideoPth(b2DVideo), videoType, true);
+            }
+            catch (Exception exc)
+            {
+                ARLog("播放报错/n" + exc.ToString());
+            }
+        }
+
+        /// <summary>
+        /// 暂停后，恢复播放（非重新开始）
+        /// </summary>
+        public void OnResume()
+        {
+            ARLog("开始恢复暂停");
+
+            if (bConnected == false)
+            {
+                OnInit();
+                return;
+            }
+
+            try
+            {
+                bSetbackSlider = true;
+                AJO.Call("ResumeVideo");
+            }
+            catch (Exception exc)
+            {
+                ARLog("播放报错/n" + exc.ToString());
+            }
+        }
+
+        /// <summary>
+        /// 暂停播放
+        /// </summary>
+        public void OnPause()
+        {
+            ARLog("开始暂停视频");
+
+            if (bConnected == false)
+            {
+                OnInit();
+                return;
+            }
+
+            try
+            {
+                AJO.Call("PauseVideo");
+            }
+            catch (Exception exc)
+            {
+                ARLog("暂停报错/n" + exc.ToString());
+            }
+        }
+        /// <summary>
+        /// 暂停回调
+        /// </summary>
+        public void CallbackPause(string s)
+        {
+            ARLog("暂停回调:" + s);
+            if (b2DVideo)
+            {
+                VideoManage2.Inst.videoTV2DCtr.CallbackPause();
+            }
+            else
+            {
+                VideoManage2.Inst.videoTV3DCtr.CallbackPause();
+            }
+        }
+        ///// <summary>
+        ///// 停止播放
+        ///// </summary>
+        //public void OnStopPlay()
+        //{
+        //    ARLog("开始停止视频");
+
+        //    if (bConnected == false)
+        //    {
+        //        OnInit();
+        //        return;
+        //    }
+
+        //    OnClose();
+
+        //}
+        /// <summary>
+        /// 停止回调
+        /// </summary>
+        public void CallbackStop(string s)
+        {
+            ARLog("停止回调:" + s);
+
+            if (b2DVideo)
+            {
+                VideoManage2.Inst.videoTV2DCtr.CallbackStop();
+            }
+            else
+            {
+                VideoManage2.Inst.videoTV3DCtr.CallbackStop();
+            }
+        }
+
+        /// <summary>
+        /// 进度条
+        /// </summary>
+        public void OnSetSlider(int duration, int position)
+        {
+            ARLog("开始设置进度条");
+
+            if (bConnected == false)
+            {
+                OnInit();
+                return;
+            }
+
+            try
+            {
+                AJO.Call("SetSlider", duration, position);
+            }
+            catch (Exception exc)
+            {
+                ARLog("设置进度条错误/n" + exc.ToString());
+            }
+        }
+
+        //是否设置进度条
+        public bool bSetbackSlider = true;
+        /// <summary>
+        /// 进度条修改回调
+        /// </summary>
+        public void CallbackSlider(string strTime)
+        {
+            if (bSetbackSlider == false)
+                return;
+
+            string[] ss = strTime.Split('-');
+            int _duration = int.Parse(ss[0]);
+
+            if ((_duration == 0))
+                return;
+
+            ////return;
+            int _position = int.Parse(ss[1]);
+
+            float _fRate = (float)_position / (float)_duration;
+            ARLog($"进度条回调：duration:{_duration},position:{_position},_fRate:{_fRate}");
+
+            if (b2DVideo)
+            {
+                VideoManage2.Inst.videoTV2DCtr.CallbackSlider(_duration, _position, _fRate);
+            }
+            else
+            {
+                VideoManage2.Inst.videoTV3DCtr.CallbackSlider(_duration, _position, _fRate);
+            }
+        }
         #endregion
 
-        #region 
-        #endregion
-
-        #region 
-        #endregion
     }
 }

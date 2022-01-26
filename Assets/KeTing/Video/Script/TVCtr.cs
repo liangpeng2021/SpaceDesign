@@ -206,12 +206,14 @@ namespace SpaceDesign
 
         string GetBlackImgPth()
         {
-            return Path.Combine(Application.persistentDataPath, "b.jpg");
+            return Path.Combine(SpaceDesign.PathConfig.GetPth(), "b.jpg");
+            //return Path.Combine(Application.persistentDataPath, "b.jpg");
         }
 
         string GetVideoPth(bool b2D)
         {
-            return Path.Combine(Application.persistentDataPath, (b2D ? "2.ts" : "3.ts"));
+            //return Path.Combine(Application.persistentDataPath, (b2D ? "2.ts" : "3.ts"));
+            return Path.Combine(SpaceDesign.PathConfig.GetPth(), (b2D ? "2.ts" : "3.ts"));
         }
 
         //推送的是关闭的黑色图

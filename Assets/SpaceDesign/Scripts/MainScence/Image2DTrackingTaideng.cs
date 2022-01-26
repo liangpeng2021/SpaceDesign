@@ -43,7 +43,10 @@ namespace SpaceDesign
 
         public void StartTrack()
         {
-            Debug.Log("MyLog::StartTrackTaideng");
+            if (JudgeGo() == false)
+                return;
+
+            Debug.Log("TaiDengMark:StartTrackTaideng");
 #if UNITY_EDITOR
             return;
 #endif
@@ -64,7 +67,10 @@ namespace SpaceDesign
 
         public void StopTrack()
         {
-            Debug.Log("MyLog::StopTrack");
+            if (JudgeGo() == false)
+                return;
+
+            Debug.Log("TaiDengMark:StopTrack");
 #if UNITY_EDITOR
             return;
 #endif
@@ -81,30 +87,42 @@ namespace SpaceDesign
 
         public override void OnAddTacker()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnAddTacker();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnAddTacker");
+            Debug.Log("TaiDengMark:OnAddTacker");
         }
 
         public override void OnGetTrackerInfo()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnGetTrackerInfo();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnGetTrackerInfo");
+            Debug.Log("TaiDengMark:OnGetTrackerInfo");
         }
 
         public override void OnStart()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnStart();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnStart");
+            Debug.Log("TaiDengMark:OnStart");
             SetModelVisible(false);
         }
 
         public override void OnStop()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnStop();
-            Debug.Log("Image2DTrackingDemoLog:OnStop");
+            Debug.Log("TaiDengMark:OnStop");
             SetModelVisible(false);
 
             bCallback = false;
@@ -112,17 +130,23 @@ namespace SpaceDesign
 
         public override void OnFindTarget()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnFindTarget();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnFindTarget");
+            Debug.Log("TaiDengMark:OnFindTarget");
             SetModelVisible(true);
         }
 
         public override void OnLossTarget()
         {
+            if (JudgeGo() == false)
+                return;
+
             base.OnLossTarget();
             if (bCallback == false) return;
-            Debug.Log("Image2DTrackingDemoLog:OnLossTarget");
+            Debug.Log("TaiDengMark:OnLossTarget");
             SetModelVisible(false);
         }
 
@@ -137,16 +161,6 @@ namespace SpaceDesign
                     return;
 
                 TaidengManager.Inst.transform.position = objTargetModel.position;
-                //TaidengManager.Inst.transform.rotation = objTargetModel.rotation;
-                ////反向
-                //TaidengManager.Inst.transform.forward = -(objTargetModel.forward);
-                ////永远保持向上
-                //TaidengManager.Inst.transform.up = Vector3.up;
-
-                //Vector3 _eur = objTargetModel.eulerAngles;
-                //_eur.x = _eur.z = 0;
-                //_eur.y += 180f;
-                //TaidengManager.Inst.transform.eulerAngles = _eur;
 
                 Vector3 _v3 = PlayerManage.Inst.transform.position;
                 Transform _tra = TaidengManager.Inst.transform;
@@ -166,14 +180,14 @@ namespace SpaceDesign
                     fTiming = 0;
                     bTiming = false;
 
-                    Debug.Log("Image2DTrackingDemoLog：计时够3秒了");
+                    Debug.Log("TaiDengMark：计时够3秒了");
 
                     if (TaidengManager.Inst == null)
                         return;
 
                     //TaidengManager.Inst.transform.SetParent(oriParent);
                     TaidengManager.Inst.taidengController.ShowMark(false);
-                    Debug.Log("Image2DTrackingDemoLog：对象隐藏了");
+                    Debug.Log("TaiDengMark：对象隐藏了");
 
                 }
             }
@@ -181,7 +195,10 @@ namespace SpaceDesign
 
         private void SetModelVisible(bool isVisible)
         {
-            Debug.Log("Image2DTrackingDemoLog:SetModelVisible-" + isVisible);
+            if (JudgeGo() == false)
+                return;
+
+            Debug.Log("TaiDengMark:SetModelVisible-" + bMarking);
 
             bMarking = isVisible;
             if (objTargetModel == null)
@@ -192,10 +209,10 @@ namespace SpaceDesign
 
             fTiming = 0;
 
-            Debug.Log("Image2DTrackingDemoLog：计时清零：isVisible" + isVisible + "---fTiming :" + fTiming);
+            Debug.Log("TaiDengMark：计时清零：bMarking" + bMarking + "---fTiming :" + fTiming);
 
             //objTargetModel.SetActive(isVisible);
-            if (isVisible)
+            if (bMarking)
             {
                 bTiming = false;
                 //TaidengManager.Inst.transform.SetParent(objTargetModel);
@@ -222,5 +239,20 @@ namespace SpaceDesign
         //    else
         //        TaidengManager.Inst.transform.SetParent(null);
         //}
+
+        bool JudgeGo()
+        {
+            if (TaidengManager.Inst.curPlayerPosState == PlayerPosState.Close)
+            {
+                return true;
+            }
+            else
+            {
+                bTiming = false;
+                fTiming = 0;
+                bMarking = false;
+                return false;
+            }
+        }
     }
 }

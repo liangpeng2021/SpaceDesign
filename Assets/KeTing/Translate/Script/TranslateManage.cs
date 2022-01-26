@@ -290,7 +290,7 @@ namespace SpaceDesign
         public void OnQuit()
         {
             objCheckTranslateParent.SetActive(true);
-            btnCheckTranslate.gameObject.SetActive(markTrackTranslate.bVisible);
+            btnCheckTranslate.gameObject.SetActive(markTrackTranslate.bMarking);
             if (timelineShow.activeSelf == true)
                 timelineHide.SetActive(true);
             timelineShow.SetActive(false);

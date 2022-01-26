@@ -32,73 +32,21 @@ public class LoadMainScence : MonoBehaviour
 
     //加载完成
     private bool bLoadFinish = false;
-    //#region 拉起其他应用
-    ///// <summary>
-    ///// 奇幻森林按钮
-    ///// </summary>
-    //public ButtonRayReceiver artowermotionBtn;
-    ///// <summary>
-    ///// 忒依亚传说
-    ///// </summary>
-    //public ButtonRayReceiver omobaBtn;
-    ///// <summary>
-    ///// AR动物园
-    ///// </summary>
-    //public ButtonRayReceiver findanimalsBtn;
 
-    ///// <summary>
-    ///// 测试demo
-    ///// </summary>
-    //public ButtonRayReceiver testBtn;
-
-    ///// <summary>
-    ///// 奇幻森林
-    ///// </summary>
-    //void ClickLaqiArtowermotion()
-    //{
-    //    AppManager.StartApp("com.gabor.artowermotion");
-    //}
-    ///// <summary>
-    ///// 忒依亚传说（moba)
-    ///// </summary>
-    //void ClickLaqiOmoba()
-    //{
-    //    AppManager.StartApp("com.baymax.omoba");
-    //}
-    ///// <summary>
-    ///// AR动物园
-    ///// </summary>
-    //void ClickLaqiFindanimals()
-    //{
-    //    AppManager.StartApp("com.xyani.findanimals");
-    //    //Debug.Log("MyLog::ClickLaqi:"+ CallApp("com.LenQiy.TestInput"));
-    //}
-
-    //void ClickTestInput()
-    //{
-    //    AppManager.StartApp("com.LenQiy.TestInput");
-    //}
-
-    //void AddLaqiEvent()
-    //{
-    //    findanimalsBtn.onPinchDown.AddListener(ClickLaqiFindanimals);
-    //    omobaBtn.onPinchDown.AddListener(ClickLaqiOmoba);
-    //    artowermotionBtn.onPinchDown.AddListener(ClickLaqiArtowermotion);
-    //    testBtn.onPinchDown.AddListener(ClickTestInput);
-    //}
-
-    //void RemoveLaqiEvent()
-    //{
-    //    artowermotionBtn.onPinchDown.RemoveAllListeners();
-    //    omobaBtn.onPinchDown.RemoveAllListeners();
-    //    findanimalsBtn.onPinchDown.RemoveAllListeners();
-    //    testBtn.onPinchDown.RemoveAllListeners();
-    //}
-
-    //#endregion
+    //------------ Modify by zh ------------
+    /// <summary>
+    /// 隐藏手机射线（从Editor场景带过来，如果存在的话）
+    /// </summary>
+    public void HidePhoneLaserPointer()
+    {
+        if (LaserPointer.instance != null)
+            LaserPointer.instance.gameObject.SetActive(false);
+    }
+    //------------------End------------------
 
     private void OnEnable()
     {
+        HidePhoneLaserPointer();
         //backto.onClick.AddListener(QuitApp);
         //AddLaqiEvent();
 
@@ -150,6 +98,7 @@ public class LoadMainScence : MonoBehaviour
 
     private void Start()
     {
+        HidePhoneLaserPointer();
         bLoadFinish = false;
 
         //Camera eventCamera = XRCameraManager.Instance.eventCamera;
@@ -196,10 +145,6 @@ public class LoadMainScence : MonoBehaviour
 
     void LoadGameObjectData()
     {
-        //===========================================================================
-        //return;
-        //===========================================================================
-
         //BitConverter方式
         string path = SpaceDesign.PathConfig.GetPth();
         path = Path.Combine(path, "scence.scn");
@@ -208,19 +153,19 @@ public class LoadMainScence : MonoBehaviour
         if (objectDatas != null)
         {
             for (int i = 0; i < objectDatas.roomDatasList.Count; i++)
-        {
-            GameObject obj = Instantiate(roomPrefab);
-            RoomControl roomControl = obj.GetComponent<RoomControl>();
-            if (objectDatas.roomDatasList[i] != null)
-                roomControl.SetRoomData(objectDatas.roomDatasList[i], LoadPrefab.prefabDic);
-            else
             {
-                Debug.Log("MyLog::第" + i.ToString() + "房间为空");
+                GameObject obj = Instantiate(roomPrefab);
+                RoomControl roomControl = obj.GetComponent<RoomControl>();
+                if (objectDatas.roomDatasList[i] != null)
+                    roomControl.SetRoomData(objectDatas.roomDatasList[i], LoadPrefab.prefabDic);
+                else
+                {
+                    Debug.Log("MyLog::第" + i.ToString() + "房间为空");
+                }
             }
+            //Debug.Log("MyLog::objectDatas.roomDatasList.Count:" + objectDatas.roomDatasList.Count);
         }
-        //Debug.Log("MyLog::objectDatas.roomDatasList.Count:" + objectDatas.roomDatasList.Count);
-        }
-		
+
         //------------ Modify by zh ------------
         //加载触点触发距离数据
         path = SpaceDesign.PathConfig.GetPth();
@@ -299,3 +244,67 @@ public class LoadMainScence : MonoBehaviour
         }
     }
 }
+//#region 拉起其他应用
+///// <summary>
+///// 奇幻森林按钮
+///// </summary>
+//public ButtonRayReceiver artowermotionBtn;
+///// <summary>
+///// 忒依亚传说
+///// </summary>
+//public ButtonRayReceiver omobaBtn;
+///// <summary>
+///// AR动物园
+///// </summary>
+//public ButtonRayReceiver findanimalsBtn;
+
+///// <summary>
+///// 测试demo
+///// </summary>
+//public ButtonRayReceiver testBtn;
+
+///// <summary>
+///// 奇幻森林
+///// </summary>
+//void ClickLaqiArtowermotion()
+//{
+//    AppManager.StartApp("com.gabor.artowermotion");
+//}
+///// <summary>
+///// 忒依亚传说（moba)
+///// </summary>
+//void ClickLaqiOmoba()
+//{
+//    AppManager.StartApp("com.baymax.omoba");
+//}
+///// <summary>
+///// AR动物园
+///// </summary>
+//void ClickLaqiFindanimals()
+//{
+//    AppManager.StartApp("com.xyani.findanimals");
+//    //Debug.Log("MyLog::ClickLaqi:"+ CallApp("com.LenQiy.TestInput"));
+//}
+
+//void ClickTestInput()
+//{
+//    AppManager.StartApp("com.LenQiy.TestInput");
+//}
+
+//void AddLaqiEvent()
+//{
+//    findanimalsBtn.onPinchDown.AddListener(ClickLaqiFindanimals);
+//    omobaBtn.onPinchDown.AddListener(ClickLaqiOmoba);
+//    artowermotionBtn.onPinchDown.AddListener(ClickLaqiArtowermotion);
+//    testBtn.onPinchDown.AddListener(ClickTestInput);
+//}
+
+//void RemoveLaqiEvent()
+//{
+//    artowermotionBtn.onPinchDown.RemoveAllListeners();
+//    omobaBtn.onPinchDown.RemoveAllListeners();
+//    findanimalsBtn.onPinchDown.RemoveAllListeners();
+//    testBtn.onPinchDown.RemoveAllListeners();
+//}
+
+//#endregion

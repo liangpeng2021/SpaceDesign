@@ -222,7 +222,7 @@ namespace SpaceDesign
         {
             if (bUIChanging)
                 return;
-            if (curPlayerPosState != PlayerPosState.Far)
+            if (curPlayerPosState == PlayerPosState.Middle)
             {
                 StopCoroutine("IEFarToMiddle");
                 StartCoroutine("IEFarToMiddle");

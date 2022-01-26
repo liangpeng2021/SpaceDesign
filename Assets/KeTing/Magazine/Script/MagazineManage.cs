@@ -361,7 +361,7 @@ namespace SpaceDesign
         public void OnQuit()
         {
             objCheckDetailParent.SetActive(true);
-            btnCheckDetail.gameObject.SetActive(markTrackMagazine.bVisible);
+            btnCheckDetail.gameObject.SetActive(markTrackMagazine.bMarking);
             if (timelineShow.activeSelf == true)
                 timelineHide.SetActive(true);
             timelineShow.SetActive(false);

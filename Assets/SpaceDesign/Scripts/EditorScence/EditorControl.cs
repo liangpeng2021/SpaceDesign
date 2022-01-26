@@ -57,7 +57,7 @@ public class EditorControl : MonoBehaviour
     /// 返回编辑模式
     /// </summary>
     public ButtonRayReceiver backToEditorBtn;
-    
+
     [HideInInspector]
     public LoadPreviewScence loadPreviewScence;
 
@@ -122,23 +122,36 @@ public class EditorControl : MonoBehaviour
 
         Instance = null;
     }
+    //------------ Modify by zh ------------
+    /// <summary>
+    /// 显示手机射线（从Main场景过来，如果被隐藏了，重新开启）
+    /// </summary>
+    public void ShowPhoneLaserPointer()
+    {
+        if (LaserPointer.instance != null)
+            LaserPointer.instance.gameObject.SetActive(true);
+    }
+    //------------------End------------------
 
     private void Awake()
     {
         Instance = this;
+        ShowPhoneLaserPointer();
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        ShowPhoneLaserPointer();
+
         ColorUtility.TryParseHtmlString("#6070FFFF", out chooseColor);
         ColorUtility.TryParseHtmlString("#6B00B0FF", out normalColor);
 
         loadPreviewScence = GetComponent<LoadPreviewScence>();
-        
+
         InitSave();
         InitTip();
-        
+
         InitCanvas();
 
         ToEditRoom();
@@ -148,9 +161,10 @@ public class EditorControl : MonoBehaviour
     }
     private void OnEnable()
     {
+        ShowPhoneLaserPointer();
         previewBtn.onPinchDown.AddListener(LoadPreview);
         backToEditorBtn.onPinchDown.AddListener(BackToEditor);
-        
+
         backtoTopBtn.onPinchDown.AddListener(BackToScenceList);
         resetMenuBtn.onPinchDown.AddListener(ResetMenuPos);
     }
@@ -159,7 +173,7 @@ public class EditorControl : MonoBehaviour
     {
         previewBtn.onPinchDown.RemoveListener(LoadPreview);
         backToEditorBtn.onPinchDown.RemoveListener(BackToEditor);
-        
+
         backtoTopBtn.onPinchDown.RemoveListener(BackToScenceList);
         resetMenuBtn.onPinchDown.RemoveAllListeners();
     }
@@ -168,16 +182,16 @@ public class EditorControl : MonoBehaviour
     {
         uiTran.position = stereoCameraTran.position;
         uiTran.forward = stereoCameraTran.forward;
-        uiTran.eulerAngles = new Vector3(0, uiTran.eulerAngles.y,0);
+        uiTran.eulerAngles = new Vector3(0, uiTran.eulerAngles.y, 0);
     }
 
     void Update()
     {
-        Vector3 cameraPos = new Vector3(stereoCameraTran.position.x,0, stereoCameraTran.position.z);
-        Vector3 uipos = new Vector3(uiTran.position.x,0,uiTran.position.z);
-        
+        Vector3 cameraPos = new Vector3(stereoCameraTran.position.x, 0, stereoCameraTran.position.z);
+        Vector3 uipos = new Vector3(uiTran.position.x, 0, uiTran.position.z);
+
         //判断距离超过3米或者夹角较大时出现复位按钮
-        if (Vector3.Distance(cameraPos, uipos)>3f || Vector3.Angle(stereoCameraTran.forward, uiTran.forward) >75f)
+        if (Vector3.Distance(cameraPos, uipos) > 3f || Vector3.Angle(stereoCameraTran.forward, uiTran.forward) > 75f)
         {
             resetMenuParent.gameObject.SetActive(true);
         }
@@ -195,7 +209,7 @@ public class EditorControl : MonoBehaviour
         roomManager.gameObject.SetActive(false);
         roomManager.editorParent.gameObject.SetActive(false);
     }
-   
+
     /// <summary>
     /// 点击预览按钮
     /// </summary>
@@ -224,7 +238,7 @@ public class EditorControl : MonoBehaviour
 
         loadPreviewScence.ClearChild();
     }
-    
+
     void QuitScence()
     {
         Application.Quit();
@@ -283,7 +297,7 @@ public class EditorControl : MonoBehaviour
         ////格式化显示当前时间
         //string timestr= string.Format("{0:D2}-{1:D2}-{2:D2} " + "{3:D4}-{4:D2}-{5:D2}", hour, minute, second, year, month, day);
         path = PathConfig.GetPth();
-        path = Path.Combine(path,"scence.scn");
+        path = Path.Combine(path, "scence.scn");
     }
 
     #endregion
@@ -305,7 +319,7 @@ public class EditorControl : MonoBehaviour
         tipText.text = str;
     }
 
-    public void ShowTipTime(string str,float time)
+    public void ShowTipTime(string str, float time)
     {
         ShowTipKeep(str);
 

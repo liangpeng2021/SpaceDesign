@@ -315,7 +315,7 @@ namespace SpaceDesign
             if (bUIChanging)
                 return;
 
-            if (curPlayerPosState != PlayerPosState.Far)
+            if (curPlayerPosState == PlayerPosState.Close)
             {
                 StopCoroutine("IEMiddleToClose");
                 StartCoroutine("IEMiddleToClose");

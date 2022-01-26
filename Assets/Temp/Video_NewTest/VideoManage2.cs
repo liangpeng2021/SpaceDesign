@@ -19,6 +19,11 @@ namespace SpaceDesign
             }
         }
 
+        public VideoTV2DCtr videoTV2DCtr;
+        public VideoTV3DCtr videoTV3DCtr;
+        public VideoAR2DCtr videoAR2DCtr;
+        public VideoAR3DCtr videoAR3DCtr;
+
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
         //Icon、UI等正在切换中
@@ -61,19 +66,19 @@ namespace SpaceDesign
         {
             PlayerManage.refreshPlayerPosEvt += RefreshPos;
             btnIcon.onPinchDown.AddListener(ClickIcon);
-            HideLoadingUI();
+            SetLoadingUI(false);
         }
 
         void OnDisable()
         {
             PlayerManage.refreshPlayerPosEvt -= RefreshPos;
             btnIcon.onPinchDown.RemoveAllListeners();
-            HideLoadingUI();
+            SetLoadingUI(false);
         }
 
         void Start()
         {
-            HideLoadingUI();
+            SetLoadingUI(false);
         }
 
         /// <summary>
@@ -308,12 +313,12 @@ namespace SpaceDesign
         /// <summary>
         /// TV模式下，播放后，隐藏加载提示UI（2D，3D根据各自的播放流程判断隐藏）
         /// </summary>
-        void HideLoadingUI()
+        public void SetLoadingUI(bool bShow)
         {
-            //print("隐藏了");
+            //Debug.Log("显示或隐藏加载提示:" + bShow);
 
-            if (objLoadingUI.activeSelf == true)
-                objLoadingUI.SetActive(false);
+            if (objLoadingUI.activeSelf != bShow)
+                objLoadingUI.SetActive(bShow);
         }
     }
 }

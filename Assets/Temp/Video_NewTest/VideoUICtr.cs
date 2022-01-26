@@ -134,6 +134,7 @@ namespace SpaceDesign
             btnTV.onPinchDown.AddListener(() => { SetTVVideo(true); });
             btnAR.onPinchDown.AddListener(() => { SetTVVideo(false); });
             btnQuit.onPinchDown.AddListener(OnVideoClose);
+            btnVideoClose.onPinchDown.AddListener(OnVideoClose);
             btnVideoSize.onPinchDown.AddListener(OnVideoSize);
             btnVideoNotMove.onPinchDown.AddListener(OnVideoNotMove);
             btnVideoMove.onPinchDown.AddListener(OnVideoMove);
@@ -157,6 +158,7 @@ namespace SpaceDesign
             btnAR.onPinchDown.RemoveAllListeners();
             btnTV.onPinchDown.RemoveAllListeners();
             btnQuit.onPinchDown.RemoveAllListeners();
+            btnVideoClose.onPinchDown.RemoveAllListeners();
             btnVideoSize.onPinchDown.RemoveAllListeners();
             btnVideoNotMove.onPinchDown.RemoveAllListeners();
             btnVideoMove.onPinchDown.RemoveAllListeners();
@@ -284,9 +286,6 @@ namespace SpaceDesign
                     curVideoType = VideoType.AR3D;
             }
 
-            traVideoChoose.SetParent(b2D ? btnVideo2D.transform : btnVideo3D.transform);
-            traVideoChoose.localPosition = Vector3.zero;
-
             if (curVideoType != lastVideoType)
                 if (curVideoType != VideoType.None)
                     ChangeVideType();
@@ -313,9 +312,6 @@ namespace SpaceDesign
                     curVideoType = VideoType.AR3D;
             }
 
-            btnAR.gameObject.SetActive(bTV);
-            btnTV.gameObject.SetActive(!bTV);
-
             if (curVideoType != lastVideoType)
                 if (curVideoType != VideoType.None)
                     ChangeVideType();
@@ -327,6 +323,21 @@ namespace SpaceDesign
         public void ChangeVideType()
         {
             ResetAutoHideUITime();
+
+            btnAR.gameObject.SetActive(bTV);
+            btnTV.gameObject.SetActive(!bTV);
+
+            traVideoChoose.SetParent(b2D ? btnVideo2D.transform : btnVideo3D.transform);
+            traVideoChoose.localPosition = Vector3.zero;
+
+            btnARWindows.transform.localScale = bTV ? Vector3.zero : new Vector3(0.8f, 0.8f, 0.8f);
+
+            if (bTV == true)
+            {
+                btnAR.GetComponentInChildren<TextMesh>().text = b2D ? "AR模式" : "3D全息模式";
+                objWindowsBtnParent.SetActive(false);
+            }
+
 
             ChangeVideTypeEvent(lastVideoType, curVideoType);
         }
@@ -344,10 +355,14 @@ namespace SpaceDesign
             bOpenVideo = true;
 
             SetReminderUI(false, false);
+            Invoke("_InvokeWatchNow", 1.3f);
+        }
+
+        void _InvokeWatchNow()
+        {
             SetExpandUI(false, true);
             SetVideoType(true, true);
         }
-
         /// <summary>
         /// 设置预览界面
         /// </summary>
@@ -377,6 +392,7 @@ namespace SpaceDesign
             {
                 timelineExpandShow.SetActive(false);
                 timelineExpandHide.SetActive(false);
+                objWindowsBtnParent.SetActive(false);
             }
             else
             {
@@ -385,9 +401,21 @@ namespace SpaceDesign
 
                 //打开的时候只有放大态的扩展界面（即缩小态不显示扩展界面）
                 if (bOpen)
+                {
+                    //AR模式下才显示
+                    if (bTV == false)
+                        objWindowsBtnParent.SetActive(true);
+
+                    //打开视频上的碰撞盒
+                    colliderBtnARWindows.enabled = true;
                     curVideoUIType = VideoUIType.ExpandBig;
+                }
                 else
+                {
+
+                    objWindowsBtnParent.SetActive(false);
                     curVideoUIType = VideoUIType.ExpandHide;
+                }
             }
         }
 
@@ -493,7 +521,15 @@ namespace SpaceDesign
         {
             bOpenVideo = false;
 
-            VideoControl.Inst.OnStop();
+            switch (curVideoType)
+            {
+                case VideoType.AR2D: VideoManage2.Inst.videoAR2DCtr.OnStop(); break;
+                case VideoType.AR3D: VideoManage2.Inst.videoAR3DCtr.OnStop(); break;
+                case VideoType.TV2D: VideoManage2.Inst.videoTV2DCtr.OnStop(); break;
+                case VideoType.TV3D: VideoManage2.Inst.videoTV3DCtr.OnStop(); break;
+            }
+
+
             //视频框直接隐藏先（缩放为0）
             btnARWindows.transform.localScale = Vector3.zero;
             VideoManage2.Inst.StopCoroutine("IECloseToMiddle");

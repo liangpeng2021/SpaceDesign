@@ -315,7 +315,7 @@ namespace SpaceDesign
         {
             if (bUIChanging == true)
                 return;
-            if (curPlayerPosState != PlayerPosState.Far)
+            if (curPlayerPosState == PlayerPosState.Close)
             {
                 StopAllCoroutines();
                 StartCoroutine(IEMiddleToClose());
@@ -345,9 +345,15 @@ namespace SpaceDesign
         public Transform traReadyUI;
         //玩游戏界面对象
         public Transform traPlayUI;
+        //卡丁车初始位置
+        public Vector3 v3PlayerOriPos;
+        //卡丁车对象
+        public Transform traPlayer;
 
         void OnStartGame()
         {
+            traPlayer.localPosition = v3PlayerOriPos;
+            traPlayer.localEulerAngles = Vector3.zero;
             KartingCPE.Inst.StartGame();
             //objReadyUI.SetActive(false);
             objKarting.SetActive(true);

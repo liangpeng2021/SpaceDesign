@@ -117,9 +117,13 @@ namespace SpaceDesign
                     btnTalkingOff.onPinchDown.Invoke();
                 }
             }
-            else
+            else if (bRecalling || bMissing)
             {
                 fCallEventDis = LoadPrefab.IconDisData.PhoneMissAndReCall;
+            }
+            else
+            {
+                fCallEventDis = LoadPrefab.IconDisData.PhoneCalling;
             }
 
         }
@@ -277,6 +281,7 @@ namespace SpaceDesign
             {
                 traCallingUI.localScale = Vector3.zero;
             }
+            fCallingTempTime = 0;
 
             Vector3 _v3 = new Vector3(1.2f, 1.2f, 1.2f);
             float _fSp;
@@ -326,12 +331,28 @@ namespace SpaceDesign
 
             if (bRecalling)
             {
-                OnRingOff();
+                //这里需要停止所有协程
+                StopSomeCoroutine();
+                ResetBoolState();
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+                traReCallUI.localScale = Vector3.zero;
+                traMissedUI.localScale = Vector3.one;
+                bMissing = true;
+                //OnRingOff();
+            }
+            else if (bMissing)
+            {
+                traReCallUI.localScale = Vector3.zero;
+                traMissedUI.localScale = Vector3.one;
+                bRecalling = false;
             }
             else if (bTalking)
             {
                 OnTalkingOff();
             }
+            bCalling = false;
+            fCallingTempTime = 0;
 
             ////接听之后的话，不中断协程（让通话界面继续放大）
             //if (bTalking == false)
@@ -346,14 +367,14 @@ namespace SpaceDesign
             //        yield break;
             //}
             //else
-            {
-                //这里是视频通话中，主动挂断，或者通话时间结束
+            //{
+            //    //这里是视频通话中，主动挂断，或者通话时间结束
 
-                //响一下挂断
-                audioSource.clip = adClipMissed_short;
-                audioSource.loop = false;
-                audioSource.Play();
-            }
+            //    //响一下挂断
+            //    audioSource.clip = adClipMissed_short;
+            //    audioSource.loop = false;
+            //    audioSource.Play();
+            //}
 
             //近距离=>中距离
             animAnswer.enabled = false;
@@ -399,6 +420,7 @@ namespace SpaceDesign
                 bUIChanging = false;
                 animAnswer.enabled = false;
                 animReCalling.enabled = false;
+                fCallingTempTime = 0;
                 //===========================================================================
             }
         }
@@ -411,7 +433,11 @@ namespace SpaceDesign
             bUIChanging = true;
 
             bCalling = bShow;
-            traMissedUI.localScale = Vector3.zero;
+            if (bShow)
+            {
+                traMissedUI.localScale = Vector3.zero;
+                traReCallUI.localScale = Vector3.zero;
+            }
             animAnswer.enabled = bShow;
             if (bCalling)
             {
@@ -466,7 +492,9 @@ namespace SpaceDesign
 
             bMissing = bShow;
 
-            float _f = bShow ? 1 : 5;
+            if (bShow)
+                traReCallUI.localScale = Vector3.zero;
+
             Vector3 _v3 = bShow ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.zero;
             while (true)
             {
@@ -512,6 +540,11 @@ namespace SpaceDesign
 
             bRecalling = bShow;
 
+            if(bRecalling)
+            {
+                traMissedUI.localScale = Vector3.zero;
+            }
+
             float _f = bShow ? 1 : 5;
             animReCalling.enabled = bShow;
             Vector3 _v3 = bShow ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.zero;
@@ -554,6 +587,21 @@ namespace SpaceDesign
 
                 //等待N秒
                 yield return new WaitForSeconds(4);
+                float _fff = 0f;
+                while (_fff < 4)
+                {
+                    _fff += Time.deltaTime;
+                    if (bRecalling == false)
+                    {
+                        print("中断了");
+
+                        bUIChanging = false;
+                        yield break;
+                    }
+
+                    yield return 0;
+                }
+
                 audioSource.Stop();
                 yield return IEReCallUI(false);
                 //UI变化未结束
@@ -640,7 +688,7 @@ namespace SpaceDesign
             if (bUIChanging)
                 return;
 
-            if (curPlayerPosState != PlayerPosState.Far)
+            if (curPlayerPosState == PlayerPosState.Close)
             {
                 StopCoroutine("IEMiddleToClose");
                 StartCoroutine("IEMiddleToClose");
@@ -697,6 +745,7 @@ namespace SpaceDesign
         [SerializeField]
         private bool bMissing;
         //呼叫计时
+        [SerializeField]
         private float fCallingTempTime;
         //通话中
         [SerializeField]
@@ -767,8 +816,8 @@ namespace SpaceDesign
 
         public void OnTalkingOff()
         {
-            if (bUIChanging)
-                return;
+            //if (bUIChanging)
+            //    return;
 
             videoPlayer.Stop();
             //这里需要停止所有协程
