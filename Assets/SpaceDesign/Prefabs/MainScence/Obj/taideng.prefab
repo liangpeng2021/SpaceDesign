@@ -59,43 +59,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onPointerEnter:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1953136228875544955}
-        m_MethodName: set_showBoundBox
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 1953136228875544955}
-        m_MethodName: SetTranslating
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
+      m_Calls: []
   onPointerExit:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1953136228875544955}
-        m_MethodName: SetTranslating
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   onPinchDown:
     m_PersistentCalls:
       m_Calls: []
@@ -586,7 +553,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4131057074515949309
 Transform:
   m_ObjectHideFlags: 0
@@ -3058,8 +3025,6 @@ MonoBehaviour:
   startpayRayReceiver: {fileID: 1953136228875544951}
   firstObj: {fileID: 1953136228875547286}
   secondObj: {fileID: 1953136228875547294}
-  objBuyUIBoxCollider: {fileID: 440813523}
-  pointLight: {fileID: 1953136228875547273}
   payObj: {fileID: 1953136228875547275}
   justpayRayReceiver: {fileID: 1953136228875544947}
   paySuccessObj: {fileID: 1953136228875547291}
@@ -3069,8 +3034,13 @@ MonoBehaviour:
   audioSource: {fileID: 7223383943898768954}
   successClip: {fileID: 8300000, guid: da948a206f203904a94c29e338b3c772, type: 3}
   zhixiangClip: {fileID: 8300000, guid: 87cf52a80b9a0374c9f41b0a37c9c6e7, type: 3}
+  lightCtr: {fileID: 1953136228875544896}
+  btnBuyUIBoxCollider: {fileID: 440813525}
+  pointLight: {fileID: 1953136228875547273}
   iShowUIState: 0
+  bShowPayUI: 0
   bTranslating: 0
+  bBoundBoxShow: 1
 --- !u!114 &1953136228875544953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4020,7 +3990,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1953136228875550569}
   - component: {fileID: 1953136228875544944}
-  - component: {fileID: 1953136228875544917}
   m_Layer: 0
   m_Name: JDManage
   m_TagString: Untagged
@@ -4057,6 +4026,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eefe30dbd713beb469355592e62e5255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  textureMark: {fileID: 2800000, guid: 2bc0a5391cb86ef409a5c51254b4a1a0, type: 3}
+  traParent: {fileID: 1953136228875548818}
   curPlayerPosState: 0
   v3OriPos: {x: 0, y: 0, z: 0}
   noOperationTime: 0
@@ -4070,39 +4041,7 @@ MonoBehaviour:
   placeBtn: {fileID: 1953136228875544918}
   taidengController: {fileID: 1953136228875544955}
   fUISpeed: 5
-  image2DTrackingTaideng: {fileID: 1953136228875544917}
   timelineShow: {fileID: 1953136228875547266}
---- !u!114 &1953136228875544917
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1953136228875547317}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 498c3b87079bc6f46ba0753bc0ec8eef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnAddTrackerEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnGetTrackerInfoEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnFindTargetEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnLossTargetEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  texture: {fileID: 2800000, guid: 2bc0a5391cb86ef409a5c51254b4a1a0, type: 3}
 --- !u!1 &1953136228875547320
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,6 +21,10 @@ namespace SpaceDesign
                 return inst;
             }
         }
+        //Mark识别图片
+        public Texture textureMark;
+        //该对象父节点
+        public Transform traParent;
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
         //Icon、UI等正在切换中
@@ -38,6 +42,8 @@ namespace SpaceDesign
         //edit by lp,添加近场点击事件
         void Awake()
         {
+            if (traParent == null)
+                traParent = transform.parent;
             animIconFar = traIcon.GetComponent<Animator>();
             btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
             //add by lp
@@ -168,21 +174,34 @@ namespace SpaceDesign
                 traIcon.localScale = v3IconTarget;
 
                 //启动Mark
-                if (markTrackTranslate == null)
-                    markTrackTranslate = FindObjectOfType<Image2DTrackingTranslate>();
-                if (markTrackTranslate != null)
+                //if (markTrackTranslate == null)
+                //    markTrackTranslate = FindObjectOfType<Image2DTrackingTranslate>();
+                //if (markTrackTranslate != null)
+                //{
+                //    if (bShow)
+                //    {
+                //        markTrackTranslate.StopTrack();
+                //        markTrackTranslate.enabled = false;
+
+                //        OnQuit();
+                //    }
+                //    else
+                //    {
+                //        markTrackTranslate.enabled = true;
+                //        markTrackTranslate.StartTrack();
+                //    }
+                //}
+                if (MarkManage.Inst != null)
                 {
                     if (bShow)
                     {
-                        markTrackTranslate.StopTrack();
-                        markTrackTranslate.enabled = false;
-
+                        if (MarkManage.Inst.curMarkType == MarkType.Translate)
+                            MarkManage.Inst.StopTrack(MarkType.Translate);
                         OnQuit();
                     }
                     else
                     {
-                        markTrackTranslate.enabled = true;
-                        markTrackTranslate.StartTrack();
+                        MarkManage.Inst.StartTrack(MarkType.Translate, textureMark);
                     }
                 }
             }
@@ -260,8 +279,8 @@ namespace SpaceDesign
         [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
-        //Mark追踪对象，杂志
-        public Image2DTrackingTranslate markTrackTranslate;
+        ////Mark追踪对象，杂志
+        //public Image2DTrackingTranslate markTrackTranslate;
         public GameObject timelineShow;
         public GameObject timelineHide;
         //查看翻译按钮
@@ -290,7 +309,8 @@ namespace SpaceDesign
         public void OnQuit()
         {
             objCheckTranslateParent.SetActive(true);
-            btnCheckTranslate.gameObject.SetActive(markTrackTranslate.bMarking);
+            //btnCheckTranslate.gameObject.SetActive(markTrackTranslate.bMarking);
+            btnCheckTranslate.gameObject.SetActive(MarkManage.bVisibleTranslate);
             if (timelineShow.activeSelf == true)
                 timelineHide.SetActive(true);
             timelineShow.SetActive(false);

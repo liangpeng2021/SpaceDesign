@@ -137,6 +137,11 @@ public class EditorControl : MonoBehaviour
     {
         Instance = this;
         ShowPhoneLaserPointer();
+        //------------ Modify by zh ------------
+        //MarkManage需要初始化一下
+        Debug.Log("编辑场景，MarkManage需要初始化一下");
+        MarkManage.Inst?.Init();
+        //------------------End------------------
     }
 
     // Start is called before the first frame update

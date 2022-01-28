@@ -21,7 +21,7 @@ namespace OXRTK.ARHandTracking
         /// 包围盒激活方式。
         /// </summary>
         public BoundingBoxActivation activationType;
-        
+
         /// <summary>
         /// The available interactions of bounding box. <br>
         /// 包围盒可用交互方式。
@@ -179,6 +179,48 @@ namespace OXRTK.ARHandTracking
         bool m_IsFocusOn;
         #endregion
 
+        //------------ Modify by lenqiy zh ------------
+        void HideMR()
+        {
+            if (scalePrefab && scalePrefab.GetComponent<MeshRenderer>())
+                scalePrefab.GetComponent<MeshRenderer>().enabled = false;
+
+            if (rotatePrefab && rotatePrefab.GetComponent<MeshRenderer>())
+                rotatePrefab.GetComponent<MeshRenderer>().enabled = false;
+        }
+        float fDelayShowMRTime = 0.1f;
+        void DelayShowMR()
+        {
+            if (m_EdgeVisulizations != null)
+            {
+                MeshRenderer _mr;
+                for (int i = 0; i < m_EdgeVisulizations.Length; i++)
+                {
+                    if (m_EdgeVisulizations[i] != null)
+                    {
+                        _mr = m_EdgeVisulizations[i].GetComponent<MeshRenderer>();
+                        if (_mr != null)
+                            _mr.enabled = true;
+                    }
+                }
+            }
+
+            if (m_CornerVisulizations != null)
+            {
+                MeshRenderer _mr;
+                for (int i = 0; i < m_CornerVisulizations.Length; i++)
+                {
+                    if (m_CornerVisulizations[i] != null)
+                    {
+                        _mr = m_CornerVisulizations[i].GetComponent<MeshRenderer>();
+                        if (_mr != null)
+                            _mr.enabled = true;
+                    }
+                }
+            }
+        }
+        //---------------------End---------------------
+
         void Start()
         {
             if (scalePrefab == null)
@@ -189,6 +231,9 @@ namespace OXRTK.ARHandTracking
             {
                 rotatePrefab = Resources.Load("Prefabs/BoundsEdge") as GameObject;
             }
+            //------------ Modify by lenqiy zh ------------
+            HideMR();
+            //---------------------End---------------------
             if (boundsOverride == null)
             {
                 if (gameObject.GetComponent<BoxCollider>() != null)
@@ -303,7 +348,7 @@ namespace OXRTK.ARHandTracking
 
             scalePrefab = null;
             rotatePrefab = null;
-            if(boundsPrefab != null)
+            if (boundsPrefab != null)
                 boundsPrefab = null;
             Resources.UnloadUnusedAssets();
         }
@@ -389,8 +434,12 @@ namespace OXRTK.ARHandTracking
                 unscaleCorner.Init();
                 unscaleCorner.SetMaxModelScaleRatio(2f);
                 unscaleCorner.SetMinWrapperScaleRatio(scaleMin);
-                m_BoundingBoxRoot.GetComponent<BoundsScaleController>().AddCorner(unscaleCorner); 
+                m_BoundingBoxRoot.GetComponent<BoundsScaleController>().AddCorner(unscaleCorner);
             }
+
+            //------------ Modify by lenqiy zh ------------
+            Invoke("DelayShowMR", fDelayShowMRTime);
+            //---------------------End---------------------
         }
 
         void InitEdge()
@@ -518,8 +567,12 @@ namespace OXRTK.ARHandTracking
                 unscaleEdge.Init();
                 unscaleEdge.SetMaxModelScaleRatio(4f);
                 unscaleEdge.SetMinWrapperScaleRatio(scaleMin);
-                m_BoundingBoxRoot.GetComponent<BoundsScaleController>().AddEdge(unscaleEdge); 
+                m_BoundingBoxRoot.GetComponent<BoundsScaleController>().AddEdge(unscaleEdge);
             }
+
+            //------------ Modify by lenqiy zh ------------
+            Invoke("DelayShowMR", fDelayShowMRTime);
+            //---------------------End---------------------
         }
 
         /// <summary>
@@ -576,7 +629,7 @@ namespace OXRTK.ARHandTracking
                     m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
                     onScaleStart?.Invoke();
                     break;
-                    
+
                 default:
                     break;
             }
@@ -638,7 +691,7 @@ namespace OXRTK.ARHandTracking
                     m_CornerRescaleDirection = new Vector2(Mathf.Sign((pointOnCamera - objectOnCamera).x), Mathf.Sign((pointOnCamera - objectOnCamera).y));
                     m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
                     onScaleStart?.Invoke();
-                    
+
                     //3d
                     /*m_OriginalLocalScale = m_TargetOverride.localScale;
                     Vector3 pointOnCamera = endPosition;
@@ -646,12 +699,12 @@ namespace OXRTK.ARHandTracking
                     m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
                     onScaleStart?.Invoke();*/
                     break;
-                    
+
                 default:
                     break;
             }
         }
-        
+
         /// <summary>
         /// Starts bounding box ui interaction. <br>
         /// 开始bounding box近场交互。
@@ -694,11 +747,11 @@ namespace OXRTK.ARHandTracking
                 case BoundsAction.Scale:
                     m_OriginalLocalScale = m_TargetOverride.localScale;
                     m_CenterToHandlerAtBeginning = pinchPosition - m_TargetOverride.position;
-                   /* Vector3 pointOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(pinchPosition);
-                    Vector3 objectOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
-                    m_CornerRescaleDirection = new Vector2(Mathf.Sign((pointOnCamera - objectOnCamera).x), Mathf.Sign((pointOnCamera - objectOnCamera).y));
-                    m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
-                   */
+                    /* Vector3 pointOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(pinchPosition);
+                     Vector3 objectOnCamera = CenterCamera.instance.centerCamera.WorldToScreenPoint(m_TargetOverride.position);
+                     m_CornerRescaleDirection = new Vector2(Mathf.Sign((pointOnCamera - objectOnCamera).x), Mathf.Sign((pointOnCamera - objectOnCamera).y));
+                     m_CenterToHandlerAtBeginning = pointOnCamera - objectOnCamera;
+                    */
                     onScaleStart?.Invoke();
                     break;
                 default:
@@ -910,7 +963,7 @@ namespace OXRTK.ARHandTracking
                     break;
             }
         }
-        
+
         /// <summary>
         /// Updates far interaction information. <br>
         /// 交互过程中，更新bounding box远端交互。
@@ -1087,7 +1140,7 @@ namespace OXRTK.ARHandTracking
                     break;
                 case BoundsAction.Scale:
                     Vector3 centerToHandler = fingerPosition - m_TargetOverride.position;
-                    
+
                     float xWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.x) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y) + Mathf.Abs(m_CenterToHandlerAtBeginning.z));
                     float yWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.y) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y) + Mathf.Abs(m_CenterToHandlerAtBeginning.z));
                     float zWeight = Mathf.Abs(m_CenterToHandlerAtBeginning.z) / (Mathf.Abs(m_CenterToHandlerAtBeginning.x) + Mathf.Abs(m_CenterToHandlerAtBeginning.y) + Mathf.Abs(m_CenterToHandlerAtBeginning.z));

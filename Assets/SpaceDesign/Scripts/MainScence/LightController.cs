@@ -62,5 +62,22 @@ namespace SpaceDesign
             lightOnFocusObj.SetActive(false);
             lightoffFocusObj.SetActive(false);
         }
+        //------------ Modify by zh ------------
+        /// <summary>
+        /// 设置灯光是否显示
+        /// </summary>
+        public void SetLight(bool bOn)
+        {
+            if (image == null)
+                return;
+
+            islightOn = bOn;
+            if (islightOn)
+                image.sprite = lightOn;
+            else
+                image.sprite = lightoff;
+            lightObj?.SetActive(islightOn);
+        }
+        //------------------End------------------
     }
 }

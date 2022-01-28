@@ -352,6 +352,9 @@ namespace SpaceDesign
 
         void OnStartGame()
         {
+            if (bUIChanging == true)
+                return;
+
             traPlayer.localPosition = v3PlayerOriPos;
             traPlayer.localEulerAngles = Vector3.zero;
             KartingCPE.Inst.StartGame();
@@ -387,6 +390,9 @@ namespace SpaceDesign
 
         void OnEndGame()
         {
+            if (bUIChanging == true)
+                return;
+
             StopCoroutine("IECloseToMiddle");
             StartCoroutine("IECloseToMiddle");
         }

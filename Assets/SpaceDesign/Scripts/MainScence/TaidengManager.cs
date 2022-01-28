@@ -22,6 +22,11 @@ namespace SpaceDesign
                 return inst;
             }
         }
+        //Mark识别图片
+        public Texture textureMark;
+
+        //该对象父节点
+        public Transform traParent;
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
 
@@ -43,6 +48,8 @@ namespace SpaceDesign
         //===========================================================================
         void Awake()
         {
+            if (traParent == null)
+                traParent = transform.parent;
             animIconFar = traIcon.GetComponent<Animator>();
             btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
             btnIconTouch = traIcon.GetComponent<ButtonTouchableReceiver>();
@@ -63,11 +70,6 @@ namespace SpaceDesign
             //taidengController.gameObject.SetActive(false);
             v3OriPos = traIconRoot.position;// this.transform.position;
 
-            //timelineShow.SetActive(false);
-            //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-            //Invoke("SetIconParent", 0.1f);
-            //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
-            //traIconRoot.SetParent(null);
             traIconRoot.SetParent(transform.parent);
         }
         void OnDestroy()
@@ -80,21 +82,6 @@ namespace SpaceDesign
                     DestroyImmediate(obj);
             }
         }
-        //void LateUpdate()
-        //{
-        //    if (taidengController.iShowUIState == 1 || taidengController.iShowUIState == 2)
-        //    {
-        //        //永远保持向上
-        //        transform.up = Vector3.up;
-        //    }
-        //}
-        //void SetIconParent()
-        //{
-        //    if (SceneManager.GetActiveScene().name.Equals("EditorScence"))
-        //        traIconRoot.SetParent(EditorControl.Instance.loadPreviewScence.ObjParent);
-        //    else
-        //        traIconRoot.SetParent(null);
-        //}
 
         /// <summary>
         /// 刷新位置消息
@@ -370,7 +357,7 @@ namespace SpaceDesign
             closeBtn.onPinchDown.RemoveListener(OnClose);
             if (closeBtnTouch != null && closeBtnTouch.onPressUp != null)
                 closeBtnTouch.onPressUp.RemoveListener(OnClose);
-            
+
             placeBtn.onPinchDown.RemoveListener(OnCheckPlace);
             if (placeBtnTouch != null && placeBtnTouch.onPressUp != null)
                 placeBtnTouch.onPressUp.RemoveListener(OnCheckPlace);
@@ -382,8 +369,8 @@ namespace SpaceDesign
         [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
-        //Mark追踪对象
-        public Image2DTrackingTaideng image2DTrackingTaideng;
+        ////Mark追踪对象
+        //public Image2DTrackingTaideng image2DTrackingTaideng;
         public GameObject timelineShow;
 
         /// <summary>
@@ -432,13 +419,16 @@ namespace SpaceDesign
         {
             if (bOpen)
             {
-                image2DTrackingTaideng.enabled = true;
-                image2DTrackingTaideng.StartTrack();
+                MarkManage.Inst.StartTrack(MarkType.Taideng, textureMark);
+                //image2DTrackingTaideng.enabled = true;
+                //image2DTrackingTaideng.StartTrack();
             }
             else
             {
-                image2DTrackingTaideng.StopTrack();
-                image2DTrackingTaideng.enabled = false;
+                if (MarkManage.Inst.curMarkType == MarkType.Taideng)
+                    MarkManage.Inst.StopTrack(MarkType.Taideng);
+                //image2DTrackingTaideng.StopTrack();
+                //image2DTrackingTaideng.enabled = false;
             }
         }
 

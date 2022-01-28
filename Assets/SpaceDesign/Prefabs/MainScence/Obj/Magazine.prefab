@@ -4789,7 +4789,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8279189705615673239}
   - component: {fileID: 8279189705615673238}
-  - component: {fileID: 8279189705615673236}
   m_Layer: 0
   m_Name: MagazineManage
   m_TagString: Untagged
@@ -4827,6 +4826,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5358e06261571384ab07fea90875259e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  textureMark: {fileID: 2800000, guid: bcc10d447d13ffb45ba4d906f287f0e4, type: 3}
+  traParent: {fileID: 635411614448000798}
   curPlayerPosState: 0
   v3OriPos: {x: 0, y: 0, z: 0}
   tt: {fileID: 8592750297696154490}
@@ -4836,44 +4837,11 @@ MonoBehaviour:
   - {fileID: 1969350041644313772}
   - {fileID: 8279189705456464288}
   fUISpeed: 5
-  markTrackMagazine: {fileID: 8279189705615673236}
   timelineShow: {fileID: 8592750297842013768}
   timelineHide: {fileID: 8592750297593492955}
   btnCheckDetail: {fileID: 8592750298907494994}
   objCheckDetailParent: {fileID: 678497092546168304}
   btnQuit: {fileID: 8592750298042967117}
---- !u!114 &8279189705615673236
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8279189705615673237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86685ac2845a9a342b8b2090abae8aca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnAddTrackerEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnGetTrackerInfoEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnFindTargetEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnLossTargetEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  texture: {fileID: 2800000, guid: bcc10d447d13ffb45ba4d906f287f0e4, type: 3}
-  bMarking: 0
 --- !u!1 &8279189706033822803
 GameObject:
   m_ObjectHideFlags: 0

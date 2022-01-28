@@ -65,13 +65,10 @@ namespace SpaceDesign
 
         void FocusOnOrOff(int num, bool isOn)
         {
+            focusTran.gameObject.SetActive(isOn);
+            if (isOn)
+                focusTran.position = lightData[num].buttonRayReceiver.transform.position;
             //------------ Modify by zh ------------
-            //focusTran.gameObject.SetActive(isOn);
-            //if (isOn)
-            //    focusTran.position = lightData[num].buttonRayReceiver.transform.position;
-
-            focusTran.gameObject.SetActive(true);
-            focusTran.position = lightData[num].buttonRayReceiver.transform.position;
             TaidengManager.Inst.taidengController.SetTranslating(isOn);
             //------------------End------------------
         }

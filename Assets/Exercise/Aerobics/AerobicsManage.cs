@@ -37,6 +37,8 @@ namespace SpaceDesign
         private string url = "ws://192.168.1.100";//"ws://192.168.1.100:7777";
         //WebSocket控制
         public MyWebSocket myWebSocket;
+        //正在启动中
+        public bool bConnecting = false;
         //===========================================================================
         //临时测距
         public TextMesh tt;
@@ -45,6 +47,7 @@ namespace SpaceDesign
         {
             animIconFar = traIcon.GetComponent<Animator>();
             btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
+            bConnecting = false;
         }
 
         void OnEnable()
@@ -66,6 +69,7 @@ namespace SpaceDesign
 
         void Start()
         {
+            bConnecting = false;
             v3OriPos = this.transform.position;
 
             traAnimConnect.localScale = Vector3.zero;
@@ -160,6 +164,8 @@ namespace SpaceDesign
         /// </summary>
         IEnumerator IEFarToMiddle()
         {
+            bConnecting = false;
+
             //UI开始变化
             bUIChanging = true;
 
@@ -180,6 +186,7 @@ namespace SpaceDesign
         /// </summary>
         IEnumerator IEMiddleToFar()
         {
+            bConnecting = false;
             //UI开始变化
             bUIChanging = true;
 
@@ -256,24 +263,26 @@ namespace SpaceDesign
         /// </summary>
         IEnumerator IECloseToMiddle()
         {
+            bConnecting = false;
             //UI开始变化
             bUIChanging = true;
 
             float _fSp;
             //近距离=>中距离
-
             Vector3 _v3Icon = LoadPrefab.IconSize;
             while (true)
             {
                 _fSp = fUISpeed * Time.deltaTime;
                 traIcon.localScale = Vector3.Lerp(traIcon.localScale, _v3Icon, _fSp);
                 btnStart.transform.localScale = Vector3.Lerp(btnStart.transform.localScale, Vector3.zero, _fSp);
+                traAnimConnect.localScale = Vector3.Lerp(traAnimConnect.localScale, Vector3.zero, fUISpeed * Time.deltaTime);
                 traReadyUI.localScale = Vector3.Lerp(traReadyUI.localScale, Vector3.zero, _fSp);
                 float _fDis = Vector3.Distance(traIcon.localScale, _v3Icon);
                 if (_fDis < fThreshold)
                 {
                     traIcon.localScale = _v3Icon;
                     btnStart.transform.localScale = Vector3.zero;
+                    traAnimConnect.localScale = Vector3.zero;
                     traReadyUI.localScale = Vector3.zero;
                     break;
                 }
@@ -327,6 +336,10 @@ namespace SpaceDesign
 
         void OnStartGame()
         {
+            if (bConnecting == true)
+                return;
+
+            bConnecting = true;
             StopCoroutine("IEConnecting");
             StartCoroutine("IEConnecting");
             myWebSocket.InitAndConnect(url, CallbackStart);
@@ -431,6 +444,8 @@ namespace SpaceDesign
 
         void OnQuit()
         {
+            bConnecting = false;
+
             myWebSocket.EndGame();
 
             StopCoroutine("IECloseToMiddle");

@@ -79,7 +79,7 @@ namespace SpaceDesign
         {
             if (bCalling)
             {
-                fCallEventDis = LoadPrefab.IconDisData.PhoneCalling;
+                fCallEventDis = LoadPrefab.IconDisData.PhoneMissAndReCall;
 
                 fCallingTempTime += Time.deltaTime;
                 if (fCallingTempTime > fCallingTime)
@@ -353,28 +353,6 @@ namespace SpaceDesign
             }
             bCalling = false;
             fCallingTempTime = 0;
-
-            ////接听之后的话，不中断协程（让通话界面继续放大）
-            //if (bTalking == false)
-            //    StopSomeCoroutine();
-
-            //if (bTalkOver == false)
-            //{
-            //    ////呼叫中、或者视频通话中，距离变远也不隐藏
-            //    //if (bCalling == true || bTalking == true)
-            //    //视频通话中，距离变远也不隐藏
-            //    if (bTalking == true)
-            //        yield break;
-            //}
-            //else
-            //{
-            //    //这里是视频通话中，主动挂断，或者通话时间结束
-
-            //    //响一下挂断
-            //    audioSource.clip = adClipMissed_short;
-            //    audioSource.loop = false;
-            //    audioSource.Play();
-            //}
 
             //近距离=>中距离
             animAnswer.enabled = false;

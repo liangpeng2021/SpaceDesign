@@ -22,6 +22,10 @@ namespace SpaceDesign
                 return inst;
             }
         }
+        //Mark识别图片
+        public Texture textureMark;
+        //该对象父节点
+        public Transform traParent;
         //人物和Icon的距离状态
         public PlayerPosState curPlayerPosState = PlayerPosState.Far;
         //Icon、UI等正在切换中
@@ -40,10 +44,12 @@ namespace SpaceDesign
         //edit by lp,添加近场点击事件
         void Awake()
         {
+            if (traParent == null)
+                traParent = transform.parent;
             animIconFar = traIcon.GetComponent<Animator>();
             btnIcon = traIcon.GetComponent<ButtonRayReceiver>();
-            btnIconTouch = traIcon.GetComponent<ButtonTouchableReceiver>();
 
+            btnIconTouch = traIcon.GetComponent<ButtonTouchableReceiver>();
             btnCheckDetailTouch = btnCheckDetail.GetComponent<ButtonTouchableReceiver>();
             btnQuitTouch = btnQuit.GetComponent<ButtonTouchableReceiver>();
         }
@@ -254,9 +260,10 @@ namespace SpaceDesign
                 yield return 0;
             }
 
-            //启动Mark
-            markTrackMagazine.enabled = true;
-            markTrackMagazine.StartTrack();
+            ////启动Mark
+            //markTrackMagazine.enabled = true;
+            //markTrackMagazine.StartTrack();
+            MarkManage.Inst.StartTrack(MarkType.Magazine, textureMark);
 
             //UI变化结束
             bUIChanging = false;
@@ -285,8 +292,10 @@ namespace SpaceDesign
                 yield return 0;
             }
 
-            markTrackMagazine.StopTrack();
-            markTrackMagazine.enabled = false;
+            if (MarkManage.Inst.curMarkType == MarkType.Magazine)
+                MarkManage.Inst.StopTrack(MarkType.Magazine);
+            //markTrackMagazine.StopTrack();
+            //markTrackMagazine.enabled = false;
 
             OnQuit();
 
@@ -328,8 +337,8 @@ namespace SpaceDesign
         [Header("===重交互，大UI，近距离")]
         //UI的变化速度
         public float fUISpeed = 5;
-        //Mark追踪对象，杂志
-        public Image2DTrackingMagazine markTrackMagazine;
+        ////Mark追踪对象，杂志
+        //public Image2DTrackingMagazine markTrackMagazine;
         public GameObject timelineShow;
         public GameObject timelineHide;
         //查看翻译按钮
@@ -361,7 +370,9 @@ namespace SpaceDesign
         public void OnQuit()
         {
             objCheckDetailParent.SetActive(true);
-            btnCheckDetail.gameObject.SetActive(markTrackMagazine.bMarking);
+            //btnCheckDetail.gameObject.SetActive(markTrackMagazine.bMarking);
+            btnCheckDetail.gameObject.SetActive(MarkManage.bVisibleMagazine);
+
             if (timelineShow.activeSelf == true)
                 timelineHide.SetActive(true);
             timelineShow.SetActive(false);
