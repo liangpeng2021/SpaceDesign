@@ -10,6 +10,8 @@ namespace SpaceDesign
 {
     public class VideoAR2DCtr : MonoBehaviour
     {
+        //2D视频播放背景对象（未播放的时候，VideoPlayer是空的）
+        public GameObject objVdpBg;
         //2D视频播放
         public VideoPlayer vdp2D;
         //2D视频的图片
@@ -44,7 +46,8 @@ namespace SpaceDesign
 
         void Awake()
         {
-            vdp2D.gameObject.SetActive(false);
+            objVdpBg.SetActive(false);
+            //vdp2D.gameObject.SetActive(false);
         }
         void OnEnable()
         {
@@ -86,7 +89,8 @@ namespace SpaceDesign
             if (curTyp == VideoType.AR2D)
             {
                 VideoManage2.Inst.SetLoadingUI(false);
-                vdp2D.gameObject.SetActive(true);
+                objVdpBg.SetActive(true);
+                //vdp2D.gameObject.SetActive(true);
 
                 //要切换的目标状态，都延迟0.2秒（防止Unity视频和容积视频冲突崩溃）
                 Invoke("InvokeGo", 0.2f);
@@ -101,14 +105,16 @@ namespace SpaceDesign
                 bRun = false;
 
                 ReleaseVideo();
-                vdp2D.gameObject.SetActive(false);
+                objVdpBg.SetActive(false);
+                //vdp2D.gameObject.SetActive(false);
 
                 return;
             }
             else
             {
                 bRun = false;
-                vdp2D.gameObject.SetActive(false);
+                objVdpBg.SetActive(false);
+                //vdp2D.gameObject.SetActive(false);
 
                 return;
             }
@@ -124,16 +130,31 @@ namespace SpaceDesign
             //unity视频播放不播放最后一帧
             fTotalFrame = (vdp2D.frameCount - 1);
             fFrameRate = vdp2D.frameRate;
+            bRun = true;
             //先设置总长度（函数中计算总时长），再设置当前播放进度
             SetTotalPlayTime();
-            SetCurTimeAndSlider(true, 0);
-            bRun = true;
+
+            if (VideoUICtr.Inst.lastVideoType == VideoType.TV2D)
+            {
+                float _fPlayProgress = VideoUICtr.Inst.fPlayProgress;
+                if (_fPlayProgress < 0)
+                {
+                    _fPlayProgress = 0;
+                }
+
+                SetCurTimeAndSlider(true, _fPlayProgress);
+            }
+            else
+            {
+                SetCurTimeAndSlider(true, 0);
+            }
+            SliderVideoPointerUp();
         }
 
         /// <summary>
         /// 停止后或暂停后播放
         /// </summary>
-        void OnPlay()
+        public void OnPlay()
         {
             if (bRun == false)
                 return;
@@ -160,7 +181,7 @@ namespace SpaceDesign
         /// <summary>
         /// 暂停播放
         /// </summary>
-        void OnPause()
+        public void OnPause()
         {
             if (bRun == false)
                 return;
@@ -331,8 +352,11 @@ namespace SpaceDesign
 
         void ReleaseVideo()
         {
-            vdp2D.targetTexture.Release();
-            vdp2D.targetTexture.MarkRestoreExpected();
+            if (vdp2D != null)
+            {
+                vdp2D.targetTexture.Release();
+                vdp2D.targetTexture.MarkRestoreExpected();
+            }
         }
     }
 }

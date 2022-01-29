@@ -223,7 +223,14 @@ namespace SpaceDesign
             }
         }
 
-        bool b2DVideo = true;
+        //bool b2DVideo = true;
+        bool b2DVideo
+        {
+            get
+            {
+                return VideoUICtr.Inst.b2D;
+            }
+        }
 
 
         /// <summary>
@@ -243,7 +250,7 @@ namespace SpaceDesign
                 return;
             }
 
-            b2DVideo = b2D;
+            //b2DVideo = b2D;
 
             try
             {
@@ -278,6 +285,22 @@ namespace SpaceDesign
             catch (Exception exc)
             {
                 ARLog("播放报错/n" + exc.ToString());
+            }
+        }
+
+        /// <summary>
+        /// 播放回调
+        /// </summary>
+        public void CallbackPlay(string s)
+        {
+            ARLog("播放回调:" + s);
+            if (b2DVideo)
+            {
+                VideoManage2.Inst.videoTV2DCtr.CallbackPlay();
+            }
+            else
+            {
+                VideoManage2.Inst.videoTV3DCtr.CallbackPlay();
             }
         }
 
@@ -332,15 +355,15 @@ namespace SpaceDesign
         /// </summary>
         public void CallbackPause(string s)
         {
-            ARLog("暂停回调:" + s);
-            if (b2DVideo)
-            {
-                VideoManage2.Inst.videoTV2DCtr.CallbackPause();
-            }
-            else
-            {
-                VideoManage2.Inst.videoTV3DCtr.CallbackPause();
-            }
+            ARLog("暂停回调（不改变AR端状态）:" + s);
+            //if (b2DVideo)
+            //{
+            //    VideoManage2.Inst.videoTV2DCtr.CallbackPause();
+            //}
+            //else
+            //{
+            //    VideoManage2.Inst.videoTV3DCtr.CallbackPause();
+            //}
         }
         ///// <summary>
         ///// 停止播放
@@ -364,6 +387,22 @@ namespace SpaceDesign
         public void CallbackStop(string s)
         {
             ARLog("停止回调:" + s);
+
+            //if (b2DVideo)
+            //{
+            //    VideoManage2.Inst.videoTV2DCtr.CallbackStop();
+            //}
+            //else
+            //{
+            //    VideoManage2.Inst.videoTV3DCtr.CallbackStop();
+            //}
+        }
+        /// <summary>
+        /// 播放完成回调
+        /// </summary>
+        public void CallbackCompletion(string s)
+        {
+            ARLog("播放完成回调:" + s);
 
             if (b2DVideo)
             {
@@ -405,6 +444,9 @@ namespace SpaceDesign
         /// </summary>
         public void CallbackSlider(string strTime)
         {
+            if (VideoUICtr.Inst.bTV == false)
+                return;
+
             if (bSetbackSlider == false)
                 return;
 

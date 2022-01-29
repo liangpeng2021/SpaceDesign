@@ -119,7 +119,7 @@ namespace SpaceDesign
                     return;
             }
 
-            StopAllCoroutines();
+            StopCoroutine("IERefreshPos");
             StartCoroutine("IERefreshPos", lastPPS);
         }
 
@@ -317,8 +317,8 @@ namespace SpaceDesign
                 return;
             if (curPlayerPosState == PlayerPosState.Close)
             {
-                StopAllCoroutines();
-                StartCoroutine(IEMiddleToClose());
+                StopCoroutine("IEMiddleToClose");
+                StartCoroutine("IEMiddleToClose");
             }
         }
 
@@ -437,11 +437,16 @@ namespace SpaceDesign
             if (bUIChanging == true)
                 return;
 
-            if (VideoManage.Inst == null)
+            //if (VideoManage.Inst == null)
+            //    return;
+            //if (VideoManage.Inst.bTV == true)
+            //    return;
+            if (VideoUICtr.Inst == null)
                 return;
-            if (VideoManage.Inst.bTV == true)
+            if (VideoUICtr.Inst.bTV == true)
                 return;
-
+            if (VideoUICtr.Inst.videoAutoRotate.bMove == false)
+                return;
 
             isSwap = !isSwap;
 
@@ -507,17 +512,19 @@ namespace SpaceDesign
         void InSwap()
         {
             //判断当前是视频跟随状态
-            if (VideoManage.Inst == null)
+            //if (VideoManage.Inst == null)
+            //    return;
+            //if (VideoManage.Inst.bTV == true)
+            //    return;
+            if (VideoUICtr.Inst == null)
                 return;
-            if (VideoManage.Inst.bTV == true)
+            if (VideoUICtr.Inst.bTV == true)
                 return;
+            if (VideoUICtr.Inst.videoAutoRotate.bMove == false)
+                return;
+
             isInArea = true;
             //TODO,修改视频节点
-            //if (VideoManage.Inst.bSizeSmall)
-            //    traVideoOriParent = VideoManage.Inst.traFollowSmallParent;
-            //else
-            //    traVideoOriParent = VideoManage.Inst.traFollowNormalParent;
-
             SetVideo(true);
 
         }
@@ -526,15 +533,15 @@ namespace SpaceDesign
         //------------ Modify by zh ------------
         public Transform traVideoBig;
         public Transform traVideoSmall;
-        //视频的原父节点
-        //Transform traVideoOriParent;
         void SetVideo(bool bKarting)
         {
-            VideoManage _vm = VideoManage.Inst;
+            //VideoManage _vm = VideoManage.Inst;
+            VideoUICtr _vm = VideoUICtr.Inst;
 
             if (_vm == null)
                 return;
-
+            if (_vm.bTV == true)
+                return;
             if (_vm.traVideoExpand == null)
                 return;
 
@@ -549,16 +556,23 @@ namespace SpaceDesign
                     _vm.colliderBtnARWindows.enabled = true;
                     //卡丁小框，视频大框
                     _traTarget = traVideoBig;
-                    _vm.btnPlay.onPinchDown.Invoke();
+                    _vm.HandleVideo(VideoState.Play);
+                    //这里视频非缩小态（离开卡丁用到）
+                    _vm.bExpandSmall = false;
+                    //_vm.btnPlay.onPinchDown.Invoke();
                 }
                 else
                 {
                     _vm.colliderBtnARWindows.enabled = false;
-                    _vm.SetExpand(false);
+                    //_vm.SetExpand(false);
+                    _vm.SetExpandUI(false, false);
+                    //这里视频是缩小态（离开卡丁用到）
+                    _vm.bExpandSmall = true;
 
                     //卡丁大框，视频小框
                     _traTarget = traVideoSmall;
-                    _vm.btnPause.onPinchDown.Invoke();
+                    _vm.HandleVideo(VideoState.Pause);
+                    //_vm.btnPause.onPinchDown.Invoke();
                 }
             }
             else
@@ -567,7 +581,8 @@ namespace SpaceDesign
 
                 Transform traVideoOriParent;
 
-                if (_vm.bSizeSmall)
+                //if (_vm.bSizeSmall)
+                if (_vm.bExpandSmall)
                     traVideoOriParent = _vm.traFollowSmallParent;
                 else
                     traVideoOriParent = _vm.traFollowNormalParent;
@@ -577,9 +592,15 @@ namespace SpaceDesign
 
             _vm.btnTV.transform.parent.gameObject.SetActive(!bKarting);
 
-            //卡丁车状态不显示视频的关闭和缩放按钮
+            //卡丁车状态不显示视频的关闭按钮、缩放按钮、固定位置按钮
+            //不能直接显隐父节点objWindowsBtnParent，信息界面呼出的时候会开启objWindowsBtnParent对象
+            //_vm.objWindowsBtnParent.SetActive(!bKarting);
             _vm.btnVideoClose.gameObject.SetActive(!bKarting);
             _vm.btnVideoSize.gameObject.SetActive(!bKarting);
+            _vm.btnVideoMove.gameObject.SetActive(!bKarting);
+            _vm.btnQuit.gameObject.SetActive(!bKarting);
+            //视频只有移动状态才能和卡丁车结合，所以不移动的按钮肯定是Disable的
+            _vm.btnVideoNotMove.gameObject.SetActive(false);
 
             _vm.traVideoExpand.SetParent(_traTarget);
             _vm.traVideoExpand.localScale = Vector3.one;

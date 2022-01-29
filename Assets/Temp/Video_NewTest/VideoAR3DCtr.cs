@@ -146,15 +146,28 @@ namespace SpaceDesign
 
                 //unity视频播放不播放最后一帧
                 fFrameRate = vdp3D.frameRate;
-                //先设置总长度（函数中计算总时长），再设置当前播放进度
-                SetTotalPlayTime();
-                //iCurFrame = 0;
-                SetCurTimeAndSlider(true, 0);
-                //VideoControl.Inst.SetVideValue(vdp3D.frameRate, fTotalFrame3D);
-                OnPlay();
-                obj3DStage.SetActive(true);
 
                 bRun = true;
+                obj3DStage.SetActive(true);
+                //先设置总长度（函数中计算总时长），再设置当前播放进度
+                SetTotalPlayTime();
+
+
+                if (VideoUICtr.Inst.lastVideoType == VideoType.TV3D)
+                {
+                    float _fPlayProgress = VideoUICtr.Inst.fPlayProgress;
+                    if (_fPlayProgress < 0)
+                    {
+                        _fPlayProgress = 0;
+                    }
+
+                    SetCurTimeAndSlider(true, _fPlayProgress);
+                }
+                else
+                {
+                    SetCurTimeAndSlider(true, 0);
+                }
+                SliderVideoPointerUp();
             });
         }
 
@@ -162,7 +175,7 @@ namespace SpaceDesign
         /// <summary>
         /// 停止后或暂停后播放
         /// </summary>
-        void OnPlay()
+        public void OnPlay()
         {
             if (bRun == false)
                 return;
@@ -229,7 +242,7 @@ namespace SpaceDesign
         /// <summary>
         /// 暂停播放
         /// </summary>
-        void OnPause()
+        public void OnPause()
         {
             if (bRun == false)
                 return;

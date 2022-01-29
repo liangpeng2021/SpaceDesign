@@ -6,6 +6,13 @@ using UnityEngine.UI;
 
 namespace SpaceDesign
 {
+    public enum VideoState
+    {
+        Stop,
+        Play,
+        Pause
+    }
+
     public class VideoManage2 : MonoBehaviour
     {
         static VideoManage2 inst;
@@ -29,7 +36,8 @@ namespace SpaceDesign
         //Icon、UI等正在切换中
         bool bUIChanging = false;
         //运动阈值
-        float fThreshold = 0.1f;
+        [HideInInspector]
+        public float fThreshold = 0.1f;
         //对象初始位置
         [SerializeField]
         private Vector3 v3OriPos;
@@ -50,6 +58,7 @@ namespace SpaceDesign
 
         [Header("===重交互，大UI，近距离")]
         //UI的变化速度
+        [HideInInspector]
         public float fUISpeed = 5;
 
         //卡丁车模式（绑定在卡丁车界面）
@@ -316,9 +325,9 @@ namespace SpaceDesign
         public void SetLoadingUI(bool bShow)
         {
             //Debug.Log("显示或隐藏加载提示:" + bShow);
-
-            if (objLoadingUI.activeSelf != bShow)
-                objLoadingUI.SetActive(bShow);
+            if (objLoadingUI != null)
+                if (objLoadingUI.activeSelf != bShow)
+                    objLoadingUI.SetActive(bShow);
         }
     }
 }

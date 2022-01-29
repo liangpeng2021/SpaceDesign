@@ -20,9 +20,10 @@ namespace SpaceDesign
     {
         None = 0,
         Reminder = 1,//预览界面
-        ExpandHide = 2,//扩展-隐藏界面
-        ExpandBig = 3,//扩展-大界面
-        ExpandSmall = 4,//扩展-小界面
+        Expand = 2,
+        //ExpandHide = 2,//扩展-隐藏界面
+        //ExpandBig = 3,//扩展-大界面
+        //ExpandSmall = 4,//扩展-小界面
     }
 
     public class VideoUICtr : MonoBehaviour
@@ -37,6 +38,9 @@ namespace SpaceDesign
                 return inst;
             }
         }
+
+        //当前播放进度（切换时候赋值）：未播放为-1，播放中【0-1】
+        public float fPlayProgress = 0;
 
         //切换视频的模式<上一次的状态，要改变的状态>（AR2D、AR3D、TV2D、TV3D）
         public static UnityAction<VideoType, VideoType> ChangeVideTypeEvent;
@@ -110,6 +114,9 @@ namespace SpaceDesign
 
         public bool bTV = true;
         public bool b2D = true;
+        public bool bExpandShow = false;
+        public bool bExpandSmall = false;
+        public bool bKarting = false;
 
         //自动隐藏UI界面等待时间
         public float fAutoHideUITime = 30;
@@ -140,12 +147,14 @@ namespace SpaceDesign
             btnVideoMove.onPinchDown.AddListener(OnVideoMove);
             btnARWindows.onPointerEnter.AddListener(() =>
             {
-                if (curVideoUIType == VideoUIType.ExpandHide)
+                //if (curVideoUIType == VideoUIType.ExpandHide)
+                if (bExpandSmall == false || bKarting == true)
                     SetExpandUI(false, true);
             });
             btnARWindows.onPinchDown.AddListener(() =>
             {
-                if (curVideoUIType == VideoUIType.ExpandSmall)
+                //if (curVideoUIType == VideoUIType.ExpandSmall)
+                if (bExpandSmall == true && bKarting == false)
                     OnVideoSize();
             });
 
@@ -172,20 +181,20 @@ namespace SpaceDesign
         }
         void Update()
         {
+            //视频未打开，后面不运行
+            if (bOpenVideo == false)
+                return;
+
             //隐藏的判断：AR模式 + 扩展模式 + （卡丁车模式、或非小框模式）
-            //if ((bTV == false) && (bExpand == true) && ((bSizeSmall == false) || (bKarting == true)))
-            if (curVideoType == VideoType.AR2D || curVideoType == VideoType.AR3D)
+            if ((bTV == false) && (bExpandShow == true) && ((bExpandSmall == false) || (bKarting == true)))
             {
-                if (curVideoUIType == VideoUIType.ExpandBig)
+                if (fAutoHideUITiming >= 0)
                 {
-                    if (fAutoHideUITiming >= 0)
+                    fAutoHideUITiming -= Time.deltaTime;
+                    if (fAutoHideUITiming <= 0)
                     {
-                        fAutoHideUITiming -= Time.deltaTime;
-                        if (fAutoHideUITiming <= 0)
-                        {
-                            ResetAutoHideUITime();
-                            SetExpandUI(false, false);
-                        }
+                        ResetAutoHideUITime();
+                        SetExpandUI(false, false);
                     }
                 }
             }
@@ -205,10 +214,9 @@ namespace SpaceDesign
             else
             {
                 //AR状态下，移动跟随窗口状态，一秒内，距离大于1米，自动到小窗模式
-                //if ((bTV == false) && (videoAutoRotate.bMove == true))
-                if ((curVideoType == VideoType.AR2D || curVideoType == VideoType.AR3D) && (videoAutoRotate.bMove == true))
+                if ((bTV == false) && (videoAutoRotate.bMove == true))
                 {
-                    if (curVideoUIType != VideoUIType.ExpandSmall)
+                    if (bExpandSmall == false)
                     {
                         iAutoSmallTimes += 1;
                         //从PlayerManage每0.5秒刷新一次距离，够2次（1秒）判断一次距离
@@ -315,6 +323,10 @@ namespace SpaceDesign
             if (curVideoType != lastVideoType)
                 if (curVideoType != VideoType.None)
                     ChangeVideType();
+
+            //切换AR、TV才自动显隐扩展界面
+            SetExpandUI(false, bTV);
+
         }
 
         /// <summary>
@@ -331,11 +343,46 @@ namespace SpaceDesign
             traVideoChoose.localPosition = Vector3.zero;
 
             btnARWindows.transform.localScale = bTV ? Vector3.zero : new Vector3(0.8f, 0.8f, 0.8f);
+            objWindowsBtnParent.SetActive(!bTV);
+            videoAutoRotate.enabled = !bTV;
 
             if (bTV == true)
-            {
                 btnAR.GetComponentInChildren<TextMesh>().text = b2D ? "AR模式" : "3D全息模式";
-                objWindowsBtnParent.SetActive(false);
+
+            if (bKarting == false)
+            {
+                traVideoExpand.SetParent(bTV ? traTVParent : traFollowNormalParent);
+                traVideoExpand.SetAsFirstSibling();
+                traVideoExpand.localEulerAngles = traVideoExpand.localPosition = Vector3.zero;
+                traVideoExpand.localScale = Vector3.one;
+            }
+
+            switch (lastVideoType)
+            {
+                case VideoType.AR2D:
+                    if (VideoManage2.Inst.videoAR2DCtr.playState == VideoState.Play)
+                        fPlayProgress = VideoManage2.Inst.videoAR2DCtr.sliderVideo.sliderValue;
+                    else
+                        fPlayProgress = -1;
+                    break;
+                case VideoType.AR3D:
+                    if (VideoManage2.Inst.videoAR3DCtr.playState == VideoState.Play)
+                        fPlayProgress = VideoManage2.Inst.videoAR3DCtr.sliderVideo.sliderValue;
+                    else
+                        fPlayProgress = -1;
+                    break;
+                case VideoType.TV2D:
+                    if (VideoManage2.Inst.videoTV2DCtr.playState == VideoState.Play)
+                        fPlayProgress = VideoManage2.Inst.videoTV2DCtr.sliderVideo.sliderValue;
+                    else
+                        fPlayProgress = -1;
+                    break;
+                case VideoType.TV3D:
+                    if (VideoManage2.Inst.videoTV3DCtr.playState == VideoState.Play)
+                        fPlayProgress = VideoManage2.Inst.videoTV3DCtr.sliderVideo.sliderValue;
+                    else
+                        fPlayProgress = -1;
+                    break;
             }
 
 
@@ -393,6 +440,7 @@ namespace SpaceDesign
                 timelineExpandShow.SetActive(false);
                 timelineExpandHide.SetActive(false);
                 objWindowsBtnParent.SetActive(false);
+                curVideoUIType = VideoUIType.None;
             }
             else
             {
@@ -408,14 +456,17 @@ namespace SpaceDesign
 
                     //打开视频上的碰撞盒
                     colliderBtnARWindows.enabled = true;
-                    curVideoUIType = VideoUIType.ExpandBig;
+                    //curVideoUIType = VideoUIType.ExpandBig;
                 }
                 else
                 {
 
                     objWindowsBtnParent.SetActive(false);
-                    curVideoUIType = VideoUIType.ExpandHide;
+                    //curVideoUIType = VideoUIType.ExpandHide;
                 }
+
+                curVideoUIType = VideoUIType.Expand;
+                bExpandShow = bOpen;
             }
         }
 
@@ -428,70 +479,83 @@ namespace SpaceDesign
             ResetAutoHideUITime();
 
             StopCoroutine("IEVideoSize");
-            StartCoroutine("IEVideoSize");
+
+            if (bTV == false)
+                StartCoroutine("IEVideoSize");
 
         }
         IEnumerator IEVideoSize()
         {
-            ////加一个临时bool变量，普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
-            //bool bTempSizeSmall = bSizeSmall;
+            //加一个临时bool变量，普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
+            bool bTempSizeSmall = bExpandSmall;// bSizeSmall;
 
-            //if (bTempSizeSmall == false)
-            //{
-            //    //普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
-            //    bSizeSmall = true;
+            if (bTempSizeSmall == false)
+            {
+                //普通状态缩小的时候，直接先赋值为小状态（防止射线碰撞，出现两边详情界面）
+                //bSizeSmall = true;
+                bExpandSmall = true;
 
-            //    btnPause.onPinchDown.Invoke();
-            //    //Normal -> Small  先隐藏扩展界面，再缩小
-            //    if (bExpand == true)
-            //    {
-            //        SetExpand(false);
-            //        yield return new WaitForSeconds(0.5f);
-            //    }
+                //btnPause.onPinchDown.Invoke();
+                HandleVideo(VideoState.Pause);
 
-            //    traVideoExpand.SetParent(traFollowSmallParent);
-            //}
-            //else
-            //{
-            //    btnPlay.onPinchDown.Invoke();
-            //    traVideoExpand.SetParent(traFollowNormalParent);
-            //}
+                //Normal -> Small  先隐藏扩展界面，再缩小
+                //if (bExpand == true)
+                //{
+                //    SetExpand(false);
+                //    yield return new WaitForSeconds(0.5f);
+                //}
+                if (bExpandShow == true)
+                {
+                    SetExpandUI(false, false);
+                    yield return new WaitForSeconds(0.5f);
+                }
+                traVideoExpand.SetParent(traFollowSmallParent);
+            }
+            else
+            {
+                //btnPlay.onPinchDown.Invoke();
+                HandleVideo(VideoState.Play);
 
-            //while (true)
-            //{
-            //    traVideoExpand.localScale = Vector3.Lerp(traVideoExpand.localScale, Vector3.one, fUISpeed * 2 * Time.deltaTime);
-            //    traVideoExpand.localPosition = Vector3.Lerp(traVideoExpand.localPosition, Vector3.zero, fUISpeed * Time.deltaTime);
-            //    traVideoExpand.localRotation = Quaternion.Lerp(traVideoExpand.localRotation, Quaternion.identity, fUISpeed * 2 * Time.deltaTime);
-            //    float _fDis = Vector3.Distance(traVideoExpand.localPosition, Vector3.zero);
-            //    if (_fDis < fThreshold)
-            //    {
-            //        traVideoExpand.localScale = Vector3.one;
-            //        traVideoExpand.localPosition = Vector3.zero;
-            //        traVideoExpand.localRotation = Quaternion.identity;
-            //        break;
-            //    }
-            //    yield return 0;
-            //}
+                traVideoExpand.SetParent(traFollowNormalParent);
+            }
 
-            //if (bTempSizeSmall == true)
-            //{
-            //    //Small  -> Normal 先恢复扩展界面，再放大
-            //    if (timelineExpandHide.gameObject.activeSelf == true)
-            //    {
-            //        SetExpand(true);
-            //        yield return new WaitForSeconds(1.5f);
-            //    }
-            //}
+            float _fThreshold = VideoManage2.Inst.fThreshold;
+            float _fUISpeed = VideoManage2.Inst.fUISpeed;
 
+            while (true)
+            {
+                traVideoExpand.localScale = Vector3.Lerp(traVideoExpand.localScale, Vector3.one, _fUISpeed * 2 * Time.deltaTime);
+                traVideoExpand.localPosition = Vector3.Lerp(traVideoExpand.localPosition, Vector3.zero, _fUISpeed * Time.deltaTime);
+                traVideoExpand.localRotation = Quaternion.Lerp(traVideoExpand.localRotation, Quaternion.identity, _fUISpeed * 2 * Time.deltaTime);
+                float _fDis = Vector3.Distance(traVideoExpand.localPosition, Vector3.zero);
+                if (_fDis < _fThreshold)
+                {
+                    traVideoExpand.localScale = Vector3.one;
+                    traVideoExpand.localPosition = Vector3.zero;
+                    traVideoExpand.localRotation = Quaternion.identity;
+                    break;
+                }
+                yield return 0;
+            }
+
+            if (bTempSizeSmall == true)
+            {
+                //Small  -> Normal 先恢复扩展界面，再放大
+                if (timelineExpandHide.gameObject.activeSelf == true)
+                {
+                    SetExpandUI(false, true);
+                    yield return new WaitForSeconds(1.5f);
+                }
+            }
+            bExpandSmall = !bTempSizeSmall;
             //bSizeSmall = !bTempSizeSmall;
 
-            //traVideoExpand.localScale = Vector3.one;
-            //traVideoExpand.localPosition = Vector3.zero;
-            //traVideoExpand.localRotation = Quaternion.identity;
+            traVideoExpand.localScale = Vector3.one;
+            traVideoExpand.localPosition = Vector3.zero;
+            traVideoExpand.localRotation = Quaternion.identity;
 
             yield return 0;
         }
-
 
 
         /// <summary>
@@ -514,6 +578,26 @@ namespace SpaceDesign
             videoAutoRotate.bMove = false;
         }
 
+        ///// <summary>
+        ///// 关闭视频
+        ///// </summary>
+        //void OnVideoClose()
+        //{
+        //    bOpenVideo = false;
+        //    switch (curVideoType)
+        //    {
+        //        case VideoType.AR2D: VideoManage2.Inst.videoAR2DCtr.OnStop(); break;
+        //        case VideoType.AR3D: VideoManage2.Inst.videoAR3DCtr.OnStop(); break;
+        //        case VideoType.TV2D: VideoManage2.Inst.videoTV2DCtr.OnStop(); break;
+        //        case VideoType.TV3D: VideoManage2.Inst.videoTV3DCtr.OnStop(); break;
+        //    }
+        //    //视频框直接隐藏先（缩放为0）
+        //    btnARWindows.transform.localScale = Vector3.zero;
+        //    VideoManage2.Inst.StopCoroutine("IECloseToMiddle");
+        //    VideoManage2.Inst.StartCoroutine("IECloseToMiddle");
+        //    SetExpandUI(false, false);
+        //}
+
         /// <summary>
         /// 关闭视频
         /// </summary>
@@ -521,14 +605,7 @@ namespace SpaceDesign
         {
             bOpenVideo = false;
 
-            switch (curVideoType)
-            {
-                case VideoType.AR2D: VideoManage2.Inst.videoAR2DCtr.OnStop(); break;
-                case VideoType.AR3D: VideoManage2.Inst.videoAR3DCtr.OnStop(); break;
-                case VideoType.TV2D: VideoManage2.Inst.videoTV2DCtr.OnStop(); break;
-                case VideoType.TV3D: VideoManage2.Inst.videoTV3DCtr.OnStop(); break;
-            }
-
+            HandleVideo(VideoState.Stop);
 
             //视频框直接隐藏先（缩放为0）
             btnARWindows.transform.localScale = Vector3.zero;
@@ -536,6 +613,44 @@ namespace SpaceDesign
             VideoManage2.Inst.StartCoroutine("IECloseToMiddle");
             SetExpandUI(false, false);
         }
+
+        /// <summary>
+        /// 处理视频（播放、暂停、停止）
+        /// </summary>
+        public void HandleVideo(VideoState videoState)
+        {
+            if (videoState == VideoState.Play)
+            {
+                switch (curVideoType)
+                {
+                    case VideoType.AR2D: VideoManage2.Inst.videoAR2DCtr.OnPlay(); break;
+                    case VideoType.AR3D: VideoManage2.Inst.videoAR3DCtr.OnPlay(); break;
+                        //case VideoType.TV2D: VideoManage2.Inst.videoTV2DCtr.OnPlay(); break;
+                        //case VideoType.TV3D: VideoManage2.Inst.videoTV3DCtr.OnPlay(); break;
+                }
+            }
+            else if (videoState == VideoState.Pause)
+            {
+                switch (curVideoType)
+                {
+                    case VideoType.AR2D: VideoManage2.Inst.videoAR2DCtr.OnPause(); break;
+                    case VideoType.AR3D: VideoManage2.Inst.videoAR3DCtr.OnPause(); break;
+                        //case VideoType.TV2D: VideoManage2.Inst.videoTV2DCtr.OnPause(); break;
+                        //case VideoType.TV3D: VideoManage2.Inst.videoTV3DCtr.OnPause(); break;
+                }
+            }
+            else if (videoState == VideoState.Stop)
+            {
+                switch (curVideoType)
+                {
+                    case VideoType.AR2D: VideoManage2.Inst.videoAR2DCtr.OnStop(); break;
+                    case VideoType.AR3D: VideoManage2.Inst.videoAR3DCtr.OnStop(); break;
+                    case VideoType.TV2D: VideoManage2.Inst.videoTV2DCtr.OnStop(); break;
+                    case VideoType.TV3D: VideoManage2.Inst.videoTV3DCtr.OnStop(); break;
+                }
+            }
+        }
+
         /// <summary>
         /// 重置隐藏UI计时
         /// </summary>
