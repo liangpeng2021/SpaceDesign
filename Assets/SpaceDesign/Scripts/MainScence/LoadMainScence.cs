@@ -146,8 +146,9 @@ public class LoadMainScence : MonoBehaviour
     void LoadGameObjectData()
     {
         //BitConverter方式
-        string path = SpaceDesign.PathConfig.GetPth();
-        path = Path.Combine(path, "scence.scn");
+        string originPath= SpaceDesign.PathConfig.GetPth();
+        string path = "";
+        path = Path.Combine(originPath, "scence.scn");
         objectDatas = MyDeSerial(path);
 
         if (objectDatas != null)
@@ -168,8 +169,7 @@ public class LoadMainScence : MonoBehaviour
 
         //------------ Modify by zh ------------
         //加载触点触发距离数据
-        path = SpaceDesign.PathConfig.GetPth();
-        path = Path.Combine(path, "IconDisData.json");
+        path = Path.Combine(originPath, "IconDisData.json");
         if (File.Exists(path) == false)
         {
             string json = LitJson.JsonMapper.ToJson(LoadPrefab.IconDisData);
@@ -183,6 +183,19 @@ public class LoadMainScence : MonoBehaviour
             LoadPrefab.IconDisData = LitJson.JsonMapper.ToObject<IconDisData>(json);
         }
         //------------------End------------------
+
+        path= Path.Combine(originPath, "cpeip.json");
+        if (File.Exists(path) == false)
+        {
+            File.WriteAllText(path, YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport]);
+        }
+        else
+        {
+            string json = File.ReadAllText(path);
+            if (string.IsNullOrEmpty(json))
+                return;
+            YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] = json;
+        }
 
         bLoadFinish = true;
     }
