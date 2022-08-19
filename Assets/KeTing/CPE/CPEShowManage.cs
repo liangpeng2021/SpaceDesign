@@ -7,6 +7,7 @@
 using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace SpaceDesign
 {
@@ -69,7 +70,9 @@ namespace SpaceDesign
 
         void OnDestroy() { StopAllCoroutines(); }
 
-        void Start() { v3OriPos = this.transform.position; }
+        void Start() { v3OriPos = this.transform.position;
+            tt.gameObject.SetActive(false);
+        }
 
         /// <summary>
         /// 刷新位置消息
@@ -83,7 +86,7 @@ namespace SpaceDesign
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 
@@ -319,15 +322,36 @@ namespace SpaceDesign
 
         void ClickLight(string str)
         {
-            //print("发送灯光：" + str);
-            //开启新协程
-            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<LightData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/lamp/setting?" + str,
-                //回调
-                (sd) => { Debug.Log("MyLog::灯" + str + ":" + sd.Status); });
-
-            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+            Debug.Log("ClickLight:");
+            try
+            {
+                StopCoroutine("SendLightDataToCPE");
+                url = YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/lamp/setting?" + str;
+                //开启新协程
+                StartCoroutine("SendLightDataToCPE");
+            }
+            catch { }
         }
+        string url = "";
+        IEnumerator SendLightDataToCPE()
+        {
+            Debug.Log("MyLog::SendDataToCPE:" + url);
+            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            {
+                yield return request.SendWebRequest();
 
+                if (request.isHttpError || request.isNetworkError)
+                {
+                    Debug.Log("MyLog::request.error:" + request.error);
+                }
+                else
+                {
+                    Debug.Log("MyLog::GetDataFromCPE:" + request.downloadHandler.text);
+                }
+
+                yield return null;
+            }
+        }
 
         public void LightSliderCPE()
         {
@@ -351,8 +375,8 @@ namespace SpaceDesign
                 {
                     bLampOn = true;
                     _iSendType = 1;
-
-                    Invoke("_DelaySetSlider", 0.5f);
+                    //TODO,暂时关闭
+                    //Invoke("_DelaySetSlider", 0.5f);
                 }
             }
 

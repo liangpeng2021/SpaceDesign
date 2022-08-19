@@ -60,7 +60,8 @@ namespace SpaceDesign
             timelineShowSecond.SetActive(false);
         }
 
-        void Start() { v3OriPos = this.transform.position; }
+        void Start() { v3OriPos = this.transform.position;
+            tt.gameObject.SetActive(false); }
         void OnDestroy() { StopAllCoroutines(); }
         void LateUpdate()
         {
@@ -83,7 +84,7 @@ namespace SpaceDesign
             Vector3 _v3 = v3OriPos;
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
             //print($"目标的距离:{_dis}--lastPPS:{lastPPS}--curPPS:{curPlayerPosState}");

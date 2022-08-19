@@ -66,6 +66,8 @@ namespace SpaceDesign
 
         void Start()
         {
+            tt.gameObject.SetActive(false);
+
             v3OriPos = this.transform.position;
             bingxiangTimeline.StartPause();
             bingxiangTimeline.gameObject.SetActive(false);
@@ -109,12 +111,13 @@ namespace SpaceDesign
 
         private void Update()
         {
-            timeCount += Time.deltaTime;
-            if (timeCount > 0.5f)
-            {
-                timeCount = 0;
-                ClickGetDoorState();
-            }
+            //TODO，待cpe调通冰箱硬件后再打开
+            //timeCount += Time.deltaTime;
+            //if (timeCount > 0.5f)
+            //{
+            //    timeCount = 0;
+            //    ClickGetDoorState();
+            //}
         }
 
         float timeCount = 0;
@@ -125,17 +128,21 @@ namespace SpaceDesign
         /// </summary>
         void ClickGetDoorState()
         {
-            //Debug.Log("GetDoorState:"+ YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/sensor/door?id=1");
-            //开启新协程
-            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<DoorState>(/*wwwFrom, */YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/sensor/door?id=1",
-                //回调
-                (sd) =>
-                {
-                    //Debug.Log("MyLog::DoorState:" + sd.Status);
-                    JudgeOpen(sd.Status);
-                }
-                );
-            StartCoroutine(enumerator);
+            Debug.Log("ClickGetDoorState:");
+            try
+            {
+                //开启新协程
+                IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<DoorState>(/*wwwFrom, */YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/sensor/door?id=1",
+                    //回调
+                    (sd) =>
+                    {
+                        Debug.Log("MyLog::DoorState:" + sd.Status);
+                        JudgeOpen(sd.Status);
+                    }
+                    );
+                StartCoroutine(enumerator);
+            }
+            catch { }
             //ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
         }
         /// <summary>
@@ -198,7 +205,7 @@ namespace SpaceDesign
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
 
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 

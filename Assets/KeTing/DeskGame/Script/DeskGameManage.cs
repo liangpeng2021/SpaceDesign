@@ -70,7 +70,8 @@ namespace SpaceDesign
 
         void OnDestroy() { StopAllCoroutines(); }
 
-        void Start() { v3OriPos = this.transform.position; }
+        void Start() { v3OriPos = this.transform.position; 
+            tt.gameObject.SetActive(false); }
 
         /// <summary>
         /// 刷新位置消息
@@ -84,7 +85,7 @@ namespace SpaceDesign
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 

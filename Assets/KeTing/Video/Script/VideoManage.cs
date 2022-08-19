@@ -161,6 +161,7 @@ namespace SpaceDesign
             //关闭视频上的碰撞盒，防止触碰显示宽展界面
             colliderBtnARWindows.enabled = false;
             objWindowsBtnParent.SetActive(false);
+            tt.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -282,7 +283,7 @@ namespace SpaceDesign
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
 
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 

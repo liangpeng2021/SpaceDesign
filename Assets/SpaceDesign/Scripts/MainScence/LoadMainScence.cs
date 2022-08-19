@@ -187,13 +187,19 @@ public class LoadMainScence : MonoBehaviour
         path= Path.Combine(originPath, "cpeip.json");
         if (File.Exists(path) == false)
         {
+            Debug.Log("setcpeip");
             File.WriteAllText(path, YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport]);
         }
         else
         {
             string json = File.ReadAllText(path);
+            json.Replace(" ", "");
+            json.Replace("\n", "");
+            json.Replace("\r", "");
+
             if (string.IsNullOrEmpty(json))
                 return;
+            Debug.Log("cpeip:"+ json);
             YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] = json;
         }
 

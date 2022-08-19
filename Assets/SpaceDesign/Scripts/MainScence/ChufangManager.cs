@@ -66,6 +66,7 @@ namespace SpaceDesign
         {
             v3OriPos = this.transform.position;
             Init();
+            tt.gameObject.SetActive(false);
         }
         void OnDestroy() { StopAllCoroutines(); }
 
@@ -80,7 +81,7 @@ namespace SpaceDesign
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
 
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 

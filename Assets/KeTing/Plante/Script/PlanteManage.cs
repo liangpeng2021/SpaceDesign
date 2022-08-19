@@ -74,7 +74,7 @@ namespace SpaceDesign
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 

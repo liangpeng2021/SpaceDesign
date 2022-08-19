@@ -172,16 +172,18 @@ namespace SpaceDesign
 
         public static IEnumerator SendDataToCPE<T>(string url, Action<T> callback)
         {
+            Debug.Log("MyLog::SendDataToCPE:" + url);
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
                 yield return request.SendWebRequest();
                 T yyd;
                 if (request.isHttpError || request.isNetworkError)
                 {
-                    //Debug.Log("MyLog::request.error:" + request.error);
+                    Debug.Log("MyLog::request.error:" + request.error);
                 }
                 else
                 {
+                    Debug.Log("MyLog::GetDataFromCPE:" + request.downloadHandler.text);
                     yyd = JsonMapper.ToObject<T>(request.downloadHandler.text);
                     if (yyd != null)
                         callback?.Invoke(yyd);

@@ -92,6 +92,7 @@ namespace SpaceDesign
             v3OriPos = traIconRoot.position;// this.transform.position;
             //开始的时候要把Icon对象父节点清空，Mark定位的时候，Icon不跟随移动
             traIconRoot.SetParent(transform.parent);
+            tt.gameObject.SetActive(false);
         }
         void OnDestroy()
         {
@@ -219,7 +220,7 @@ namespace SpaceDesign
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"目标的距离:{_dis}");
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 

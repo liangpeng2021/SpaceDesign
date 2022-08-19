@@ -1377,6 +1377,11 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 8899919071822045381}
+    - target: {fileID: 2113415720523845050, guid: d2dab3c11f4b62f479eee9942ffbdb97,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2113415721634434127, guid: d2dab3c11f4b62f479eee9942ffbdb97,
         type: 3}
       propertyPath: canvas.Array.size
@@ -1410,6 +1415,11 @@ PrefabInstance:
       propertyPath: canvas.Array.data[0]
       value: 
       objectReference: {fileID: 1360070466}
+    - target: {fileID: 2113415722373837204, guid: d2dab3c11f4b62f479eee9942ffbdb97,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3862211332478017593, guid: d2dab3c11f4b62f479eee9942ffbdb97,
         type: 3}
       propertyPath: m_IsActive
@@ -1975,7 +1985,7 @@ MonoBehaviour:
   noviceGuidanceObj: {fileID: 1833367906}
   btnSkip: {fileID: 1833367908}
   btnStart: {fileID: 1833367907}
-  bTest: 1
+  bTest: 0
 --- !u!1 &8246754435250124687
 GameObject:
   m_ObjectHideFlags: 0

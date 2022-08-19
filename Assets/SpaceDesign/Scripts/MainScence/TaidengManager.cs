@@ -71,6 +71,7 @@ namespace SpaceDesign
             v3OriPos = traIconRoot.position;// this.transform.position;
 
             traIconRoot.SetParent(transform.parent);
+            tt.gameObject.SetActive(false);
         }
         void OnDestroy()
         {
@@ -94,7 +95,7 @@ namespace SpaceDesign
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
 
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 

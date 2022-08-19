@@ -4,9 +4,11 @@
 
  */
 
+using LitJson;
 using OXRTK.ARHandTracking;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace SpaceDesign
@@ -212,7 +214,9 @@ namespace SpaceDesign
             //Debug.Log("MyLog: 声音" + _iVolum);
 
             OnSliderVolumeChange((float)_iVolum / OPPOSystemMaxVolum);
-            OnSliderVolume();
+            //OnSliderVolume();
+
+            tt.gameObject.SetActive(false);
         }
 
         void Update()
@@ -350,6 +354,7 @@ namespace SpaceDesign
 
         void AutoNext()
         {
+            Debug.Log("AutoNext");
             switch (curMusicPlayState)
             {
                 case MusicPlayState.AllLoop:
@@ -505,6 +510,7 @@ namespace SpaceDesign
         /// </summary>
         public void OnRight()
         {
+            Debug.Log("OnRight");
             imgSliderMin.fillAmount = 0;
             _SetCurMusicNum(iCurMusicNum + 1);
             bClockWise = false;
@@ -548,7 +554,8 @@ namespace SpaceDesign
 
 
             EachMusicAttr _ema = aryEachMusicAttr[iCurMusicNum - 1];
-            SetAudioTime(0);
+            //TODO
+            //SetAudioTime(0);
 
             _SetCurPlayTime(true);
             textCurMusicNameMax.text = $"{_ema.strName} - {_ema.strAuthor}";
@@ -559,6 +566,7 @@ namespace SpaceDesign
             audioSource.clip = _ema.audioClip;
             fTotalPlayTime = audioSource.clip.length;
             textTotalPlayTime.text = ((int)(fTotalPlayTime / 60)).ToString("D2") + ":" + ((int)(fTotalPlayTime % 60)).ToString("D2");
+            Debug.Log(bPlaying);
             if (bPlaying)
             {
                 SetAudioPlay(iCurMusicNum);
@@ -612,7 +620,7 @@ namespace SpaceDesign
             _v3.y = pos.y;
             float _dis = Vector3.Distance(_v3, pos);
             //print($"音乐的距离:{_dis}");
-            tt.text = _dis.ToString();
+            //tt.text = _dis.ToString();
 
             PlayerPosState lastPPS = curPlayerPosState;
 
@@ -1306,7 +1314,7 @@ namespace SpaceDesign
                 _i = 16;
             XR.AudioManager.SetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC, _i);
 #endif
-
+            //TODO
             SetAudioVolume(pinchSliderVolumMax.sliderValue);
         }
 
@@ -1400,30 +1408,50 @@ namespace SpaceDesign
 
         void ClickMusic(string str)
         {
-            //开启新协程
-            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<MusicData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/music/" + str,
-                //回调
-                (sd) =>
-                {
-                    Debug.Log("MyLog::音乐" + str + ":" + sd.MusicId);
-                }
-                );
-
-            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+            Debug.Log("ClickMusic：");
+            
+            try
+            {
+                StopCoroutine("SendMusicDataToCPE");
+                url = YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/music/" + str;
+                //开启新协程
+                StartCoroutine("SendMusicDataToCPE");
+            }
+            catch { }
         }
 
         void ClickMusicVolume(string str)
         {
-            //开启新协程
-            IEnumerator enumerator = YoopInterfaceSupport.SendDataToCPE<VomlumeData>(YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/music/setting?action=setVolume&value=" + str,
-                //回调
-                (sd) =>
-                {
-                    Debug.Log("MyLog::音响" + str + ":" + sd.Volume);
-                }
-                );
+            Debug.Log("ClickMusicVolume:");
+            
+            try
+            {
+                StopCoroutine("SendMusicDataToCPE");
+                url = YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/music/setting?action=setVolume&value=" + str;
+                //开启新协程
+                StartCoroutine("SendMusicDataToCPE");
+            }
+            catch { }
+        }
+        string url = "";
+        IEnumerator SendMusicDataToCPE()
+        {
+            Debug.Log("MyLog::SendDataToCPE:" + url);
+            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            {
+                yield return request.SendWebRequest();
 
-            ActionQueue.InitOneActionQueue().AddAction(enumerator).StartQueue();
+                if (request.isHttpError || request.isNetworkError)
+                {
+                    Debug.Log("MyLog::request.error:" + request.error);
+                }
+                else
+                {
+                    Debug.Log("MyLog::GetDataFromCPE:" + request.downloadHandler.text);
+                }
+
+                yield return null;
+            }
         }
 
         public void SetAudioPlay(int index = -1)
@@ -1432,6 +1460,7 @@ namespace SpaceDesign
             if (index != -1)
             {
                 audioSource.Play();
+                Debug.Log("SetAudioPlay");
                 //===========================================================================
                 //CPE发送：带序号播放
                 ClickMusic("play?id=" + index.ToString());
@@ -1462,7 +1491,7 @@ namespace SpaceDesign
             audioSource.Stop();
             //===========================================================================
             //CPE发送：停止
-            ClickMusic("stop");
+            //ClickMusic("stop");
             //===========================================================================
         }
         public void SetAudioVolume(float fValue)
