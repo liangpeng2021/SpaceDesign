@@ -60,7 +60,9 @@ namespace SpaceDesign
         }
 
         void OnDestroy() { StopAllCoroutines(); }
-        void Start() { v3OriPos = this.transform.position; }
+        void Start() { v3OriPos = this.transform.position;
+            tt.gameObject.SetActive(false);
+        }
 
         /// <summary>
         /// 刷新位置消息

@@ -23,6 +23,9 @@ public class LoadMainScence : MonoBehaviour
     //public Button backto;
     //public Canvas[] canvas;
     public GameObject kaichangObj;
+
+    [SerializeField] GameObject guanjiaObj;
+
     //新手引导
     public GameObject noviceGuidanceObj;
     //新手引导，跳过
@@ -115,10 +118,9 @@ public class LoadMainScence : MonoBehaviour
             return;
         }
 #endif
-
-
         //新手引导先关闭（开场动画完毕后开启）
         noviceGuidanceObj.SetActive(false);
+        guanjiaObj.SetActive(false);
         //播放开场动效
         kaichangObj.SetActive(true);
         Invoke("HideKaichang", 7.1f);
@@ -127,6 +129,16 @@ public class LoadMainScence : MonoBehaviour
     void HideKaichang()
     {
         kaichangObj.SetActive(false);
+        //新手引导开始
+        guanjiaObj.SetActive(true);
+        ////加载物体
+        //LoadGameObjectData();
+        Invoke("ShowNoviceGuidance", 35.3f);
+    }
+
+    void ShowNoviceGuidance()
+    {
+        guanjiaObj.SetActive(false);
         //新手引导开始
         noviceGuidanceObj.SetActive(true);
         ////加载物体

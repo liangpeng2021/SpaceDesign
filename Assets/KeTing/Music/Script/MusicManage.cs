@@ -6,7 +6,9 @@
 
 using LitJson;
 using OXRTK.ARHandTracking;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -555,7 +557,7 @@ namespace SpaceDesign
 
             EachMusicAttr _ema = aryEachMusicAttr[iCurMusicNum - 1];
             //TODO
-            //SetAudioTime(0);
+            SetAudioTime(0);
 
             _SetCurPlayTime(true);
             textCurMusicNameMax.text = $"{_ema.strName} - {_ema.strAuthor}";
@@ -1306,14 +1308,14 @@ namespace SpaceDesign
         }
         void JudgeVolume()
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
-            int _i = Mathf.FloorToInt(pinchSliderVolumMax.sliderValue * OPPOSystemMaxVolum);
-            if (_i < 0)
-                _i = 0;
-            else if (_i > 16)
-                _i = 16;
-            XR.AudioManager.SetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC, _i);
-#endif
+//#if UNITY_ANDROID && !UNITY_EDITOR
+//            int _i = Mathf.FloorToInt(pinchSliderVolumMax.sliderValue * OPPOSystemMaxVolum);
+//            if (_i < 0)
+//                _i = 0;
+//            else if (_i > 16)
+//                _i = 16;
+//            XR.AudioManager.SetStreamVolume(XR.XRAudioStream.XR_AUDIO_STREAM_MUSIC, _i);
+//#endif
             //TODO
             SetAudioVolume(pinchSliderVolumMax.sliderValue);
         }
@@ -1406,32 +1408,49 @@ namespace SpaceDesign
             public int Volume;
         }
 
+        //add by lp,队列执行消息的发送，0.5秒间隔
+        Queue<Action> _queueAction = new Queue<Action>();
+
+        float _queueTime = 0;
+
+        void FixedUpdate()
+        {
+            _queueTime += Time.fixedDeltaTime;
+            if (_queueTime > 0.5f)
+            {
+                _queueTime = 0;
+
+                if (_queueAction.Count > 0)
+                {
+                    Action action = _queueAction.Dequeue();
+                    action?.Invoke();
+                }
+            }
+        }
+        //end
+
         void ClickMusic(string str)
         {
             Debug.Log("ClickMusic：");
-            
-            try
+            _queueAction.Enqueue(()=>
             {
                 StopCoroutine("SendMusicDataToCPE");
                 url = YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/music/" + str;
                 //开启新协程
                 StartCoroutine("SendMusicDataToCPE");
-            }
-            catch { }
+            });
         }
 
         void ClickMusicVolume(string str)
         {
             Debug.Log("ClickMusicVolume:");
-            
-            try
+            _queueAction.Enqueue(()=>
             {
                 StopCoroutine("SendMusicDataToCPE");
                 url = YoopInterfaceSupport.Instance.yoopInterfaceDic[InterfaceName.cpeipport] + "iot/music/setting?action=setVolume&value=" + str;
                 //开启新协程
                 StartCoroutine("SendMusicDataToCPE");
-            }
-            catch { }
+            });
         }
         string url = "";
         IEnumerator SendMusicDataToCPE()
@@ -1491,7 +1510,7 @@ namespace SpaceDesign
             audioSource.Stop();
             //===========================================================================
             //CPE发送：停止
-            //ClickMusic("stop");
+            ClickMusic("stop");
             //===========================================================================
         }
         public void SetAudioVolume(float fValue)

@@ -162,6 +162,8 @@ namespace SpaceDesign
             colliderBtnARWindows.enabled = false;
             objWindowsBtnParent.SetActive(false);
             tt.gameObject.SetActive(false);
+            //默认固定
+            OnVideoMove();
         }
 
         /// <summary>
